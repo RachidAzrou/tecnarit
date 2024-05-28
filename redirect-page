@@ -3,10 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="0;url=https://www.tecnarit.com/en">
-    <title>Redirecting...</title>
+    <meta http-equiv="refresh" content="5;url=https://www.jouw-website.com">
+    <title>Landing Page</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .message {
+            max-width: 600px;
+            padding: 20px;
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
-    <p>Als je niet automatisch wordt doorverwezen, <a href="https://www.tecnarit.com/en">klik dan hier</a>.</p>
+    <div class="message">
+        <h1>Thank you for scanning the QR code!</h1>
+        <p>You will be redirected to our main website shortly.</p>
+        <p>If you're not redirected, <a href="https://www.jouw-website.com">click here</a>.</p>
+    </div>
 </body>
 </html>
