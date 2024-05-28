@@ -33,13 +33,13 @@
             margin-bottom: 20px; /* Adjust the margin-bottom to create space between header and logo */
         }
         .logo {
-            width: 100%; /* Logo will be as wide as the container */
+            width: 80%; /* Logo will be 80% of the container width */
             height: auto; /* Maintain aspect ratio */
-            max-width: 100%; /* Ensure it does not exceed container width */
+            max-width: 600px; /* Maximum width for the logo */
             margin-bottom: 20px; /* Adjust the margin-bottom to create space between logo and text */
         }
-        p {
-            font-size: 1.2em;
+        .redirect {
+            font-size: 1.2em; /* Adjust font size for the redirection message */
             margin: 10px 0; /* Adjust margin for spacing */
         }
         a {
@@ -51,10 +51,10 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="header">"No rides here, but we can elevate your IT!"</h1>
+        <h1 class="header">No rides here, but we can elevate your IT!</h1>
         <img src="logo.png" alt="Company Logo" class="logo">
-        <p>You will be redirected to our main website shortly.</p>
-        <p>If you're not redirected, <a href="https://www.jouw-website.com">click here</a> to go to our website.</p>
+        <p class="redirect">You will be redirected to our main website shortly.</p>
+        <p class="redirect">If you're not redirected, <a href="https://www.jouw-website.com">click here</a> to go to our website.</p>
     </div>
 </body>
 </html>
