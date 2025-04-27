@@ -360,13 +360,7 @@ export default function CandidateList() {
                     {/* Recente kandidaten tabel */}
                     <div className="flex justify-between items-center mt-8 mb-4">
                       <h2 className="text-xl tecnarit-blue-text">Recente Kandidaten</h2>
-                      <Button 
-                        onClick={handleAddCandidate}
-                        className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Kandidaat Toevoegen
-                      </Button>
+                      {/* Knop verwijderd op verzoek */}
                     </div>
                     {isLoading ? (
                       <div className="flex justify-center items-center h-48 sm:h-64 glass-effect rounded-lg">
@@ -382,13 +376,7 @@ export default function CandidateList() {
                         <p className="mt-2 text-primary/70">
                           Voeg uw eerste kandidaat toe om te beginnen.
                         </p>
-                        <Button 
-                          onClick={handleAddCandidate}
-                          className="mt-4 tecnarit-blue-bg transition-all hover-lift touch-friendly"
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Kandidaat Toevoegen
-                        </Button>
+                        {/* Knop verwijderd op verzoek */}
                       </div>
                     )}
                   </div>
@@ -426,15 +414,7 @@ export default function CandidateList() {
                           ? "Pas je zoekcriteria aan of verwijder filters om meer resultaten te zien." 
                           : "Voeg je eerste kandidaat toe om te beginnen."}
                       </p>
-                      {!searchQuery && (!status || status === "all") && (
-                        <Button 
-                          onClick={handleAddCandidate}
-                          className="mt-4 tecnarit-blue-bg transition-all hover-lift touch-friendly"
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Kandidaat Toevoegen
-                        </Button>
-                      )}
+                      {/* Knop verwijderd op verzoek */}
                     </div>
                   ) : (
                     <div className="glass-effect rounded-lg overflow-hidden">
