@@ -1,0 +1,683 @@
+// server/index.ts
+import express3 from "express";
+
+// server/routes.ts
+import { createServer } from "http";
+
+// server/storage.ts
+import session from "express-session";
+import createMemoryStore from "memorystore";
+var MemoryStore = createMemoryStore(session);
+var MemStorage = class {
+  users;
+  candidates;
+  files;
+  currentUserId;
+  currentCandidateId;
+  currentFileId;
+  sessionStore;
+  constructor() {
+    this.users = /* @__PURE__ */ new Map();
+    this.candidates = /* @__PURE__ */ new Map();
+    this.files = /* @__PURE__ */ new Map();
+    this.currentUserId = 1;
+    this.currentCandidateId = 1;
+    this.currentFileId = 1;
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 864e5
+      // 24h in ms
+    });
+  }
+  async getUser(id) {
+    return this.users.get(id);
+  }
+  async getUserByUsername(username) {
+    return Array.from(this.users.values()).find(
+      (user) => user.username === username
+    );
+  }
+  async createUser(insertUser) {
+    const id = this.currentUserId++;
+    const user = {
+      id,
+      username: insertUser.username,
+      password: insertUser.password,
+      name: insertUser.name || null
+    };
+    this.users.set(id, user);
+    return user;
+  }
+  async getCandidates() {
+    return Array.from(this.candidates.values());
+  }
+  async getCandidate(id) {
+    return this.candidates.get(id);
+  }
+  async createCandidate(candidate) {
+    const id = this.currentCandidateId++;
+    const newCandidate = {
+      id,
+      firstName: candidate.firstName,
+      lastName: candidate.lastName,
+      email: candidate.email,
+      status: candidate.status || "active",
+      profileImage: candidate.profileImage || null,
+      phone: candidate.phone || null,
+      notes: candidate.notes || null,
+      linkedinProfile: candidate.linkedinProfile || null,
+      yearsOfExperience: candidate.yearsOfExperience || null,
+      unavailableUntil: candidate.unavailableUntil || null,
+      client: candidate.client || null,
+      createdAt: /* @__PURE__ */ new Date()
+    };
+    this.candidates.set(id, newCandidate);
+    return newCandidate;
+  }
+  async updateCandidate(id, updates) {
+    const candidate = this.candidates.get(id);
+    if (!candidate) return void 0;
+    const updatedCandidate = {
+      ...candidate,
+      ...updates
+    };
+    this.candidates.set(id, updatedCandidate);
+    return updatedCandidate;
+  }
+  async deleteCandidate(id) {
+    return this.candidates.delete(id);
+  }
+  async getCandidateFiles(candidateId) {
+    return Array.from(this.files.values()).filter(
+      (file) => file.candidateId === candidateId
+    );
+  }
+  async addCandidateFile(file) {
+    const id = this.currentFileId++;
+    const newFile = { ...file, id };
+    this.files.set(id, newFile);
+    return newFile;
+  }
+  async deleteCandidateFile(id) {
+    return this.files.delete(id);
+  }
+};
+var storage = new MemStorage();
+
+// server/auth.ts
+import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
+import session2 from "express-session";
+import { scrypt, randomBytes, timingSafeEqual } from "crypto";
+import { promisify } from "util";
+var scryptAsync = promisify(scrypt);
+async function hashPassword(password) {
+  const salt = randomBytes(16).toString("hex");
+  const buf = await scryptAsync(password, salt, 64);
+  return `${buf.toString("hex")}.${salt}`;
+}
+async function comparePasswords(supplied, stored) {
+  const [hashed, salt] = stored.split(".");
+  const hashedBuf = Buffer.from(hashed, "hex");
+  const suppliedBuf = await scryptAsync(supplied, salt, 64);
+  return timingSafeEqual(hashedBuf, suppliedBuf);
+}
+function setupAuth(app2) {
+  const sessionSettings = {
+    secret: process.env.SESSION_SECRET || "employeecrm-secret-key",
+    resave: true,
+    saveUninitialized: true,
+    store: storage.sessionStore,
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1e3,
+      // 24 hours
+      httpOnly: true,
+      // Replit heeft veilige omgeving, maar in productie zou je dit op true moeten zetten
+      secure: false,
+      sameSite: "lax"
+    }
+  };
+  app2.set("trust proxy", 1);
+  app2.use(session2(sessionSettings));
+  app2.use(passport.initialize());
+  app2.use(passport.session());
+  passport.use(
+    new LocalStrategy(async (username, password, done) => {
+      try {
+        const user = await storage.getUserByUsername(username);
+        if (!user || !await comparePasswords(password, user.password)) {
+          return done(null, false);
+        } else {
+          return done(null, user);
+        }
+      } catch (error) {
+        return done(error);
+      }
+    })
+  );
+  passport.serializeUser((user, done) => done(null, user.id));
+  passport.deserializeUser(async (id, done) => {
+    try {
+      const user = await storage.getUser(id);
+      done(null, user);
+    } catch (error) {
+      done(error);
+    }
+  });
+  app2.post("/api/register", async (req, res, next) => {
+    try {
+      const existingUser = await storage.getUserByUsername(req.body.username);
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+      const user = await storage.createUser({
+        ...req.body,
+        password: await hashPassword(req.body.password)
+      });
+      req.login(user, (err) => {
+        if (err) return next(err);
+        const { password, ...userWithoutPassword } = user;
+        res.status(201).json(userWithoutPassword);
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+  app2.post("/api/login", (req, res, next) => {
+    passport.authenticate("local", (err, user, info) => {
+      if (err) return next(err);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid username or password" });
+      }
+      req.login(user, (err2) => {
+        if (err2) return next(err2);
+        const { password, ...userWithoutPassword } = user;
+        res.status(200).json(userWithoutPassword);
+      });
+    })(req, res, next);
+  });
+  app2.post("/api/logout", (req, res, next) => {
+    req.logout((err) => {
+      if (err) return next(err);
+      res.sendStatus(200);
+    });
+  });
+  app2.get("/api/user", (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const { password, ...userWithoutPassword } = req.user;
+    res.json(userWithoutPassword);
+  });
+  app2.post("/api/firebase-auth", async (req, res, next) => {
+    try {
+      console.log("Firebase-auth aangeroepen met:", req.body);
+      const { email, firebaseUid } = req.body;
+      if (!email || !firebaseUid) {
+        console.log("Email of Firebase UID ontbreekt");
+        return res.status(400).json({ message: "Email en Firebase UID zijn vereist" });
+      }
+      let user = await storage.getUserByUsername(email);
+      console.log("Bestaande gebruiker gevonden:", user ? "Ja" : "Nee");
+      if (!user) {
+        const randomPassword = randomBytes(16).toString("hex");
+        const hashedPassword = await hashPassword(randomPassword);
+        user = await storage.createUser({
+          username: email,
+          password: hashedPassword,
+          name: email.split("@")[0]
+          // Gebruik eerste deel van email als naam
+        });
+        console.log("Nieuwe gebruiker aangemaakt:", user.id);
+      }
+      req.login(user, (err) => {
+        if (err) {
+          console.log("Login error:", err);
+          return next(err);
+        }
+        console.log("Gebruiker ingelogd in sessie:", user.id);
+        const { password, ...userWithoutPassword } = user;
+        res.status(200).json(userWithoutPassword);
+      });
+    } catch (error) {
+      console.error("Error in firebase-auth route:", error);
+      next(error);
+    }
+  });
+}
+
+// server/upload.ts
+import express from "express";
+import * as path from "path";
+import * as fs from "fs";
+import * as crypto from "crypto";
+import { promisify as promisify2 } from "util";
+import multer from "multer";
+var mkdir2 = promisify2(fs.mkdir);
+var uploadDir = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+var fileStorage = multer.diskStorage({
+  destination: async (req, file, cb) => {
+    const candidateId = req.params.id;
+    const candidateDir = path.join(uploadDir, candidateId);
+    if (!fs.existsSync(candidateDir)) {
+      await mkdir2(candidateDir, { recursive: true });
+    }
+    cb(null, candidateDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = crypto.randomBytes(8).toString("hex");
+    const extension = path.extname(file.originalname);
+    cb(null, `${uniqueSuffix}${extension}`);
+  }
+});
+var fileFilter = (req, file, cb) => {
+  const allowedImageTypes = ["image/jpeg", "image/png", "image/gif"];
+  const allowedDocTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+  const isImageUpload = req.path.includes("profile-image");
+  const isDocUpload = req.path.includes("documents");
+  if (isImageUpload && allowedImageTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else if (isDocUpload && [...allowedImageTypes, ...allowedDocTypes].includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Invalid file type"));
+  }
+};
+var upload = multer({
+  storage: fileStorage,
+  fileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024
+    // 10MB limit
+  }
+});
+function setupFileRoutes(app2) {
+  app2.post("/api/candidates/:id/profile-image", upload.single("profileImage"), async (req, res, next) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+      const candidateId = parseInt(req.params.id, 10);
+      const candidate = await storage.getCandidate(candidateId);
+      if (!candidate) {
+        fs.unlinkSync(req.file.path);
+        return res.status(404).json({ message: "Candidate not found" });
+      }
+      const relativePath = path.relative(process.cwd(), req.file.path).replace(/\\/g, "/");
+      const updatedCandidate = await storage.updateCandidate(candidateId, {
+        profileImage: relativePath
+      });
+      res.status(200).json(updatedCandidate);
+    } catch (error) {
+      next(error);
+    }
+  });
+  app2.post("/api/candidates/:id/documents", upload.single("document"), async (req, res, next) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+      const candidateId = parseInt(req.params.id, 10);
+      const candidate = await storage.getCandidate(candidateId);
+      if (!candidate) {
+        fs.unlinkSync(req.file.path);
+        return res.status(404).json({ message: "Candidate not found" });
+      }
+      const relativePath = path.relative(process.cwd(), req.file.path).replace(/\\/g, "/");
+      const file = await storage.addCandidateFile({
+        candidateId,
+        fileName: req.file.originalname,
+        fileType: req.file.mimetype,
+        filePath: relativePath,
+        fileSize: req.file.size,
+        uploadDate: /* @__PURE__ */ new Date()
+      });
+      res.status(201).json(file);
+    } catch (error) {
+      next(error);
+    }
+  });
+  app2.get("/api/candidates/:id/files", async (req, res, next) => {
+    try {
+      const candidateId = parseInt(req.params.id, 10);
+      const files = await storage.getCandidateFiles(candidateId);
+      res.status(200).json(files);
+    } catch (error) {
+      next(error);
+    }
+  });
+  app2.get("/api/files/:id", async (req, res, next) => {
+    try {
+      const candidateId = parseInt(req.params.candidateId, 10);
+      const fileId = parseInt(req.params.id, 10);
+      const files = await storage.getCandidateFiles(candidateId);
+      const file = files.find((f) => f.id === fileId);
+      if (!file) {
+        return res.status(404).json({ message: "File not found" });
+      }
+      res.download(path.join(process.cwd(), file.filePath), file.fileName);
+    } catch (error) {
+      next(error);
+    }
+  });
+  app2.delete("/api/files/:id", async (req, res, next) => {
+    try {
+      const fileId = parseInt(req.params.id, 10);
+      const allFiles = Array.from(await Promise.all(
+        (await storage.getCandidates()).map((c) => storage.getCandidateFiles(c.id))
+      )).flat();
+      const file = allFiles.find((f) => f.id === fileId);
+      if (!file) {
+        return res.status(404).json({ message: "File not found" });
+      }
+      fs.unlinkSync(path.join(process.cwd(), file.filePath));
+      await storage.deleteCandidateFile(fileId);
+      res.status(200).json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+  app2.use("/uploads", (req, res, next) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    next();
+  }, express.static(uploadDir));
+}
+
+// shared/schema.ts
+import { pgTable, text, serial, integer, timestamp } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+var users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  name: text("name")
+});
+var insertUserSchema = createInsertSchema(users).pick({
+  username: true,
+  password: true,
+  name: true
+});
+var candidates = pgTable("candidates", {
+  id: serial("id").primaryKey(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  linkedinProfile: text("linkedin_profile"),
+  yearsOfExperience: integer("years_of_experience"),
+  status: text("status").notNull().default("beschikbaar"),
+  unavailableUntil: timestamp("unavailable_until"),
+  client: text("client"),
+  notes: text("notes"),
+  profileImage: text("profile_image"),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+var insertCandidateSchema = createInsertSchema(candidates).omit({
+  id: true,
+  createdAt: true
+});
+var candidateFileSchema = z.object({
+  id: z.number(),
+  candidateId: z.union([z.string(), z.number()]),
+  // Ondersteuning voor zowel string als number ID's
+  fileName: z.string(),
+  fileType: z.string(),
+  filePath: z.string(),
+  fileSize: z.number(),
+  uploadDate: z.date()
+});
+
+// server/routes.ts
+import { z as z2 } from "zod";
+async function registerRoutes(app2) {
+  setupAuth(app2);
+  setupFileRoutes(app2);
+  app2.get("/api/candidates", async (req, res, next) => {
+    try {
+      console.log("GET /api/candidates - isAuthenticated:", req.isAuthenticated());
+      console.log("Session ID:", req.sessionID);
+      console.log("Session:", req.session);
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const candidates2 = await storage.getCandidates();
+      console.log("Aantal kandidaten gevonden:", candidates2.length);
+      res.status(200).json(candidates2);
+    } catch (error) {
+      console.error("Error in GET /api/candidates:", error);
+      next(error);
+    }
+  });
+  app2.get("/api/candidates/:id", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const id = parseInt(req.params.id, 10);
+      const candidate = await storage.getCandidate(id);
+      if (!candidate) {
+        return res.status(404).json({ message: "Candidate not found" });
+      }
+      res.status(200).json(candidate);
+    } catch (error) {
+      next(error);
+    }
+  });
+  app2.post("/api/candidates", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const validatedData = insertCandidateSchema.parse(req.body);
+      const candidate = await storage.createCandidate(validatedData);
+      res.status(201).json(candidate);
+    } catch (error) {
+      if (error instanceof z2.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+  app2.patch("/api/candidates/:id", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const id = parseInt(req.params.id, 10);
+      const validatedData = insertCandidateSchema.partial().parse(req.body);
+      const candidate = await storage.updateCandidate(id, validatedData);
+      if (!candidate) {
+        return res.status(404).json({ message: "Candidate not found" });
+      }
+      res.status(200).json(candidate);
+    } catch (error) {
+      if (error instanceof z2.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+  app2.delete("/api/candidates/:id", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const id = parseInt(req.params.id, 10);
+      const files = await storage.getCandidateFiles(id);
+      const result = await storage.deleteCandidate(id);
+      if (!result) {
+        return res.status(404).json({ message: "Candidate not found" });
+      }
+      for (const file of files) {
+        await storage.deleteCandidateFile(file.id);
+      }
+      res.status(200).json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+  const httpServer = createServer(app2);
+  return httpServer;
+}
+
+// server/vite.ts
+import express2 from "express";
+import fs2 from "fs";
+import path3 from "path";
+import { createServer as createViteServer, createLogger } from "vite";
+
+// vite.config.ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path2 from "path";
+import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+var vite_config_default = defineConfig({
+  plugins: [
+    react(),
+    runtimeErrorOverlay(),
+    ...process.env.NODE_ENV !== "production" && process.env.REPL_ID !== void 0 ? [
+      await import("@replit/vite-plugin-cartographer").then(
+        (m) => m.cartographer()
+      )
+    ] : []
+  ],
+  resolve: {
+    alias: {
+      "@": path2.resolve(import.meta.dirname, "client", "src"),
+      "@shared": path2.resolve(import.meta.dirname, "shared"),
+      "@assets": path2.resolve(import.meta.dirname, "attached_assets")
+    }
+  },
+  root: path2.resolve(import.meta.dirname, "client"),
+  build: {
+    outDir: path2.resolve(import.meta.dirname, "dist/public"),
+    emptyOutDir: true
+  }
+});
+
+// server/vite.ts
+import { nanoid } from "nanoid";
+var viteLogger = createLogger();
+function log(message, source = "express") {
+  const formattedTime = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+  });
+  console.log(`${formattedTime} [${source}] ${message}`);
+}
+async function setupVite(app2, server) {
+  const serverOptions = {
+    middlewareMode: true,
+    hmr: { server },
+    allowedHosts: true
+  };
+  const vite = await createViteServer({
+    ...vite_config_default,
+    configFile: false,
+    customLogger: {
+      ...viteLogger,
+      error: (msg, options) => {
+        viteLogger.error(msg, options);
+        process.exit(1);
+      }
+    },
+    server: serverOptions,
+    appType: "custom"
+  });
+  app2.use(vite.middlewares);
+  app2.use("*", async (req, res, next) => {
+    const url = req.originalUrl;
+    try {
+      const clientTemplate = path3.resolve(
+        import.meta.dirname,
+        "..",
+        "client",
+        "index.html"
+      );
+      let template = await fs2.promises.readFile(clientTemplate, "utf-8");
+      template = template.replace(
+        `src="/src/main.tsx"`,
+        `src="/src/main.tsx?v=${nanoid()}"`
+      );
+      const page = await vite.transformIndexHtml(url, template);
+      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+    } catch (e) {
+      vite.ssrFixStacktrace(e);
+      next(e);
+    }
+  });
+}
+function serveStatic(app2) {
+  const distPath = path3.resolve(import.meta.dirname, "public");
+  if (!fs2.existsSync(distPath)) {
+    throw new Error(
+      `Could not find the build directory: ${distPath}, make sure to build the client first`
+    );
+  }
+  app2.use(express2.static(distPath));
+  app2.use("*", (_req, res) => {
+    res.sendFile(path3.resolve(distPath, "index.html"));
+  });
+}
+
+// server/index.ts
+var app = express3();
+app.use(express3.json());
+app.use(express3.urlencoded({ extended: false }));
+app.use((req, res, next) => {
+  const start = Date.now();
+  const path4 = req.path;
+  let capturedJsonResponse = void 0;
+  const originalResJson = res.json;
+  res.json = function(bodyJson, ...args) {
+    capturedJsonResponse = bodyJson;
+    return originalResJson.apply(res, [bodyJson, ...args]);
+  };
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    if (path4.startsWith("/api")) {
+      let logLine = `${req.method} ${path4} ${res.statusCode} in ${duration}ms`;
+      if (capturedJsonResponse) {
+        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+      }
+      if (logLine.length > 80) {
+        logLine = logLine.slice(0, 79) + "\u2026";
+      }
+      log(logLine);
+    }
+  });
+  next();
+});
+(async () => {
+  const server = await registerRoutes(app);
+  app.use((err, _req, res, _next) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+    res.status(status).json({ message });
+    throw err;
+  });
+  if (app.get("env") === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+  }
+  const port = 5e3;
+  server.listen({
+    port,
+    host: "0.0.0.0",
+    reusePort: true
+  }, () => {
+    log(`serving on port ${port}`);
+  });
+})();
