@@ -56,7 +56,12 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      id, 
+      username: insertUser.username,
+      password: insertUser.password,
+      name: insertUser.name || null
+    };
     this.users.set(id, user);
     return user;
   }
@@ -74,14 +79,18 @@ export class MemStorage implements IStorage {
     
     // Ensure all nullable fields have default values
     const newCandidate: Candidate = {
-      ...candidate, 
       id,
+      firstName: candidate.firstName,
+      lastName: candidate.lastName,
+      email: candidate.email,
       status: candidate.status || "active",
       profileImage: candidate.profileImage || null,
       phone: candidate.phone || null,
       notes: candidate.notes || null,
       linkedinProfile: candidate.linkedinProfile || null,
       yearsOfExperience: candidate.yearsOfExperience || null,
+      unavailableUntil: candidate.unavailableUntil || null,
+      client: candidate.client || null,
       createdAt: new Date()
     };
     

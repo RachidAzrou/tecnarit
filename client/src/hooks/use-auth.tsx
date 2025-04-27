@@ -236,6 +236,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.setQueryData(["/api/user"], null);
       queryClient.invalidateQueries({queryKey: ['/api/candidates']});
       
+      // Zet de user state op null
+      setUser(null);
+      
       toast({
         title: "Je bent uitgelogd",
       });

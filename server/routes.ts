@@ -16,13 +16,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Candidate CRUD routes
   app.get("/api/candidates", async (req, res, next) => {
     try {
+      console.log('GET /api/candidates - isAuthenticated:', req.isAuthenticated());
+      console.log('Session ID:', req.sessionID);
+      console.log('Session:', req.session);
+      
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
       const candidates = await storage.getCandidates();
+      console.log('Aantal kandidaten gevonden:', candidates.length);
       res.status(200).json(candidates);
     } catch (error) {
+      console.error('Error in GET /api/candidates:', error);
       next(error);
     }
   });

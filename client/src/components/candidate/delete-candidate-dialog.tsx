@@ -1,18 +1,16 @@
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+import { 
+  AlertDialog, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle 
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { AlertTriangle } from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Candidate } from "@shared/schema";
 
 interface DeleteCandidateDialogProps {
@@ -27,22 +25,22 @@ export default function DeleteCandidateDialog({
   onClose,
 }: DeleteCandidateDialogProps) {
   const { toast } = useToast();
-
-  const deleteMutation = useMutation({
+  
+  const deleteCandidate = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/candidates/${id}`);
+      return apiRequest("DELETE", `/api/candidates/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/candidates"] });
       toast({
-        title: "Candidate deleted",
-        description: "The candidate has been successfully deleted.",
+        title: "Kandidaat verwijderd",
+        description: "De kandidaat is succesvol verwijderd.",
       });
+      queryClient.invalidateQueries({queryKey: ['/api/candidates']});
       onClose();
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
-        title: "Failed to delete candidate",
+        title: "Fout bij verwijderen",
         description: error.message,
         variant: "destructive",
       });
@@ -51,37 +49,32 @@ export default function DeleteCandidateDialog({
 
   const handleDelete = () => {
     if (candidate) {
-      deleteMutation.mutate(candidate.id);
+      deleteCandidate.mutate(candidate.id);
     }
   };
-
-  if (!candidate) return null;
 
   return (
     <AlertDialog open={open} onOpenChange={onClose}>
       <AlertDialogContent>
-        <AlertDialogHeader className="flex flex-row items-center gap-3">
-          <div className="bg-red-100 p-2 rounded-full">
-            <AlertTriangle className="h-6 w-6 text-red-500" />
-          </div>
-          <div>
-            <AlertDialogTitle>Delete Candidate</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete {candidate.firstName} {candidate.lastName}? All of their data will be permanently removed. This action cannot be undone.
-            </AlertDialogDescription>
-          </div>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Kandidaat verwijderen</AlertDialogTitle>
+          <AlertDialogDescription>
+            Weet je zeker dat je de kandidaat 
+            <strong className="font-medium">
+              {candidate ? ` ${candidate.firstName} ${candidate.lastName}` : ""}
+            </strong> 
+            wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction asChild>
-            <Button 
-              variant="destructive" 
-              onClick={handleDelete}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? "Deleting..." : "Delete"}
-            </Button>
-          </AlertDialogAction>
+          <AlertDialogCancel disabled={deleteCandidate.isPending}>Annuleren</AlertDialogCancel>
+          <Button 
+            variant="destructive" 
+            onClick={handleDelete}
+            disabled={deleteCandidate.isPending}
+          >
+            {deleteCandidate.isPending ? "Bezig met verwijderen..." : "Verwijderen"}
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
