@@ -75,7 +75,11 @@ export default function CandidateForm() {
     isLoading: isCandidateLoading,
     error: candidateError,
   } = useQuery<Candidate>({
-    queryKey: [`/api/candidates/${id}`],
+    queryKey: [`candidates/${id}`],
+    queryFn: async () => {
+      if (!id) throw new Error("No candidate ID provided");
+      return await getCandidate(parseInt(id));
+    },
     enabled: isEditMode,
   });
 
@@ -124,21 +128,21 @@ export default function CandidateForm() {
   // Mutations voor toevoegen/bijwerken van kandidaten
   const createMutation = useMutation({
     mutationFn: async (formData: FormValues) => {
-      const response = await apiRequest("POST", "/api/candidates", formData);
-      return await response.json();
+      // Gebruik Firebase in plaats van de API
+      return await createCandidate(formData);
     },
     onSuccess: async (data: Candidate) => {
       // Upload profiel foto als die is geselecteerd
       if (profileImageFile) {
-        await uploadProfileImage(data.id, profileImageFile);
+        await firebaseUploadProfileImage(data.id, profileImageFile);
       }
 
       // Upload CV als die is geselecteerd
       if (resumeFile) {
-        await uploadResume(data.id, resumeFile);
+        await addCandidateFile(data.id, resumeFile, "CV");
       }
 
-      queryClient.invalidateQueries({ queryKey: ["/api/candidates"] });
+      queryClient.invalidateQueries({ queryKey: ["candidates"] });
       toast({
         title: "Kandidaat Toegevoegd",
         description: `${data.firstName} ${data.lastName} is toegevoegd aan het systeem.`,
@@ -156,22 +160,23 @@ export default function CandidateForm() {
 
   const updateMutation = useMutation({
     mutationFn: async (formData: FormValues) => {
-      const response = await apiRequest("PATCH", `/api/candidates/${id}`, formData);
-      return await response.json();
+      if (!id) throw new Error("Geen kandidaat ID opgegeven");
+      // Gebruik Firebase in plaats van de API
+      return await updateCandidate(parseInt(id), formData);
     },
     onSuccess: async (data: Candidate) => {
       // Upload profiel foto als die is geselecteerd
       if (profileImageFile) {
-        await uploadProfileImage(data.id, profileImageFile);
+        await firebaseUploadProfileImage(data.id, profileImageFile);
       }
 
       // Upload CV als die is geselecteerd
       if (resumeFile) {
-        await uploadResume(data.id, resumeFile);
+        await addCandidateFile(data.id, resumeFile, "CV");
       }
 
-      queryClient.invalidateQueries({ queryKey: [`/api/candidates/${id}`] });
-      queryClient.invalidateQueries({ queryKey: ["/api/candidates"] });
+      queryClient.invalidateQueries({ queryKey: [`candidates/${id}`] });
+      queryClient.invalidateQueries({ queryKey: ["candidates"] });
       toast({
         title: "Kandidaat Bijgewerkt",
         description: `${data.firstName} ${data.lastName} is bijgewerkt.`,
@@ -187,58 +192,8 @@ export default function CandidateForm() {
     },
   });
 
-  // Functie om profielfoto te uploaden
-  const uploadProfileImage = async (candidateId: number, file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await fetch(`/api/candidates/${candidateId}/profile-image`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Fout bij het uploaden van de profielfoto");
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("Fout bij uploaden profielfoto:", error);
-      toast({
-        title: "Fout bij uploaden",
-        description: "Er is een fout opgetreden tijdens het uploaden van de profielfoto.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Functie om CV te uploaden
-  const uploadResume = async (candidateId: number, file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("fileType", "resume");
-
-    try {
-      const response = await fetch(`/api/candidates/${candidateId}/files`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Fout bij het uploaden van het CV");
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("Fout bij uploaden CV:", error);
-      toast({
-        title: "Fout bij uploaden",
-        description: "Er is een fout opgetreden tijdens het uploaden van het CV.",
-        variant: "destructive",
-      });
-    }
-  };
+  // Deze functies gebruiken nu direct de Firebase-functies
+  // De oude implementaties zijn vervangen
 
   // Functie om het formulier in te dienen
   const onSubmit = (data: FormValues) => {

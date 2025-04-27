@@ -10,8 +10,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { Candidate } from "@shared/schema";
+import { deleteCandidate as deleteFirebaseCandidate } from "@/firebase/candidates";
 
 interface DeleteCandidateDialogProps {
   candidate: Candidate | null;

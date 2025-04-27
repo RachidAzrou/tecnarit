@@ -25,6 +25,8 @@ import CandidateTable from "@/components/candidate/candidate-table";
 import { Candidate } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { PageTitle } from "@/components/layout/page-title";
+// Firebase import
+import { getCandidates, getCandidatesByStatus } from "@/firebase/candidates";
 
 export default function CandidateList() {
   const [, setLocation] = useLocation();
@@ -41,7 +43,10 @@ export default function CandidateList() {
   }, []);
 
   const { data: candidates, isLoading, error } = useQuery<Candidate[]>({
-    queryKey: ["/api/candidates"],
+    queryKey: ["candidates"],
+    queryFn: async () => {
+      return await getCandidates();
+    },
     retry: 3,
     retryDelay: 1000,
     // Voorkom dat 401-fouten als error worden beschouwd
