@@ -82,7 +82,8 @@ export default function EmployeeList() {
           <div className="py-6">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
               <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-semibold text-primary-900">Employees</h1>
+                <h1 className="text-2xl font-semibold text-primary-900 lg:block hidden">Employees</h1>
+                <div className="flex-grow"></div>
                 <Button onClick={handleAddEmployee}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Employee

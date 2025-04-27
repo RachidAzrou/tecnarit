@@ -104,7 +104,7 @@ export default function EmployeeDetail() {
           <div className="py-6">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
               <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-semibold text-primary-900">Employee Details</h1>
+                <h1 className="text-2xl font-semibold text-primary-900 lg:block hidden">Employee Details</h1>
                 <div className="flex space-x-3">
                   <Button
                     variant="outline"
