@@ -54,9 +54,9 @@ export default function Sidebar({ onClose }: SidebarProps) {
       {/* Permanente sidebar */}
       <div className="fixed top-0 bottom-0 left-0 z-40 flex min-h-0 flex-1 flex-col border-r border-border bg-card w-64">
         {/* Logo Container */}
-        <div className="flex flex-shrink-0 border-b border-border h-16 overflow-hidden p-0 bg-white">
-          <div className="w-full h-full p-0 m-0">
-            <img src={tecnaritLogo} alt="TECNARIT" className="h-full w-full object-contain" />
+        <div className="flex-shrink-0 border-b border-border h-16 overflow-hidden p-0 bg-[#233142] flex items-center justify-center">
+          <div className="flex items-center justify-center">
+            <img src={tecnaritLogo} alt="TECNARIT" className="h-10 w-auto object-contain" />
           </div>
         </div>
         
