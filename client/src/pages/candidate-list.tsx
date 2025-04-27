@@ -273,41 +273,41 @@ export default function CandidateList() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       {/* Totaal aantal kandidaten */}
                       <Card 
-                        className="bg-white shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                        className="dashboard-total-card cursor-pointer hover-lift mobile-friendly-card"
                         onClick={() => {
                           setShowDashboard(false);
                           setStatus("all");
                           window.history.pushState({}, "", "?search=true");
                         }}
                       >
-                        <CardContent className="flex flex-col items-center justify-center p-6">
-                          <div className="rounded-full bg-blue-100 p-3 mb-3">
-                            <Users className="h-8 w-8 text-blue-600" />
+                        <CardContent className="flex flex-col items-center justify-center p-4 sm:p-6">
+                          <div className="rounded-full bg-blue-100/80 p-3 mb-3">
+                            <Users className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
                           </div>
-                          <h3 className="text-lg font-medium text-gray-900">Totaal Kandidaten</h3>
-                          <p className="text-3xl font-bold gradient-text mt-2">
-                            {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : candidates?.length || 0}
+                          <h3 className="text-base sm:text-lg font-medium text-gray-900">Totaal Kandidaten</h3>
+                          <p className="text-2xl sm:text-3xl font-bold gradient-text mt-2">
+                            {isLoading ? <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" /> : candidates?.length || 0}
                           </p>
                         </CardContent>
                       </Card>
                       
                       {/* Beschikbare kandidaten */}
                       <Card 
-                        className="bg-white shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                        className="dashboard-available-card cursor-pointer hover-lift mobile-friendly-card"
                         onClick={() => {
                           setShowDashboard(false);
                           setStatus("beschikbaar");
                           window.history.pushState({}, "", "?search=true&status=beschikbaar");
                         }}
                       >
-                        <CardContent className="flex flex-col items-center justify-center p-6">
-                          <div className="rounded-full bg-green-100 p-3 mb-3">
-                            <Users className="h-8 w-8 text-green-600" />
+                        <CardContent className="flex flex-col items-center justify-center p-4 sm:p-6">
+                          <div className="rounded-full bg-green-100/80 p-3 mb-3">
+                            <Users className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
                           </div>
-                          <h3 className="text-lg font-medium text-gray-900">Beschikbare Kandidaten</h3>
-                          <p className="text-3xl font-bold gradient-text mt-2">
+                          <h3 className="text-base sm:text-lg font-medium text-gray-900">Beschikbare Kandidaten</h3>
+                          <p className="text-2xl sm:text-3xl font-bold gradient-text mt-2">
                             {isLoading ? (
-                              <Loader2 className="h-6 w-6 animate-spin" />
+                              <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
                             ) : (
                               candidates?.filter(c => c.status === "beschikbaar").length || 0
                             )}
@@ -317,21 +317,21 @@ export default function CandidateList() {
                       
                       {/* Kandidaten in dienst */}
                       <Card 
-                        className="bg-white shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                        className="dashboard-employed-card cursor-pointer hover-lift mobile-friendly-card"
                         onClick={() => {
                           setShowDashboard(false);
                           setStatus("in_dienst");
                           window.history.pushState({}, "", "?search=true&status=in_dienst");
                         }}
                       >
-                        <CardContent className="flex flex-col items-center justify-center p-6">
-                          <div className="rounded-full bg-purple-100 p-3 mb-3">
-                            <Users className="h-8 w-8 text-purple-600" />
+                        <CardContent className="flex flex-col items-center justify-center p-4 sm:p-6">
+                          <div className="rounded-full bg-purple-100/80 p-3 mb-3">
+                            <Users className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
                           </div>
-                          <h3 className="text-lg font-medium text-gray-900">Kandidaten in Dienst</h3>
-                          <p className="text-3xl font-bold gradient-text mt-2">
+                          <h3 className="text-base sm:text-lg font-medium text-gray-900">Kandidaten in Dienst</h3>
+                          <p className="text-2xl sm:text-3xl font-bold gradient-text mt-2">
                             {isLoading ? (
-                              <Loader2 className="h-6 w-6 animate-spin" />
+                              <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
                             ) : (
                               candidates?.filter(c => c.status === "in_dienst").length || 0
                             )}
@@ -341,49 +341,61 @@ export default function CandidateList() {
                     </div>
                     
                     {/* Recente kandidaten tabel */}
-                    <h2 className="text-xl font-medium my-6">Recente Kandidaten</h2>
+                    <h2 className="text-xl font-medium mt-8 mb-4">Recente Kandidaten</h2>
                     {isLoading ? (
-                      <div className="flex justify-center items-center h-64">
+                      <div className="flex justify-center items-center h-48 sm:h-64 glass-effect rounded-lg">
                         <Loader2 className="h-8 w-8 animate-spin gradient-text" />
                       </div>
                     ) : candidates?.length ? (
-                      <CandidateTable candidates={candidates.slice(0, 5)} />
+                      <div className="glass-effect rounded-lg overflow-hidden">
+                        <CandidateTable candidates={candidates.slice(0, 5)} />
+                      </div>
                     ) : (
-                      <div className="text-center py-10 px-4 border-2 border-dashed border-primary/30 rounded-lg">
+                      <div className="text-center py-8 px-4 border-2 border-dashed border-primary/30 rounded-lg glass-effect">
                         <h3 className="mt-2 text-lg font-medium text-primary-800">Geen kandidaten beschikbaar</h3>
+                        <p className="mt-2 text-primary/70">
+                          Voeg uw eerste kandidaat toe om te beginnen.
+                        </p>
+                        <Button 
+                          onClick={handleAddCandidate}
+                          className="mt-4 gradient-bg hover:opacity-90 transition-all hover-lift"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Kandidaat Toevoegen
+                        </Button>
                       </div>
                     )}
                   </div>
                 ) : (
                   // Kandidaat zoeken weergave
                   isLoading ? (
-                    <div className="flex justify-center items-center h-64">
+                    <div className="flex justify-center items-center h-48 sm:h-64 glass-effect rounded-lg">
                       <Loader2 className="h-8 w-8 animate-spin gradient-text" />
                     </div>
                   ) : error ? (
-                    <div className="text-center p-8 border-2 border-red-300 rounded-lg bg-red-50">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <div className="text-center p-6 sm:p-8 border-2 border-red-300 rounded-lg glass-effect-green bg-red-50/80">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="12" y1="8" x2="12" y2="12"></line>
                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
                       </svg>
                       <h3 className="mt-4 text-lg font-medium text-red-800">Fout bij het laden van kandidaten</h3>
-                      <p className="mt-2 text-red-600">Probeer het later opnieuw of neem contact op met ondersteuning.</p>
+                      <p className="mt-2 text-red-700">Probeer het later opnieuw of neem contact op met ondersteuning.</p>
                       <Button 
                         onClick={() => window.location.reload()} 
-                        className="mt-4 bg-red-600 hover:bg-red-700"
+                        className="mt-4 bg-red-600 hover:bg-red-700 hover-lift touch-friendly"
                       >
                         Opnieuw proberen
                       </Button>
                     </div>
                   ) : filteredCandidates.length === 0 ? (
-                    <div className="text-center py-16 px-4 border-2 border-dashed border-primary/30 rounded-lg">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-primary/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <div className="text-center py-12 sm:py-16 px-4 border-2 border-dashed border-primary/30 rounded-lg glass-effect">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-primary/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                       </svg>
                       <h3 className="mt-4 text-lg font-medium text-primary-800">Geen kandidaten gevonden</h3>
-                      <p className="mt-2 text-primary/70">
+                      <p className="mt-2 text-primary/70 max-w-md mx-auto">
                         {searchQuery || (status && status !== "all") 
                           ? "Pas je zoekcriteria aan of verwijder filters om meer resultaten te zien." 
                           : "Voeg je eerste kandidaat toe om te beginnen."}
@@ -391,7 +403,7 @@ export default function CandidateList() {
                       {!searchQuery && (!status || status === "all") && (
                         <Button 
                           onClick={handleAddCandidate}
-                          className="mt-4 gradient-bg hover:opacity-90 transition-opacity"
+                          className="mt-4 gradient-bg hover:opacity-90 transition-all hover-lift touch-friendly"
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           Kandidaat Toevoegen
@@ -399,7 +411,9 @@ export default function CandidateList() {
                       )}
                     </div>
                   ) : (
-                    <CandidateTable candidates={filteredCandidates} />
+                    <div className="glass-effect rounded-lg overflow-hidden">
+                      <CandidateTable candidates={filteredCandidates} />
+                    </div>
                   )
                 )}
               </div>

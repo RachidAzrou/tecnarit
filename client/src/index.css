@@ -84,7 +84,12 @@
   
   /* Glass-effect voor betere leesbaarheid met achtergrond */
   .glass-effect {
-    @apply bg-white/90 backdrop-blur-sm;
+    @apply bg-white/85 backdrop-blur-sm border border-white/40 shadow-lg;
+  }
+  
+  /* Groen getint glaseffect voor speciale elementen */
+  .glass-effect-green {
+    @apply bg-gradient-to-br from-white/90 to-green-50/90 backdrop-blur-sm border border-green-100/40 shadow-lg;
   }
   
   /* Responsieve stijlen voor mobiel */
@@ -112,7 +117,25 @@
   
   /* Verbeterde card stijl met glaseffect */
   .tecnarit-glass-card {
-    @apply rounded-lg border border-border bg-white/90 backdrop-blur-sm text-card-foreground shadow-md hover:shadow-lg transition-shadow duration-200;
+    @apply rounded-lg border border-white/40 bg-white/90 backdrop-blur-sm text-card-foreground shadow-md hover:shadow-lg transition-all duration-200;
+  }
+  
+  /* Dashboard kaarten met verschillende kleuren */
+  .dashboard-total-card {
+    @apply rounded-lg border border-blue-100/40 bg-gradient-to-br from-white/90 to-blue-50/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-200;
+  }
+  
+  .dashboard-available-card {
+    @apply rounded-lg border border-green-100/40 bg-gradient-to-br from-white/90 to-green-50/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-200;
+  }
+  
+  .dashboard-employed-card {
+    @apply rounded-lg border border-purple-100/40 bg-gradient-to-br from-white/90 to-purple-50/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-200;
+  }
+  
+  /* Verbeterde interacties */
+  .hover-lift {
+    @apply hover:-translate-y-1 transition-transform duration-200;
   }
 }
 
