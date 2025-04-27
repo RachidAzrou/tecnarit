@@ -58,12 +58,12 @@ export default function MobileNavbar() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button 
-                  variant="ghost" 
+                  variant={location.includes('search=true') ? "default" : "ghost"}
                   size="icon" 
-                  className="h-12 w-12 rounded-full text-muted-foreground"
+                  className={`${location.includes('search=true') ? 'h-14 w-14 rounded-full tecnarit-blue-bg -mt-5 shadow-lg' : 'h-12 w-12 rounded-full text-muted-foreground'}`}
                   onClick={goToSearch}
                 >
-                  <Search className={`h-5 w-5 ${location.includes('search=true') ? 'text-primary' : ''}`} />
+                  <Search className={`${location.includes('search=true') ? 'h-6 w-6 text-white' : 'h-5 w-5'}`} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">
@@ -75,12 +75,12 @@ export default function MobileNavbar() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button 
-                  variant="ghost" 
+                  variant={location === '/candidates/new' ? "default" : "ghost"}
                   size="icon" 
-                  className="h-12 w-12 rounded-full text-muted-foreground"
+                  className={`${location === '/candidates/new' ? 'h-14 w-14 rounded-full tecnarit-blue-bg -mt-5 shadow-lg' : 'h-12 w-12 rounded-full text-muted-foreground'}`}
                   onClick={goToAddCandidate}
                 >
-                  <Plus className={`h-5 w-5 ${location === '/candidates/new' ? 'text-primary' : ''}`} />
+                  <Plus className={`${location === '/candidates/new' ? 'h-6 w-6 text-white' : 'h-5 w-5'}`} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">
@@ -92,12 +92,12 @@ export default function MobileNavbar() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button 
-                  variant="default" 
+                  variant={location === '/' && !location.includes('search=true') ? "default" : "ghost"}
                   size="icon" 
-                  className="h-14 w-14 rounded-full tecnarit-blue-bg -mt-5 shadow-lg"
+                  className={`${location === '/' && !location.includes('search=true') ? 'h-14 w-14 rounded-full tecnarit-blue-bg -mt-5 shadow-lg' : 'h-12 w-12 rounded-full text-muted-foreground'}`}
                   onClick={goToDashboard}
                 >
-                  <Home className={`h-6 w-6 ${location === '/' && !location.includes('search=true') ? 'text-primary' : 'text-white'}`} />
+                  <Home className={`${location === '/' && !location.includes('search=true') ? 'h-6 w-6 text-white' : 'h-5 w-5'}`} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">
