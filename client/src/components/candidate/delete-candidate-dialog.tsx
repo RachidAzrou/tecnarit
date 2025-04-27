@@ -37,14 +37,15 @@ export default function DeleteCandidateDialog({
         description: "De kandidaat is succesvol verwijderd.",
       });
       
-      // Invalideer alle kandidaat-gerelateerde queries om caching-problemen te voorkomen
-      queryClient.invalidateQueries({queryKey: ["candidates"]});
+      // Invalideer alle caches om problemen met oude data te voorkomen
+      queryClient.invalidateQueries();
       
-      // Forceer de pagina om helemaal opnieuw te laden voor volledige verversing
+      // Sluit de dialog en laat de calling component de UI updaten
       setTimeout(() => {
-        window.location.href = window.location.pathname === "/candidates" 
-          ? "/candidates" 
-          : "/candidates?freshLoad=" + new Date().getTime();
+        // Gebruik de wouter navigate functie en ga terug naar de hoofdpagina als we in detail view zijn
+        if (window.location.pathname.includes("/candidates/") && !window.location.pathname.includes("/new")) {
+          window.location.href = "/";
+        }
       }, 500);
       
       onClose();
