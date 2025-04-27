@@ -8,17 +8,26 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Sidebar from "@/components/layout/sidebar";
 import { PageTitle } from "@/components/layout/page-title";
 import { Candidate, CandidateFile } from "@shared/schema";
+import { getCandidate, getCandidateFiles } from "@/firebase/candidates";
 
 export default function CandidateDetail() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
 
   const { data: candidate, isLoading: isCandidateLoading } = useQuery<Candidate>({
-    queryKey: [`/api/candidates/${params.id}`],
+    queryKey: [`candidates/${params.id}`],
+    queryFn: async () => {
+      if (!params.id) throw new Error("No candidate ID provided");
+      return await getCandidate(parseInt(params.id));
+    },
   });
 
   const { data: files, isLoading: isFilesLoading } = useQuery<CandidateFile[]>({
-    queryKey: [`/api/candidates/${params.id}/files`],
+    queryKey: [`candidates/${params.id}/files`],
+    queryFn: async () => {
+      if (!params.id) throw new Error("No candidate ID provided");
+      return await getCandidateFiles(parseInt(params.id));
+    },
   });
 
   const handleBackToList = () => {

@@ -29,14 +29,14 @@ export default function DeleteCandidateDialog({
   
   const deleteCandidate = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest("DELETE", `/api/candidates/${id}`);
+      return await deleteFirebaseCandidate(id);
     },
     onSuccess: () => {
       toast({
         title: "Kandidaat verwijderd",
         description: "De kandidaat is succesvol verwijderd.",
       });
-      queryClient.invalidateQueries({queryKey: ['/api/candidates']});
+      queryClient.invalidateQueries({queryKey: ["candidates"]});
       onClose();
     },
     onError: (error: Error) => {
