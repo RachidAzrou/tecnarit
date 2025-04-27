@@ -282,9 +282,9 @@ export default function CandidateForm() {
 
         <div className="flex-1">
           {/* Main Content Area */}
-          <div className="py-6 max-w-5xl mx-auto">
+          <div className="py-6 w-full mx-auto">
             {/* Desktop Header */}
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+            <div className="lg:max-w-4xl xl:max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
               <div className="text-center">
                 <h1 className="text-3xl md:text-4xl tecnarit-blue-text font-bold mb-6">
                   {isEditMode ? "Kandidaat Bewerken" : "Kandidaat Toevoegen"}
@@ -302,9 +302,9 @@ export default function CandidateForm() {
               </div>
             </div>
 
-            {/* Form Container - centering with fixed width */}
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+            {/* Form Container - centering with responsive width */}
+            <div className="lg:max-w-3xl xl:max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="overflow-hidden">
                 {isEditMode && isCandidateLoading ? (
                   <div className="flex justify-center items-center h-64">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -316,8 +316,8 @@ export default function CandidateForm() {
                 ) : (
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                      <div className="p-6">
-                        <div className="py-2 sm:p-4">
+                      <div>
+                        <div className="py-4 sm:p-0">
                           <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                             {/* Basic Information */}
                             <div className="sm:col-span-6">
