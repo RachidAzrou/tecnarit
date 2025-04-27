@@ -106,12 +106,11 @@ export default function CandidateDetail() {
                 </div>
                 <div className="flex space-x-3">
                   <Button
-                    variant="outline"
                     onClick={handleBackToList}
-                    className="text-primary hover:text-primary-700 hover:bg-primary/5 border-primary/30"
+                    className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
-                    Terug naar Lijst
+                    Dashboard
                   </Button>
                   <Button 
                     onClick={handleEdit}

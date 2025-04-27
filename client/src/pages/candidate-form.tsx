@@ -297,12 +297,11 @@ export default function CandidateForm() {
                 </div>
                 <div className="flex space-x-3">
                   <Button
-                    variant="outline"
                     onClick={() => setLocation("/")}
-                    className="text-primary hover:text-primary-700 hover:bg-primary/5 border-primary/30"
+                    className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
-                    Terug naar Lijst
+                    Dashboard
                   </Button>
                 </div>
               </div>
@@ -670,7 +669,7 @@ export default function CandidateForm() {
                           <Button
                             type="submit"
                             disabled={isPending}
-                            className="relative gradient-bg hover:opacity-90 transition-opacity"
+                            className="relative tecnarit-blue-bg transition-all hover-lift touch-friendly"
                           >
                             {isPending && (
                               <Loader2 className="mr-2 h-4 w-4 animate-spin text-white" />
