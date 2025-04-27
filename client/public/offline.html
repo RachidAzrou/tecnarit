@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline - TECNARIT - EMS</title>
+  <meta name="theme-color" content="#233142" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #233142;
+      color: #f4f4f4;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    
+    .container {
+      max-width: 500px;
+      padding: 1.5rem;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, #36d1dc 0%, #5b86e5 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    p {
+      font-size: 1.25rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+    
+    .logo {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 2rem;
+    }
+    
+    .retry-button {
+      background: linear-gradient(90deg, #36d1dc 0%, #5b86e5 100%);
+      color: white;
+      font-weight: 600;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    
+    .retry-button:hover {
+      opacity: 0.9;
+    }
+
+    .tecnarit-text {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 2rem;
+      background: linear-gradient(90deg, #36d1dc 0%, #5b86e5 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="/favicon.png" alt="TECNARIT Logo" class="logo" />
+    <h1>Geen internetverbinding</h1>
+    <p>Het lijkt erop dat je offline bent. Controleer je internetverbinding en probeer het opnieuw.</p>
+    <button class="retry-button" onclick="window.location.reload()">Opnieuw proberen</button>
+    <div class="tecnarit-text">TECNARIT - EMS</div>
+  </div>
+  <script>
+    // Controleer periodiek of de verbinding is hersteld
+    window.addEventListener('online', () => {
+      window.location.reload();
+    });
+  </script>
+</body>
+</html>
