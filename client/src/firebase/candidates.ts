@@ -104,7 +104,17 @@ export const createCandidate = async (candidate: InsertCandidate): Promise<Candi
     // Return the created candidate with ID
     return {
       id: parseInt(docRef.id),
-      ...candidate,
+      firstName: candidate.firstName,
+      lastName: candidate.lastName,
+      email: candidate.email,
+      phone: candidate.phone || null,
+      linkedinProfile: candidate.linkedinProfile || null,
+      yearsOfExperience: candidate.yearsOfExperience || null,
+      status: candidate.status || 'beschikbaar',
+      unavailableUntil: candidate.unavailableUntil || null,
+      client: candidate.client || null,
+      notes: candidate.notes || null,
+      profileImage: candidate.profileImage || null,
       createdAt: new Date(),
     };
   } catch (error) {
@@ -136,7 +146,9 @@ export const updateCandidate = async (id: number, candidate: Partial<InsertCandi
     
     // Prepare data for Firestore
     const updateData = { ...candidate };
+    // Converteer Date naar string voor Firestore
     if (updateData.unavailableUntil instanceof Date) {
+      // @ts-ignore - We weten dat dit een string wordt en dat is prima voor Firestore
       updateData.unavailableUntil = updateData.unavailableUntil.toISOString();
     }
     
@@ -261,6 +273,11 @@ export const addCandidateFile = async (
   fileName: string
 ): Promise<CandidateFile> => {
   try {
+    // Zorg ervoor dat de gebruiker is ingelogd
+    if (!auth.currentUser) {
+      throw new Error("Je moet ingelogd zijn om bestanden te uploaden");
+    }
+    
     const storageRef = ref(storage, `candidates/${candidateId}/documents/${file.name}`);
     await uploadBytes(storageRef, file);
     const downloadURL = await getDownloadURL(storageRef);
@@ -274,7 +291,8 @@ export const addCandidateFile = async (
       filePath: `candidates/${candidateId}/documents/${file.name}`,
       fileUrl: downloadURL,
       fileSize: file.size,
-      uploadDate: serverTimestamp()
+      uploadDate: serverTimestamp(),
+      uploadedBy: auth.currentUser.uid
     });
     
     return {
@@ -288,6 +306,12 @@ export const addCandidateFile = async (
     };
   } catch (error) {
     console.error("Error adding candidate file:", error);
+    // Geef een meer specifieke foutmelding terug
+    if (error instanceof Error) {
+      if (error.message.includes("permission")) {
+        throw new Error("Onvoldoende rechten. Controleer of je bent ingelogd en de juiste rechten hebt.");
+      }
+    }
     throw error;
   }
 };
@@ -321,6 +345,11 @@ export const getCandidateFiles = async (candidateId: number): Promise<CandidateF
 // Delete candidate file
 export const deleteCandidateFile = async (fileId: number): Promise<boolean> => {
   try {
+    // Zorg ervoor dat de gebruiker is ingelogd
+    if (!auth.currentUser) {
+      throw new Error("Je moet ingelogd zijn om bestanden te verwijderen");
+    }
+    
     const fileRef = doc(db, FILES_COLLECTION, fileId.toString());
     const fileSnap = await getDoc(fileRef);
     
@@ -340,6 +369,12 @@ export const deleteCandidateFile = async (fileId: number): Promise<boolean> => {
     return true;
   } catch (error) {
     console.error("Error deleting candidate file:", error);
+    // Geef een meer specifieke foutmelding terug
+    if (error instanceof Error) {
+      if (error.message.includes("permission")) {
+        throw new Error("Onvoldoende rechten. Controleer of je bent ingelogd en de juiste rechten hebt.");
+      }
+    }
     throw error;
   }
 };
