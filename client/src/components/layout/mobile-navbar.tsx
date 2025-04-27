@@ -19,7 +19,7 @@ export default function MobileNavbar() {
     } else if (location === '/candidates/new') {
       setPageTitle("Kandidaat Toevoegen");
     } else if (location.includes('search=true')) {
-      setPageTitle("Kandidaten Zoeken");
+      setPageTitle("Kandidaat zoeken");
     } else if (location.includes('/candidates/') && location.includes('/edit')) {
       setPageTitle("Kandidaat Bewerken");
     } else if (location.includes('/candidates/')) {
@@ -81,7 +81,7 @@ export default function MobileNavbar() {
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">
-                <p>Kandidaten Zoeken</p>
+                <p>Kandidaat zoeken</p>
               </TooltipContent>
             </Tooltip>
 
