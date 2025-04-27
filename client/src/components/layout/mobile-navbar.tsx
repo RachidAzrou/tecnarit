@@ -57,11 +57,9 @@ export default function MobileNavbar() {
 
   return (
     <>
-      {/* Pagina titel in mobiele header */}
-      <div className="lg:hidden fixed top-16 left-0 right-0 bg-transparent z-5 py-2">
-        <h1 className="text-center text-2xl font-bold tecnarit-blue-text">
-          {pageTitle}
-        </h1>
+      {/* Pagina titel in mobiele header - niet gefixeerd */}
+      <div className="lg:hidden py-2 mb-4">
+        {/* Deze div is leeg omdat we de titel nu in de individuele pagina-inhoud tonen */}
       </div>
       
       {/* Mobiele navigatiebalk */}

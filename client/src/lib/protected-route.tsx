@@ -48,8 +48,8 @@ export function ProtectedRoute({
           </div>
         </div>
         
-        {/* Main content */}
-        <div className="flex-1 overflow-auto pt-24 pb-20 lg:pt-0 lg:pb-4">
+        {/* Main content - verminderde padding nu pagetitle niet fixed is */}
+        <div className="flex-1 overflow-auto pt-16 pb-20 lg:pt-0 lg:pb-4">
           <Component />
         </div>
         
