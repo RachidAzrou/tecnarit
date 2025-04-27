@@ -103,29 +103,30 @@ export default function Sidebar({ onClose }: SidebarProps) {
         <div className="flex flex-1 flex-col overflow-y-auto pt-2 pb-4">
           <nav className="flex-1 space-y-1 px-2">
             {navItems.map((item) => (
-              <Link 
+                  <div 
                 key={item.id} 
-                href={item.path}
-                onClick={onClose}
-              >
-                <a className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
+                onClick={() => {
+                  window.location.href = item.path;
+                  if (onClose) onClose();
+                }}
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
                   isActive(item.id)
                     ? "gradient-bg text-white font-medium"
                     : "text-foreground hover:bg-muted"
-                }`}>
-                  <span className={isActive(item.id) ? "text-white" : "text-primary"}>
-                    {item.icon}
-                  </span>
-                  {!collapsed && item.label}
-                </a>
-              </Link>
+                }`}
+              >
+                <span className={isActive(item.id) ? "text-white" : "text-primary"}>
+                  {item.icon}
+                </span>
+                {!collapsed && <span className="ml-2">{item.label}</span>}
+              </div>
             ))}
           </nav>
         </div>
       </div>
 
       {/* Toggle knop - altijd zichtbaar */}
-      <div className={`fixed top-4 left-0 z-50 transition-all duration-300 ${collapsed ? 'left-[60px]' : 'left-[254px]'}`}>
+      <div className={`fixed top-4 z-50 transition-all duration-300 ${collapsed ? 'left-[15px]' : 'left-[254px]'}`}>
         <Button
           variant="ghost"
           size="sm"
