@@ -27,6 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 import { PageTitle } from "@/components/layout/page-title";
 // Firebase import
 import { getCandidates, getCandidatesByStatus } from "@/firebase/candidates";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/firebase/config";
 
 export default function CandidateList() {
   const [, setLocation] = useLocation();
@@ -42,10 +44,63 @@ export default function CandidateList() {
     setShowDashboard(!hasSearchParam);
   }, []);
 
-  const { data: candidates, isLoading, error, refetch } = useQuery<Candidate[]>({
+  // Directe kandidatenlijst uit Firebase (omzeilt cachingproblemen)
+  const [directCandidates, setDirectCandidates] = useState<Candidate[]>([]);
+  const [directLoading, setDirectLoading] = useState(false);
+  
+  // Deze functie haalt kandidaten direct uit Firebase op
+  const fetchDirectCandidates = async () => {
+    try {
+      setDirectLoading(true);
+      console.log("Direct ophalen van kandidaten uit Firebase...");
+      
+      const candidatesCollection = collection(db, 'candidates');
+      const candidatesSnapshot = await getDocs(candidatesCollection);
+      
+      const candidates = candidatesSnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: parseInt(doc.id),
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          phone: data.phone || null,
+          linkedinProfile: data.linkedinProfile || null,
+          yearsOfExperience: data.yearsOfExperience || null,
+          status: data.status || 'beschikbaar',
+          unavailableUntil: data.unavailableUntil ? new Date(data.unavailableUntil) : null,
+          client: data.client || null,
+          notes: data.notes || null,
+          profileImage: data.profileImage || null,
+          createdAt: data.createdAt ? new Date(data.createdAt.toDate()) : new Date(),
+        };
+      });
+      
+      console.log(`${candidates.length} kandidaten direct opgehaald uit Firebase`);
+      setDirectCandidates(candidates);
+    } catch (error) {
+      console.error("Fout bij direct ophalen van kandidaten:", error);
+      toast({
+        title: "Fout bij ophalen",
+        description: "Er is een fout opgetreden bij het ophalen van kandidaten.",
+        variant: "destructive",
+      });
+    } finally {
+      setDirectLoading(false);
+    }
+  };
+  
+  // Bij componentmount en als TanStack query opnieuw wordt uitgevoerd
+  useEffect(() => {
+    fetchDirectCandidates();
+  }, []);
+  
+  // De originele query behouden we voor compatibiliteit, maar we gebruiken deze niet actief
+  const { data: candidates, isLoadingState: queryIsLoading, error, refetch } = useQuery<Candidate[]>({
     queryKey: ["candidates"],
     queryFn: async () => {
-      return await getCandidates();
+      await fetchDirectCandidates(); // Direct ophalen bij elke query
+      return directCandidates;
     },
     retry: 3,
     retryDelay: 1000,
@@ -173,7 +228,10 @@ export default function CandidateList() {
     });
   };
 
-  const filteredCandidates = candidates ? filterCandidates(candidates) : [];
+  // Prioritize direct candidates over query-fetched candidates
+  const candidatesToUse = directCandidates.length > 0 ? directCandidates : (candidates || []);
+  const isLoadingStateState = directLoading || queryIsLoading;
+  const filteredCandidates = candidatesToUse ? filterCandidates(candidatesToUse) : [];
 
   return (
     <div className="bg-primary-50">
@@ -307,7 +365,7 @@ export default function CandidateList() {
                         </div>
                         <h3 className="text-base sm:text-lg font-medium text-gray-900">Totaal Kandidaten</h3>
                         <p className="text-2xl sm:text-3xl font-bold gradient-text mt-2">
-                          {isLoading ? <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" /> : candidates?.length || 0}
+                          {isLoadingState ? <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" /> : candidates?.length || 0}
                         </p>
                       </CardContent>
                     </Card>
@@ -327,7 +385,7 @@ export default function CandidateList() {
                         </div>
                         <h3 className="text-base sm:text-lg font-medium text-gray-900">Beschikbare Kandidaten</h3>
                         <p className="text-2xl sm:text-3xl font-bold gradient-text mt-2">
-                          {isLoading ? (
+                          {isLoadingState ? (
                             <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
                           ) : (
                             candidates?.filter(c => c.status === "beschikbaar").length || 0
@@ -351,7 +409,7 @@ export default function CandidateList() {
                         </div>
                         <h3 className="text-base sm:text-lg font-medium text-gray-900">Kandidaten in Dienst</h3>
                         <p className="text-2xl sm:text-3xl font-bold gradient-text mt-2">
-                          {isLoading ? (
+                          {isLoadingState ? (
                             <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
                           ) : (
                             candidates?.filter(c => c.status === "in_dienst").length || 0
@@ -366,7 +424,7 @@ export default function CandidateList() {
                     <h2 className="text-xl tecnarit-blue-text">Recente Kandidaten</h2>
                     {/* Knop verwijderd op verzoek */}
                   </div>
-                  {isLoading ? (
+                  {isLoadingState ? (
                     <div className="flex justify-center items-center h-48 sm:h-64 glass-effect rounded-lg">
                       <Loader2 className="h-8 w-8 animate-spin gradient-text" />
                     </div>
@@ -386,7 +444,7 @@ export default function CandidateList() {
                 </div>
               ) : (
                 // Kandidaat zoeken weergave
-                isLoading ? (
+                isLoadingState ? (
                   <div className="flex justify-center items-center h-48 sm:h-64 glass-effect rounded-lg">
                     <Loader2 className="h-8 w-8 animate-spin gradient-text" />
                   </div>

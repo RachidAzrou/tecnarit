@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { 
   AlertDialog, 
@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Candidate } from "@shared/schema";
-import { deleteDoc, doc } from "firebase/firestore";
+import { deleteDoc, doc, collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebase/config";
 
 interface DeleteCandidateDialogProps {
@@ -29,6 +29,37 @@ export default function DeleteCandidateDialog({
   const { toast } = useToast();
   const [, navigate] = useLocation();
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Bij het openen van het dialog, debugging informatie tonen
+  useEffect(() => {
+    if (open && candidate) {
+      debugFirebaseData();
+    }
+  }, [open, candidate]);
+  
+  // Deze functie haalt direct alle kandidaten op uit Firebase
+  const debugFirebaseData = async () => {
+    try {
+      console.log("=========== DEBUG INFO ===========");
+      console.log(`Te verwijderen kandidaat: ${candidate?.id} (${candidate?.firstName} ${candidate?.lastName})`);
+      
+      // Alle kandidaten ophalen
+      const candidatesCollection = collection(db, 'candidates');
+      const candidatesSnapshot = await getDocs(candidatesCollection);
+      
+      console.log(`Totaal aantal kandidaten in Firebase: ${candidatesSnapshot.size}`);
+      
+      // Toon alle kandidaten en hun IDs
+      candidatesSnapshot.forEach((doc) => {
+        const data = doc.data();
+        console.log(`Kandidaat in Firebase - ID: ${doc.id} - Naam: ${data.firstName} ${data.lastName}`);
+      });
+      
+      console.log("=================================");
+    } catch (error) {
+      console.error("Fout bij ophalen debug data:", error);
+    }
+  };
   
   // Directe verwijdering zonder tussenlagen
   const handleDelete = async () => {
