@@ -11,7 +11,7 @@ import {
   serverTimestamp, 
   Timestamp 
 } from 'firebase/firestore';
-import { db, storage } from './config';
+import { db, storage, auth } from './config';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Candidate, InsertCandidate, CandidateFile } from '@shared/schema';
 
@@ -83,13 +83,20 @@ export const getCandidate = async (id: number): Promise<Candidate | undefined> =
 // Create a new candidate
 export const createCandidate = async (candidate: InsertCandidate): Promise<Candidate> => {
   try {
+    // Zorg ervoor dat de gebruiker is ingelogd
+    if (!auth.currentUser) {
+      throw new Error("Je moet ingelogd zijn om een kandidaat aan te maken");
+    }
+    
     const candidatesCol = collection(db, CANDIDATES_COLLECTION);
     
     // Prepare data for Firestore (especially timestamps)
     const candidateData = {
       ...candidate,
       unavailableUntil: candidate.unavailableUntil ? candidate.unavailableUntil.toISOString() : null,
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
+      // Voeg de userId toe aan de kandidaat data voor beveiliging
+      createdBy: auth.currentUser.uid
     };
     
     const docRef = await addDoc(candidatesCol, candidateData);
@@ -102,6 +109,12 @@ export const createCandidate = async (candidate: InsertCandidate): Promise<Candi
     };
   } catch (error) {
     console.error("Error creating candidate:", error);
+    // Geef een meer specifieke foutmelding terug
+    if (error instanceof Error) {
+      if (error.message.includes("permission")) {
+        throw new Error("Onvoldoende rechten. Controleer of je bent ingelogd en de juiste rechten hebt.");
+      }
+    }
     throw error;
   }
 };
@@ -109,6 +122,11 @@ export const createCandidate = async (candidate: InsertCandidate): Promise<Candi
 // Update a candidate
 export const updateCandidate = async (id: number, candidate: Partial<InsertCandidate>): Promise<Candidate | undefined> => {
   try {
+    // Zorg ervoor dat de gebruiker is ingelogd
+    if (!auth.currentUser) {
+      throw new Error("Je moet ingelogd zijn om een kandidaat bij te werken");
+    }
+    
     const candidateRef = doc(db, CANDIDATES_COLLECTION, id.toString());
     const candidateSnap = await getDoc(candidateRef);
     
@@ -124,7 +142,8 @@ export const updateCandidate = async (id: number, candidate: Partial<InsertCandi
     
     await updateDoc(candidateRef, {
       ...updateData,
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
+      updatedBy: auth.currentUser.uid
     });
     
     // Get updated candidate
@@ -148,6 +167,12 @@ export const updateCandidate = async (id: number, candidate: Partial<InsertCandi
     };
   } catch (error) {
     console.error("Error updating candidate:", error);
+    // Geef een meer specifieke foutmelding terug
+    if (error instanceof Error) {
+      if (error.message.includes("permission")) {
+        throw new Error("Onvoldoende rechten. Controleer of je bent ingelogd en de juiste rechten hebt.");
+      }
+    }
     throw error;
   }
 };
@@ -155,6 +180,11 @@ export const updateCandidate = async (id: number, candidate: Partial<InsertCandi
 // Delete a candidate
 export const deleteCandidate = async (id: number): Promise<boolean> => {
   try {
+    // Zorg ervoor dat de gebruiker is ingelogd
+    if (!auth.currentUser) {
+      throw new Error("Je moet ingelogd zijn om een kandidaat te verwijderen");
+    }
+    
     const candidateRef = doc(db, CANDIDATES_COLLECTION, id.toString());
     await deleteDoc(candidateRef);
     
@@ -181,6 +211,12 @@ export const deleteCandidate = async (id: number): Promise<boolean> => {
     return true;
   } catch (error) {
     console.error("Error deleting candidate:", error);
+    // Geef een meer specifieke foutmelding terug
+    if (error instanceof Error) {
+      if (error.message.includes("permission")) {
+        throw new Error("Onvoldoende rechten. Controleer of je bent ingelogd en de juiste rechten hebt.");
+      }
+    }
     throw error;
   }
 };
@@ -188,6 +224,11 @@ export const deleteCandidate = async (id: number): Promise<boolean> => {
 // Upload profile image
 export const uploadProfileImage = async (candidateId: number, file: File): Promise<string> => {
   try {
+    // Zorg ervoor dat de gebruiker is ingelogd
+    if (!auth.currentUser) {
+      throw new Error("Je moet ingelogd zijn om profielfoto's te uploaden");
+    }
+    
     const storageRef = ref(storage, `candidates/${candidateId}/profile/${file.name}`);
     await uploadBytes(storageRef, file);
     const downloadURL = await getDownloadURL(storageRef);
@@ -196,12 +237,19 @@ export const uploadProfileImage = async (candidateId: number, file: File): Promi
     const candidateRef = doc(db, CANDIDATES_COLLECTION, candidateId.toString());
     await updateDoc(candidateRef, {
       profileImage: downloadURL,
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
+      updatedBy: auth.currentUser.uid
     });
     
     return downloadURL;
   } catch (error) {
     console.error("Error uploading profile image:", error);
+    // Geef een meer specifieke foutmelding terug
+    if (error instanceof Error) {
+      if (error.message.includes("permission")) {
+        throw new Error("Onvoldoende rechten. Controleer of je bent ingelogd en de juiste rechten hebt.");
+      }
+    }
     throw error;
   }
 };
