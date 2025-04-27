@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { Redirect, Route, useLocation } from "wouter";
 import MobileNavbar from "@/components/layout/mobile-navbar";
-import Sidebar from "@/components/layout/sidebar";
+import Sidebar from "@/components/layout/sidebar_new";
 import tecnaritLogo from "../assets/tecnarit-logo.png";
 
 export function ProtectedRoute({
