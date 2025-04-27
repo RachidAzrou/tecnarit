@@ -295,7 +295,13 @@ export default function CandidateForm() {
                               <FormLabel>Profielfoto</FormLabel>
                               <div className="mt-3 flex flex-col sm:flex-row items-center">
                                 <div className="mb-4 sm:mb-0 sm:mr-6">
-                                  <label htmlFor="profile-upload" className="cursor-pointer block">
+                                  <div 
+                                    className="cursor-pointer block"
+                                    onClick={() => {
+                                      // Programmatically click the hidden file input
+                                      document.getElementById('profile-upload')?.click();
+                                    }}
+                                  >
                                     <Avatar className="h-28 w-28 border-2 border-primary hover:border-primary/70 transition-colors">
                                       <AvatarImage 
                                         src={profileImagePreview || undefined} 
@@ -306,21 +312,27 @@ export default function CandidateForm() {
                                         {form.getValues("lastName").charAt(0) || ""}
                                       </AvatarFallback>
                                     </Avatar>
-                                  </label>
+                                  </div>
                                 </div>
                                 <div className="text-center sm:text-left">
-                                  <label htmlFor="profile-upload" className="cursor-pointer">
-                                    <Button variant="outline" type="button" className="cursor-pointer mb-2">
-                                      {profileImagePreview ? 'Foto wijzigen' : 'Foto uploaden'}
-                                    </Button>
-                                    <input
-                                      id="profile-upload"
-                                      type="file"
-                                      className="sr-only"
-                                      accept="image/*"
-                                      onChange={handleProfileImageChange}
-                                    />
-                                  </label>
+                                  <Button 
+                                    variant="outline" 
+                                    type="button" 
+                                    className="cursor-pointer mb-2"
+                                    onClick={() => {
+                                      // Programmatically click the hidden file input
+                                      document.getElementById('profile-upload')?.click();
+                                    }}
+                                  >
+                                    {profileImagePreview ? 'Foto wijzigen' : 'Foto uploaden'}
+                                  </Button>
+                                  <input
+                                    id="profile-upload"
+                                    type="file"
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleProfileImageChange}
+                                  />
                                   <p className="text-xs text-primary-500">Klik op de cirkel of de knop om een foto te uploaden</p>
                                   <p className="mt-1 text-xs text-primary-500">JPG, PNG of GIF tot 2MB</p>
                                 </div>
