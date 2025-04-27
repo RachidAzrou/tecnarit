@@ -323,7 +323,7 @@ export default function CandidateForm() {
               <h1 className="text-2xl sm:text-3xl tecnarit-blue-text font-bold text-center">
                 {isEditMode ? "Kandidaat Bewerken" : "Kandidaat Toevoegen"}
               </h1>
-              <div className="flex justify-center mt-4">
+              <div className="flex justify-end mt-4">
                 <Button
                   onClick={() => setLocation("/")}
                   className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
