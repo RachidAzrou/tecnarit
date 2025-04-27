@@ -1,0 +1,26 @@
+{
+  "name": "TECNARIT - EMS",
+  "short_name": "TECNARIT EMS",
+  "description": "TECNARIT Employee Management System - Kandidaten en medewerkers beheren",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#233142",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    },
+    {
+      "src": "logo192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
