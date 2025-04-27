@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import EmployeeTable from "@/components/employee/employee-table";
+import CandidateTable from "@/components/candidate/candidate-table";
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
 import { Candidate } from "@shared/schema";
@@ -161,7 +161,7 @@ export default function CandidateList() {
                     No candidates found. {searchQuery || status ? "Try adjusting your search." : ""}
                   </div>
                 ) : (
-                  <EmployeeTable employees={filteredCandidates} />
+                  <CandidateTable candidates={filteredCandidates} />
                 )}
               </div>
             </div>

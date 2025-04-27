@@ -13,37 +13,37 @@
 --card-foreground: 215 28% 17%;
 --border: 214 32% 91%;
 --input: 214 32% 91%;
---primary: 142 76% 36%;
+--primary: 130 65% 40%;
 --primary-foreground: 144 70% 96%;
---secondary: 215 28% 17%;
+--secondary: 214 59% 15%;
 --secondary-foreground: 210 40% 98%;
---accent: 120 100% 27%;
+--accent: 84 100% 59%;
 --accent-foreground: 210 40% 98%;
 --destructive: 0 84.2% 60.2%;
 --destructive-foreground: 210 40% 98%;
---ring: 142 76% 36%;
+--ring: 130 65% 40%;
 --radius: 0.5rem;
   }
   .dark {
-      --background: 215 28% 17%;
+      --background: 214 59% 15%;
 --foreground: 210 40% 98%;
---muted: 215 28% 25%;
+--muted: 214 45% 20%;
 --muted-foreground: 215 20% 65%;
---popover: 215 28% 17%;
+--popover: 214 59% 15%;
 --popover-foreground: 210 40% 98%;
---card: 215 28% 17%;
+--card: 214 59% 15%;
 --card-foreground: 210 40% 98%;
---border: 215 28% 25%;
---input: 215 28% 25%;
---primary: 142 76% 36%;
+--border: 214 45% 20%;
+--input: 214 45% 20%;
+--primary: 130 65% 40%;
 --primary-foreground: 144 70% 96%;
---secondary: 217 19% 27%;
+--secondary: 214 45% 25%;
 --secondary-foreground: 210 40% 98%;
---accent: 120 100% 27%;
+--accent: 84 100% 59%;
 --accent-foreground: 210 40% 98%;
 --destructive: 0 62.8% 30.6%;
 --destructive-foreground: 0 0% 98%;
---ring: 142 76% 36%;
+--ring: 130 65% 40%;
 --radius: 0.5rem;
   }
 
@@ -54,6 +54,27 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+  }
+  
+  /* TECNARIT Brand Styles */
+  .gradient-text {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-[hsl(130,65%,40%)] to-[hsl(84,100%,59%)];
+  }
+  
+  .gradient-bg {
+    @apply bg-gradient-to-r from-[hsl(130,65%,40%)] to-[hsl(84,100%,59%)];
+  }
+  
+  .tecnarit-card {
+    @apply rounded-lg border border-border bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .tecnarit-button {
+    @apply bg-primary hover:bg-opacity-90 text-primary-foreground;
+  }
+  
+  .navy-bg {
+    @apply bg-[hsl(214,59%,15%)];
   }
 }
 
