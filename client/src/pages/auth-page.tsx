@@ -115,8 +115,8 @@ export default function AuthPage() {
                     <FormItem>
                       <FormLabel className="text-gray-700 font-medium">E-mailadres</FormLabel>
                       <div className="relative">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M22 5L11 13 2 5" />
                             <path d="M2 5H22V19H2z" />
                           </svg>
@@ -125,7 +125,7 @@ export default function AuthPage() {
                           <Input 
                             {...field} 
                             type="email" 
-                            className="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#233142]/25 focus:border-[#233142]"
+                            className="w-full pl-11 p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#233142]/25 focus:border-[#233142]"
                             placeholder="admin@tecnarit.com"
                           />
                         </FormControl>
@@ -142,8 +142,8 @@ export default function AuthPage() {
                     <FormItem>
                       <FormLabel className="text-gray-700 font-medium">Wachtwoord</FormLabel>
                       <div className="relative">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
                             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                           </svg>
@@ -152,7 +152,7 @@ export default function AuthPage() {
                           <Input 
                             type="password" 
                             {...field} 
-                            className="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#233142]/25 focus:border-[#233142]"
+                            className="w-full pl-11 p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#233142]/25 focus:border-[#233142]"
                             placeholder="admin123"
                           />
                         </FormControl>
