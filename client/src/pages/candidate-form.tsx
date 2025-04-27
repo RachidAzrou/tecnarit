@@ -78,7 +78,9 @@ export default function CandidateForm() {
     queryKey: [`candidates/${id}`],
     queryFn: async () => {
       if (!id) throw new Error("No candidate ID provided");
-      return await getCandidate(id);
+      const result = await getCandidate(id);
+      if (!result) throw new Error("Candidate not found");
+      return result;
     },
     enabled: isEditMode,
   });
@@ -129,7 +131,9 @@ export default function CandidateForm() {
   const createMutation = useMutation({
     mutationFn: async (formData: FormValues) => {
       // Gebruik Firebase in plaats van de API
-      return await createCandidate(formData);
+      const result = await createCandidate(formData);
+      if (!result) throw new Error("Failed to create candidate");
+      return result;
     },
     onSuccess: async (data: FirebaseCandidate) => {
       // Upload profiel foto als die is geselecteerd
@@ -162,7 +166,9 @@ export default function CandidateForm() {
     mutationFn: async (formData: FormValues) => {
       if (!id) throw new Error("Geen kandidaat ID opgegeven");
       // Gebruik Firebase in plaats van de API
-      return await updateCandidate(id, formData);
+      const result = await updateCandidate(id, formData);
+      if (!result) throw new Error("Failed to update candidate");
+      return result;
     },
     onSuccess: async (data: FirebaseCandidate) => {
       // Upload profiel foto als die is geselecteerd

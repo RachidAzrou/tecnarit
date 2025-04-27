@@ -18,7 +18,9 @@ export default function CandidateDetail() {
     queryKey: [`candidates/${params.id}`],
     queryFn: async () => {
       if (!params.id) throw new Error("No candidate ID provided");
-      return await getCandidate(params.id);
+      const result = await getCandidate(params.id);
+      if (!result) throw new Error("Candidate not found");
+      return result;
     },
   });
 
