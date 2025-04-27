@@ -37,16 +37,12 @@ export default function CandidateTable({ candidates }: CandidateTableProps) {
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
-      case "active":
+      case "beschikbaar":
         return "bg-green-500 bg-opacity-10 text-green-500";
-      case "contacted":
-        return "bg-blue-500 bg-opacity-10 text-blue-500";
-      case "interview":
+      case "onbeschikbaar":
         return "bg-amber-500 bg-opacity-10 text-amber-500";
-      case "hired":
+      case "in_dienst":
         return "bg-primary bg-opacity-10 text-primary";
-      case "rejected":
-        return "bg-red-500 bg-opacity-10 text-red-500";
       default:
         return "bg-gray-500 bg-opacity-10 text-gray-500";
     }
@@ -54,16 +50,12 @@ export default function CandidateTable({ candidates }: CandidateTableProps) {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "active":
-        return "Active";
-      case "contacted":
-        return "Contacted";
-      case "interview":
-        return "Interview Scheduled";
-      case "hired":
-        return "Hired";
-      case "rejected":
-        return "Rejected";
+      case "beschikbaar":
+        return "Beschikbaar";
+      case "onbeschikbaar":
+        return "Onbeschikbaar";
+      case "in_dienst":
+        return "In Dienst";
       default:
         return status.charAt(0).toUpperCase() + status.slice(1);
     }
