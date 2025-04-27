@@ -240,11 +240,9 @@ export default function CandidateList() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">Alle Statussen</SelectItem>
-                          <SelectItem value="active">Actief</SelectItem>
-                          <SelectItem value="contacted">Gecontacteerd</SelectItem>
-                          <SelectItem value="interview">Interview Gepland</SelectItem>
-                          <SelectItem value="hired">Aangenomen</SelectItem>
-                          <SelectItem value="rejected">Afgewezen</SelectItem>
+                          <SelectItem value="active">Beschikbaar</SelectItem>
+                          <SelectItem value="unavailable">Onbeschikbaar</SelectItem>
+                          <SelectItem value="hired">In Dienst</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -332,13 +330,6 @@ export default function CandidateList() {
                     ) : (
                       <div className="text-center py-10 px-4 border-2 border-dashed border-primary/30 rounded-lg">
                         <h3 className="mt-2 text-lg font-medium text-primary-800">Geen kandidaten beschikbaar</h3>
-                        <Button 
-                          onClick={handleAddCandidate}
-                          className="mt-4 gradient-bg hover:opacity-90 transition-opacity"
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Kandidaat Toevoegen
-                        </Button>
                       </div>
                     )}
                   </div>

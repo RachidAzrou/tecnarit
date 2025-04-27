@@ -87,13 +87,6 @@ export default function Sidebar({ onClose }: SidebarProps) {
             {!collapsed && (
               <div className="ml-3 flex-grow">
                 <p className="text-sm font-medium gradient-text">{user?.username}</p>
-                <Button
-                  variant="link"
-                  className="px-0 h-auto text-xs font-medium text-primary hover:text-primary/80"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="h-3 w-3 mr-1" /> Uitloggen
-                </Button>
               </div>
             )}
           </div>
@@ -122,6 +115,19 @@ export default function Sidebar({ onClose }: SidebarProps) {
               </div>
             ))}
           </nav>
+          
+          {/* Uitloggen knop - nu onderaan de sidebar */}
+          <div className="mt-auto border-t border-border pt-2 px-2">
+            <div 
+              onClick={handleLogout}
+              className="flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer text-foreground hover:bg-muted"
+            >
+              <span className="text-primary">
+                <LogOut className="h-5 w-5" />
+              </span>
+              {!collapsed && <span className="ml-2">Uitloggen</span>}
+            </div>
+          </div>
         </div>
       </div>
 
