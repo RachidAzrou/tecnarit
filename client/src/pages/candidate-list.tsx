@@ -167,7 +167,7 @@ export default function CandidateList() {
       <div className="relative z-0 overflow-y-auto focus:outline-none">
         <div className="py-6">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-            <div className="text-center mb-6">
+            <div className="text-center mb-6 lg:block hidden">
               <h1 className="text-3xl md:text-4xl tecnarit-blue-text font-bold">
                 {showDashboard ? "Dashboard" : "Kandidaten Zoeken"}
               </h1>

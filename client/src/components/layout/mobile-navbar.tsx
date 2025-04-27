@@ -35,8 +35,16 @@ export default function MobileNavbar() {
 
   // Functie om naar de zoekpagina te navigeren
   const goToSearch = () => {
-    window.history.pushState({}, "", "?search=true");
-    setLocation('/?search=true');
+    setLocation("/");
+    // Push history state na een korte time-out om de routing de tijd te geven
+    setTimeout(() => {
+      window.history.pushState({}, "", "?search=true");
+      // Trigger handmatig de status update voor de zoekmodus
+      if (window.location.search.includes('search=true')) {
+        const searchEvent = new Event('searchmodechanged');
+        window.dispatchEvent(searchEvent);
+      }
+    }, 10);
   };
 
   // Functie om naar kandidaat toevoegen te navigeren
