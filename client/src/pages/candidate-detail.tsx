@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Sidebar from "@/components/layout/sidebar";
-// Verwijderd: import MobileHeader
+import { PageTitle } from "@/components/layout/page-title";
 import { Candidate, CandidateFile } from "@shared/schema";
 
 export default function CandidateDetail() {
@@ -94,11 +94,7 @@ export default function CandidateDetail() {
         <div className="flex-1 relative z-0 overflow-y-auto focus:outline-none">
           <div className="py-6">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-              <div className="text-center mb-6 lg:block hidden">
-                <h1 className="text-3xl md:text-4xl tecnarit-blue-text font-bold">
-                  Kandidaat Details
-                </h1>
-              </div>
+              <PageTitle title="Kandidaat Details" />
               
               <div className="flex justify-between items-center mb-6">
                 <div>

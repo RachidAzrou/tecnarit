@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import EmployeeTable from "@/components/employee/employee-table";
 import Sidebar from "@/components/layout/sidebar";
-// Verwijderd: import MobileHeader
+import { PageTitle } from "@/components/layout/page-title";
 import { Employee } from "@shared/schema";
 
 export default function EmployeeList() {
@@ -81,12 +81,12 @@ export default function EmployeeList() {
         <div className="flex-1 relative z-0 overflow-y-auto focus:outline-none">
           <div className="py-6">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+              <PageTitle title="Medewerkers" />
               <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-semibold text-primary-900 lg:block hidden">Employees</h1>
-                <div className="flex-grow"></div>
-                <Button onClick={handleAddEmployee}>
+                <div></div>
+                <Button onClick={handleAddEmployee} className="tecnarit-blue-bg transition-all hover-lift touch-friendly">
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Employee
+                  Medewerker Toevoegen
                 </Button>
               </div>
             </div>
