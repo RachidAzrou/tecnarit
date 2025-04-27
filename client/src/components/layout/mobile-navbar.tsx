@@ -3,7 +3,6 @@ import { useLocation } from "wouter";
 import { Home, Search, Plus, LogOut, User } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import tecnaritLogo from "../../assets/tecnarit-logo.png";
 
 export default function MobileNavbar() {
   const { logoutMutation } = useAuth();
@@ -11,6 +10,27 @@ export default function MobileNavbar() {
 
   const handleLogout = () => {
     logoutMutation.mutate();
+  };
+
+  // Functie om naar de zoekpagina te navigeren
+  const goToSearch = () => {
+    window.history.pushState({}, "", "?search=true");
+    setLocation('/?search=true');
+  };
+
+  // Functie om naar kandidaat toevoegen te navigeren
+  const goToAddCandidate = () => {
+    setLocation('/candidates/new');
+  };
+
+  // Functie om naar het dashboard te navigeren
+  const goToDashboard = () => {
+    setLocation('/');
+  };
+
+  // Functie om naar het profiel te navigeren
+  const goToProfile = () => {
+    setLocation('/profile');
   };
 
   return (
@@ -24,10 +44,7 @@ export default function MobileNavbar() {
                 variant="ghost" 
                 size="icon" 
                 className={`h-12 w-12 rounded-full ${location.includes('search=true') ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
-                onClick={() => {
-                  window.history.pushState({}, "", "?search=true");
-                  setLocation('/?search=true');
-                }}
+                onClick={goToSearch}
               >
                 <Search className="h-5 w-5" />
               </Button>
@@ -43,8 +60,8 @@ export default function MobileNavbar() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-12 w-12 rounded-full text-muted-foreground"
-                onClick={() => setLocation('/candidates/new')}
+                className={`h-12 w-12 rounded-full ${location === '/candidates/new' ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
+                onClick={goToAddCandidate}
               >
                 <Plus className="h-5 w-5" />
               </Button>
@@ -61,7 +78,7 @@ export default function MobileNavbar() {
                 variant="default" 
                 size="icon" 
                 className="h-14 w-14 rounded-full tecnarit-blue-bg -mt-5 shadow-lg"
-                onClick={() => setLocation('/')}
+                onClick={goToDashboard}
               >
                 <Home className="h-6 w-6" />
               </Button>
@@ -77,8 +94,8 @@ export default function MobileNavbar() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-12 w-12 rounded-full text-muted-foreground"
-                onClick={() => setLocation('/profile')}
+                className={`h-12 w-12 rounded-full ${location === '/profile' ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
+                onClick={goToProfile}
               >
                 <User className="h-5 w-5" />
               </Button>

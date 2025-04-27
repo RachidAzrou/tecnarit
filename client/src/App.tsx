@@ -8,6 +8,7 @@ import AuthPage from "@/pages/auth-page";
 import CandidateList from "@/pages/candidate-list";
 import CandidateForm from "@/pages/candidate-form";
 import CandidateDetail from "@/pages/candidate-detail";
+import ProfilePage from "@/pages/profile-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "./hooks/use-auth";
 
@@ -18,6 +19,7 @@ function Router() {
       <ProtectedRoute path="/candidates/new" component={CandidateForm} />
       <ProtectedRoute path="/candidates/:id/edit" component={CandidateForm} />
       <ProtectedRoute path="/candidates/:id" component={CandidateDetail} />
+      <ProtectedRoute path="/profile" component={ProfilePage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
