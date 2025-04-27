@@ -7,15 +7,20 @@ interface PageTitleProps {
 
 export function PageTitle({ title, children }: PageTitleProps) {
   return (
-    <div className="mb-6">
-      <h1 className="text-3xl md:text-4xl font-bold text-center tecnarit-blue-text mb-2">
-        {title}
-      </h1>
-      {children && (
-        <div className="text-center text-muted-foreground">
-          {children}
-        </div>
-      )}
+    <div className="mb-10 relative">
+      <div className="py-8 px-4 sm:px-6 bg-gradient-to-br from-primary-50 via-white to-primary-50 rounded-lg shadow-sm relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-30"></div>
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/20 via-primary to-primary/20 rounded-t-lg"></div>
+        
+        <h1 className="text-4xl md:text-5xl font-extrabold text-center mb-3 bg-gradient-to-r from-primary to-primary-800 bg-clip-text text-transparent drop-shadow-sm">
+          {title}
+        </h1>
+        {children && (
+          <div className="text-center text-lg text-gray-600 max-w-2xl mx-auto">
+            {children}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
