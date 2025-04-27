@@ -94,17 +94,57 @@ export default function CandidateList() {
     }
   };
   
-  // Bij componentmount en als TanStack query opnieuw wordt uitgevoerd
+  // Bij componentmount en wanneer we terugkeren naar deze pagina
   useEffect(() => {
     fetchDirectCandidates();
+    
+    // Refresh kandidaten wanneer we terugkeren naar deze pagina
+    window.addEventListener('focus', fetchDirectCandidates);
+    
+    return () => {
+      window.removeEventListener('focus', fetchDirectCandidates);
+    };
   }, []);
   
-  // De originele query behouden we voor compatibiliteit, maar we gebruiken deze niet actief
+  // De originele query behouden we voor compatibiliteit, maar we verbeteren de werking
   const { data: candidates, isLoading: queryIsLoading, error, refetch } = useQuery<FirebaseCandidate[]>({
     queryKey: ["candidates"],
     queryFn: async () => {
-      await fetchDirectCandidates(); // Direct ophalen bij elke query
-      return directCandidates;
+      try {
+        // Direct ophalen van de meest recente gegevens uit Firebase
+        const candidatesCollection = collection(db, 'candidates');
+        const candidatesSnapshot = await getDocs(candidatesCollection);
+        
+        const fetchedCandidates = candidatesSnapshot.docs.map(doc => {
+          const data = doc.data();
+          
+          return {
+            id: doc.id,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            email: data.email,
+            phone: data.phone || null,
+            linkedinProfile: data.linkedinProfile || null,
+            yearsOfExperience: data.yearsOfExperience || null,
+            status: data.status || 'beschikbaar',
+            unavailableUntil: data.unavailableUntil ? new Date(data.unavailableUntil) : null,
+            client: data.client || null,
+            notes: data.notes || null,
+            profileImage: data.profileImage || null,
+            createdAt: data.createdAt ? new Date(data.createdAt.toDate()) : new Date(),
+          };
+        });
+        
+        console.log(`${fetchedCandidates.length} kandidaten opgehaald voor TanStack Query`);
+        
+        // Update ook de directe lijst
+        setDirectCandidates(fetchedCandidates);
+        
+        return fetchedCandidates;
+      } catch (error) {
+        console.error("Fout bij ophalen van kandidaten:", error);
+        throw error;
+      }
     },
     retry: 3,
     retryDelay: 1000,
@@ -247,7 +287,16 @@ export default function CandidateList() {
             {/* Aparte rij voor knoppen onder de titel */}
             <div className="flex justify-between items-center mb-6">
               <div>
-                {/* Linker deel leeg gelaten */}
+                {/* Vernieuwknop om data te verversen */}
+                <Button 
+                  onClick={fetchDirectCandidates}
+                  variant="outline"
+                  className="border-primary/30 hover-lift"
+                  disabled={isLoadingState}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingState ? 'animate-spin' : ''}`} />
+                  <span className="responsive-button-text">Vernieuwen</span>
+                </Button>
               </div>
               <div className="flex space-x-2">
                 {showDashboard && (
@@ -369,7 +418,7 @@ export default function CandidateList() {
                         </div>
                         <h3 className="text-base sm:text-lg font-medium text-gray-900">Totaal Kandidaten</h3>
                         <p className="text-2xl sm:text-3xl font-bold gradient-text mt-2">
-                          {isLoadingState ? <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" /> : candidates?.length || 0}
+                          {isLoadingState ? <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" /> : candidatesToUse?.length || 0}
                         </p>
                       </CardContent>
                     </Card>
@@ -392,7 +441,7 @@ export default function CandidateList() {
                           {isLoadingState ? (
                             <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
                           ) : (
-                            candidates?.filter(c => c.status === "beschikbaar").length || 0
+                            candidatesToUse?.filter(c => c.status === "beschikbaar").length || 0
                           )}
                         </p>
                       </CardContent>
