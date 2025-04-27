@@ -185,17 +185,18 @@ export default function CandidateList() {
               {/* Aparte rij voor knoppen onder de titel */}
               <div className="flex justify-between items-center mb-6">
                 <div>
+                  {/* Linker deel leeg gelaten */}
+                </div>
+                <div className="flex space-x-2">
                   {showDashboard && (
                     <Button 
                       onClick={handleAddCandidate}
-                      className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
+                      className="tecnarit-blue-bg transition-all hover-lift touch-friendly mr-2"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Kandidaat Toevoegen
                     </Button>
                   )}
-                </div>
-                <div className="flex space-x-2">
                   {filteredCandidates.length > 0 && !showDashboard && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
