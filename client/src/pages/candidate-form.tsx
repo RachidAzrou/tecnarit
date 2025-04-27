@@ -287,12 +287,12 @@ export default function CandidateForm() {
   return (
     <>
       <div className="flex flex-col flex-1 py-6">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+        <div className="w-full px-4 sm:px-6 md:px-8">
           <PageTitle title={isEditMode ? "Kandidaat Bewerken" : "Kandidaat Toevoegen"} />
         </div>
 
         {/* Form Container - full width with margin away from sidebar */}
-        <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6 md:px-8">
+        <div className="w-full px-4 sm:px-6 md:px-8">
           <div className="glass-effect rounded-lg overflow-hidden">
             {isEditMode && isCandidateLoading ? (
               <div className="flex justify-center items-center h-64">
