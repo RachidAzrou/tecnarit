@@ -17,23 +17,6 @@ export default function MobileNavbar() {
     <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-10">
       <div className="flex items-center justify-around h-16">
         <TooltipProvider>
-          {/* Home/Dashboard button */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className={`h-12 w-12 rounded-full ${location === '/' ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
-                onClick={() => setLocation('/')}
-              >
-                <Home className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              <p>Dashboard</p>
-            </TooltipContent>
-          </Tooltip>
-
           {/* Search button */}
           <Tooltip>
             <TooltipTrigger asChild>
@@ -58,16 +41,33 @@ export default function MobileNavbar() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button 
-                variant="default" 
+                variant="ghost" 
                 size="icon" 
-                className="h-14 w-14 rounded-full tecnarit-blue-bg -mt-5 shadow-lg"
+                className="h-12 w-12 rounded-full text-muted-foreground"
                 onClick={() => setLocation('/candidates/new')}
               >
-                <Plus className="h-6 w-6" />
+                <Plus className="h-5 w-5" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">
               <p>Kandidaat Toevoegen</p>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Home/Dashboard button */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="default" 
+                size="icon" 
+                className="h-14 w-14 rounded-full tecnarit-blue-bg -mt-5 shadow-lg"
+                onClick={() => setLocation('/')}
+              >
+                <Home className="h-6 w-6" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p>Dashboard</p>
             </TooltipContent>
           </Tooltip>
 
