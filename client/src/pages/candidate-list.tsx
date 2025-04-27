@@ -203,7 +203,7 @@ export default function CandidateList() {
                   )}
                   <Button 
                     onClick={handleAddCandidate}
-                    className="gradient-bg hover:opacity-90 transition-opacity"
+                    className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Kandidaat Toevoegen
@@ -358,7 +358,7 @@ export default function CandidateList() {
                         </p>
                         <Button 
                           onClick={handleAddCandidate}
-                          className="mt-4 gradient-bg hover:opacity-90 transition-all hover-lift"
+                          className="mt-4 tecnarit-blue-bg transition-all hover-lift touch-friendly"
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           Kandidaat Toevoegen
@@ -403,7 +403,7 @@ export default function CandidateList() {
                       {!searchQuery && (!status || status === "all") && (
                         <Button 
                           onClick={handleAddCandidate}
-                          className="mt-4 gradient-bg hover:opacity-90 transition-all hover-lift touch-friendly"
+                          className="mt-4 tecnarit-blue-bg transition-all hover-lift touch-friendly"
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           Kandidaat Toevoegen
