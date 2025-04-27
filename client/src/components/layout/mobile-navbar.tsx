@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
-import { Home, Search, Plus, LogOut, User } from "lucide-react";
+import { Home, Search, Plus, LogOut } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
@@ -19,7 +19,7 @@ export default function MobileNavbar() {
     } else if (location === '/candidates/new') {
       setPageTitle("Kandidaat Toevoegen");
     } else if (location.includes('search=true')) {
-      setPageTitle("Kandidaat zoeken");
+      setPageTitle("Kandidaten zoeken");
     } else if (location.includes('/candidates/') && location.includes('/edit')) {
       setPageTitle("Kandidaat Bewerken");
     } else if (location.includes('/candidates/')) {
@@ -35,7 +35,6 @@ export default function MobileNavbar() {
 
   // Functie om naar de kandidaten zoekpagina te navigeren
   const goToSearch = () => {
-    // Gebruik setLocation in plaats van direct window.location wijzigen
     setLocation("/?search=true");
   };
 
@@ -46,24 +45,11 @@ export default function MobileNavbar() {
 
   // Functie om naar dashboard te navigeren
   const goToDashboard = () => {
-    // Navigeer naar de dashboard pagina (startpagina)
     setLocation("/");
-  };
-
-  // Functie om naar het profiel te navigeren
-  const goToProfile = () => {
-    setLocation('/profile');
   };
 
   return (
     <>
-      {/* Pagina titel in mobiele header */}
-      <div className="lg:hidden fixed top-16 left-0 right-0 bg-transparent z-5 py-2">
-        <h1 className="text-center text-2xl font-bold tecnarit-blue-text">
-          {pageTitle}
-        </h1>
-      </div>
-      
       {/* Mobiele navigatiebalk */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-10">
         <div className="flex items-center justify-around h-16">
@@ -81,7 +67,7 @@ export default function MobileNavbar() {
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">
-                <p>Kandidaat zoeken</p>
+                <p>Kandidaten zoeken</p>
               </TooltipContent>
             </Tooltip>
 
@@ -102,7 +88,7 @@ export default function MobileNavbar() {
               </TooltipContent>
             </Tooltip>
 
-            {/* Home/Dashboard button */}
+            {/* Home/Dashboard button - Centraal */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button 
@@ -116,23 +102,6 @@ export default function MobileNavbar() {
               </TooltipTrigger>
               <TooltipContent side="top">
                 <p>Dashboard</p>
-              </TooltipContent>
-            </Tooltip>
-
-            {/* Profile button */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className={`h-12 w-12 rounded-full ${location === '/profile' ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
-                  onClick={goToProfile}
-                >
-                  <User className="h-5 w-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p>Profiel</p>
               </TooltipContent>
             </Tooltip>
 
