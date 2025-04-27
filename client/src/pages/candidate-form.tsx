@@ -315,7 +315,7 @@ export default function CandidateForm() {
                                 name="firstName"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>First name</FormLabel>
+                                    <FormLabel>Voornaam</FormLabel>
                                     <FormControl>
                                       <Input {...field} />
                                     </FormControl>
@@ -332,7 +332,7 @@ export default function CandidateForm() {
                                 name="lastName"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Last name</FormLabel>
+                                    <FormLabel>Achternaam</FormLabel>
                                     <FormControl>
                                       <Input {...field} />
                                     </FormControl>
@@ -349,7 +349,7 @@ export default function CandidateForm() {
                                 name="email"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Email address</FormLabel>
+                                    <FormLabel>E-mailadres</FormLabel>
                                     <FormControl>
                                       <Input type="email" {...field} />
                                     </FormControl>
@@ -366,7 +366,7 @@ export default function CandidateForm() {
                                 name="phone"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Phone number</FormLabel>
+                                    <FormLabel>Telefoonnummer</FormLabel>
                                     <FormControl>
                                       <Input type="tel" {...field} />
                                     </FormControl>
@@ -383,7 +383,7 @@ export default function CandidateForm() {
                                 name="linkedinProfile"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>LinkedIn Profile</FormLabel>
+                                    <FormLabel>LinkedIn Profiel</FormLabel>
                                     <FormControl>
                                       <Input {...field} />
                                     </FormControl>
@@ -400,7 +400,7 @@ export default function CandidateForm() {
                                 name="yearsOfExperience"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Years of Experience</FormLabel>
+                                    <FormLabel>Jaren Ervaring</FormLabel>
                                     <FormControl>
                                       <Input 
                                         type="number" 
@@ -495,7 +495,7 @@ export default function CandidateForm() {
 
                             {/* Resume Upload */}
                             <div className="sm:col-span-6">
-                              <h2 className="text-lg font-medium text-primary-900 mb-4">CV / Resume Upload</h2>
+                              <h2 className="text-lg font-medium text-primary-900 mb-4">CV Upload</h2>
                               <div className="mt-2">
                                 <label
                                   htmlFor="file-upload"
@@ -530,7 +530,7 @@ export default function CandidateForm() {
                                                 setResumeFile(null);
                                               }}
                                             >
-                                              Change file
+                                              Bestand wijzigen
                                             </Button>
                                           </div>
                                         </div>
@@ -583,7 +583,7 @@ export default function CandidateForm() {
                                 name="notes"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Notes</FormLabel>
+                                    <FormLabel>Notities</FormLabel>
                                     <FormControl>
                                       <Textarea rows={4} {...field} />
                                     </FormControl>
