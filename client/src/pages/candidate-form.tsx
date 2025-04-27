@@ -29,6 +29,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import ImageCropper from "@/components/ui/image-cropper";
 
 // Extend the schema for form validation
 const candidateFormSchema = insertCandidateSchema.extend({
@@ -43,6 +44,8 @@ export default function CandidateForm() {
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [cropperOpen, setCropperOpen] = useState<boolean>(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
 
   // Fetch candidate data when in edit mode
   const {
@@ -221,17 +224,44 @@ export default function CandidateForm() {
         return;
       }
       
+      // Tijdelijk de file bewaren
       setProfileImageFile(file);
+      
+      // Afbeelding inladen voor de cropper
       const reader = new FileReader();
       reader.onload = () => {
-        setProfileImagePreview(reader.result as string);
-        toast({
-          title: "Afbeelding geselecteerd",
-          description: "De profielfoto is klaar om opgeslagen te worden.",
-        });
+        // Open de cropper met deze afbeelding
+        setImageToCrop(reader.result as string);
+        setCropperOpen(true);
       };
       reader.readAsDataURL(file);
     }
+  };
+  
+  // Functie om de bijgesneden afbeelding te verwerken
+  const handleCroppedImage = (croppedImage: string) => {
+    setProfileImagePreview(croppedImage);
+    
+    // Converteer base64 naar Blob en dan naar File object
+    fetch(croppedImage)
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], 'cropped-profile.jpg', { type: 'image/jpeg' });
+        setProfileImageFile(file);
+        
+        toast({
+          title: "Afbeelding bijgesneden",
+          description: "De profielfoto is klaar om opgeslagen te worden.",
+        });
+      })
+      .catch(err => {
+        console.error("Error converting cropped image:", err);
+        toast({
+          title: "Fout bij bewerken afbeelding",
+          description: "De foto kon niet worden bijgesneden. Probeer het opnieuw.",
+          variant: "destructive",
+        });
+      });
   };
 
   const handleResumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -648,6 +678,19 @@ export default function CandidateForm() {
           </div>
         </div>
       </div>
+      
+      {/* Beeldbewerking Modal */}
+      {imageToCrop && (
+        <ImageCropper
+          image={imageToCrop}
+          open={cropperOpen}
+          onClose={() => {
+            setCropperOpen(false);
+            setImageToCrop(null);
+          }}
+          onCropComplete={handleCroppedImage}
+        />
+      )}
     </div>
   );
 }
