@@ -18,47 +18,60 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { insertCandidateSchema, Candidate } from "@shared/schema";
-import { z } from "zod";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import Sidebar from "@/components/layout/sidebar";
-// Verwijderd: import MobileHeader
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { nl } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Candidate, insertCandidateSchema } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { cn } from "@/lib/utils";
+import * as z from "zod";
 import ImageCropper from "@/components/ui/image-cropper";
 
-// Extend the schema for form validation
-const candidateFormSchema = insertCandidateSchema.extend({
-  yearsOfExperience: z.number().optional().nullable(),
+const formSchema = insertCandidateSchema.extend({
+  unavailableUntil: z.date().optional().nullable(),
+  client: z.string().optional().nullable(),
 });
 
-export default function CandidateForm() {
-  const params = useParams<{ id: string }>();
-  const isEditMode = !!params.id;
-  const [, setLocation] = useLocation();
-  const { toast } = useToast();
-  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
-  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
-  const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [cropperOpen, setCropperOpen] = useState<boolean>(false);
-  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+type FormValues = z.infer<typeof formSchema>;
 
-  // Fetch candidate data when in edit mode
+export default function CandidateForm() {
+  const { id } = useParams<{ id: string }>();
+  const [, setLocation] = useLocation();
+  const isEditMode = !!id;
+  const { toast } = useToast();
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [resumeFileName, setResumeFileName] = useState<string | null>(null);
+  
+  // State voor beeldbewerking
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [cropperOpen, setCropperOpen] = useState(false);
+
+  // Query om kandidaat gegevens op te halen indien we in wijzigingsmodus zijn
   const {
     data: candidate,
     isLoading: isCandidateLoading,
     error: candidateError,
   } = useQuery<Candidate>({
-    queryKey: [isEditMode ? `/api/candidates/${params.id}` : null],
+    queryKey: [`/api/candidates/${id}`],
     enabled: isEditMode,
   });
 
-  const form = useForm<z.infer<typeof candidateFormSchema>>({
-    resolver: zodResolver(candidateFormSchema),
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -70,615 +83,605 @@ export default function CandidateForm() {
       unavailableUntil: null,
       client: "",
       notes: "",
-      profileImage: null,
+      profileImage: "",
     },
   });
 
-  // Update form values when candidate data is loaded
+  // Zorg ervoor dat het formulier wordt ingevuld met bestaande gegevens wanneer we in wijzigingsmodus zijn
   useEffect(() => {
-    if (candidate) {
-      // Populate form with candidate data
+    if (candidate && isEditMode) {
+      // Update de form values met bestaande kandidaat gegevens
       form.reset({
         firstName: candidate.firstName,
         lastName: candidate.lastName,
         email: candidate.email,
-        phone: candidate.phone || "",
-        linkedinProfile: candidate.linkedinProfile || "",
-        yearsOfExperience: candidate.yearsOfExperience || null,
+        phone: candidate.phone || null,
+        linkedinProfile: candidate.linkedinProfile || null,
+        yearsOfExperience: candidate.yearsOfExperience,
         status: candidate.status,
-        unavailableUntil: candidate.unavailableUntil || null,
-        client: candidate.client || "",
-        notes: candidate.notes || "",
-        profileImage: candidate.profileImage || null,
+        unavailableUntil: candidate.unavailableUntil ? new Date(candidate.unavailableUntil) : null,
+        client: candidate.client || null,
+        notes: candidate.notes || null,
+        profileImage: candidate.profileImage || "",
       });
 
-      // Set profile image preview if available
+      // Update de profielfoto preview als die bestaat
       if (candidate.profileImage) {
-        setProfileImagePreview(`/${candidate.profileImage}`);
+        setProfileImagePreview(candidate.profileImage);
       }
     }
-  }, [candidate, form]);
+  }, [candidate, isEditMode, form]);
 
+  // Mutations voor toevoegen/bijwerken van kandidaten
   const createMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof candidateFormSchema>) => {
-      const res = await apiRequest("POST", "/api/candidates", data);
-      return await res.json();
+    mutationFn: async (formData: FormValues) => {
+      const response = await apiRequest("POST", "/api/candidates", formData);
+      return await response.json();
     },
-    onSuccess: async (newCandidate) => {
-      // Upload profile image if selected
+    onSuccess: async (data: Candidate) => {
+      // Upload profiel foto als die is geselecteerd
       if (profileImageFile) {
-        await uploadProfileImage(newCandidate.id, profileImageFile);
+        await uploadProfileImage(data.id, profileImageFile);
       }
-      
-      // Upload resume if selected
+
+      // Upload CV als die is geselecteerd
       if (resumeFile) {
-        await uploadResume(newCandidate.id, resumeFile);
+        await uploadResume(data.id, resumeFile);
       }
-      
+
       queryClient.invalidateQueries({ queryKey: ["/api/candidates"] });
       toast({
-        title: "Kandidaat aangemaakt",
-        description: "Nieuwe kandidaat is succesvol aangemaakt.",
+        title: "Kandidaat Toegevoegd",
+        description: `${data.firstName} ${data.lastName} is toegevoegd aan het systeem.`,
       });
       setLocation("/");
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
-        title: "Fout bij aanmaken kandidaat",
-        description: error.message,
+        title: "Fout bij toevoegen",
+        description: error.message || "Er is een fout opgetreden tijdens het toevoegen van de kandidaat.",
         variant: "destructive",
       });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: { id: number; formData: z.infer<typeof candidateFormSchema> }) => {
-      const res = await apiRequest("PATCH", `/api/candidates/${data.id}`, data.formData);
-      return await res.json();
+    mutationFn: async (formData: FormValues) => {
+      const response = await apiRequest("PATCH", `/api/candidates/${id}`, formData);
+      return await response.json();
     },
-    onSuccess: async (updatedCandidate) => {
-      // Upload profile image if selected
+    onSuccess: async (data: Candidate) => {
+      // Upload profiel foto als die is geselecteerd
       if (profileImageFile) {
-        await uploadProfileImage(updatedCandidate.id, profileImageFile);
+        await uploadProfileImage(data.id, profileImageFile);
       }
-      
-      // Upload resume if selected
+
+      // Upload CV als die is geselecteerd
       if (resumeFile) {
-        await uploadResume(updatedCandidate.id, resumeFile);
+        await uploadResume(data.id, resumeFile);
       }
-      
+
+      queryClient.invalidateQueries({ queryKey: [`/api/candidates/${id}`] });
       queryClient.invalidateQueries({ queryKey: ["/api/candidates"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/candidates/${params.id}`] });
       toast({
-        title: "Kandidaat bijgewerkt",
-        description: "Kandidaat is succesvol bijgewerkt.",
+        title: "Kandidaat Bijgewerkt",
+        description: `${data.firstName} ${data.lastName} is bijgewerkt.`,
       });
       setLocation("/");
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
-        title: "Fout bij bijwerken kandidaat",
-        description: error.message,
+        title: "Fout bij bijwerken",
+        description: error.message || "Er is een fout opgetreden tijdens het bijwerken van de kandidaat.",
         variant: "destructive",
       });
     },
   });
 
+  // Functie om profielfoto te uploaden
   const uploadProfileImage = async (candidateId: number, file: File) => {
     const formData = new FormData();
-    formData.append("profileImage", file);
-    
+    formData.append("file", file);
+
     try {
-      await fetch(`/api/candidates/${candidateId}/profile-image`, {
+      const response = await fetch(`/api/candidates/${candidateId}/profile-image`, {
         method: "POST",
         body: formData,
-        credentials: "include",
       });
+
+      if (!response.ok) {
+        throw new Error("Fout bij het uploaden van de profielfoto");
+      }
+
+      return await response.json();
     } catch (error) {
-      console.error("Error uploading profile image:", error);
+      console.error("Fout bij uploaden profielfoto:", error);
       toast({
-        title: "Fout bij uploaden profielfoto",
-        description: "De profielfoto kon niet worden geüpload.",
+        title: "Fout bij uploaden",
+        description: "Er is een fout opgetreden tijdens het uploaden van de profielfoto.",
         variant: "destructive",
       });
     }
   };
 
+  // Functie om CV te uploaden
   const uploadResume = async (candidateId: number, file: File) => {
     const formData = new FormData();
-    formData.append("document", file);
-    
+    formData.append("file", file);
+    formData.append("fileType", "resume");
+
     try {
-      await fetch(`/api/candidates/${candidateId}/documents`, {
+      const response = await fetch(`/api/candidates/${candidateId}/files`, {
         method: "POST",
         body: formData,
-        credentials: "include",
       });
+
+      if (!response.ok) {
+        throw new Error("Fout bij het uploaden van het CV");
+      }
+
+      return await response.json();
     } catch (error) {
-      console.error("Error uploading resume:", error);
+      console.error("Fout bij uploaden CV:", error);
       toast({
-        title: "Failed to upload resume",
-        description: "The resume could not be uploaded.",
+        title: "Fout bij uploaden",
+        description: "Er is een fout opgetreden tijdens het uploaden van het CV.",
         variant: "destructive",
       });
     }
   };
 
-  const onSubmit = (data: z.infer<typeof candidateFormSchema>) => {
-    if (isEditMode && candidate) {
-      updateMutation.mutate({ id: candidate.id, formData: data });
+  // Functie om het formulier in te dienen
+  const onSubmit = (data: FormValues) => {
+    if (isEditMode) {
+      updateMutation.mutate(data);
     } else {
       createMutation.mutate(data);
     }
   };
 
-  const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) { // 2MB max
-        toast({
-          title: "Bestand te groot",
-          description: "De afbeelding mag maximaal 2MB groot zijn.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Tijdelijk de file bewaren
-      setProfileImageFile(file);
-      
-      // Afbeelding inladen voor de cropper
-      const reader = new FileReader();
-      reader.onload = () => {
-        // Open de cropper met deze afbeelding
-        setImageToCrop(reader.result as string);
-        setCropperOpen(true);
-      };
-      reader.readAsDataURL(file);
+  // Functie om de bestandsselectie voor de profielfoto af te handelen
+  const handleProfileImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Controleer het bestandstype
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Ongeldig bestandstype",
+        description: "Upload alstublieft een afbeelding (JPEG, PNG, GIF, etc.)",
+        variant: "destructive",
+      });
+      return;
     }
+
+    // Controleer de bestandsgrootte (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "Bestand te groot",
+        description: "De afbeelding moet kleiner zijn dan 2MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setProfileImageFile(file);
+    
+    // Open de image cropper
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        setImageToCrop(e.target.result.toString());
+        setCropperOpen(true);
+      }
+    };
+    reader.readAsDataURL(file);
   };
-  
-  // Functie om de bijgesneden afbeelding te verwerken
+
+  // Functie om geknipt beeld te verwerken
   const handleCroppedImage = (croppedImage: string) => {
     setProfileImagePreview(croppedImage);
+    setCropperOpen(false);
+    setImageToCrop(null);
     
-    // Converteer base64 naar Blob en dan naar File object
+    // Converteer base64 naar bestand
     fetch(croppedImage)
       .then(res => res.blob())
       .then(blob => {
-        const file = new File([blob], 'cropped-profile.jpg', { type: 'image/jpeg' });
+        const file = new File([blob], profileImageFile?.name || "profile.jpg", { type: 'image/jpeg' });
         setProfileImageFile(file);
-        
-        toast({
-          title: "Afbeelding bijgesneden",
-          description: "De profielfoto is klaar om opgeslagen te worden.",
-        });
-      })
-      .catch(err => {
-        console.error("Error converting cropped image:", err);
-        toast({
-          title: "Fout bij bewerken afbeelding",
-          description: "De foto kon niet worden bijgesneden. Probeer het opnieuw.",
-          variant: "destructive",
-        });
       });
   };
 
-  const handleResumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setResumeFile(file);
+  // Functie om de bestandsselectie voor het CV af te handelen
+  const handleResumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Controleer de bestandsgrootte (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Bestand te groot",
+        description: "Het CV moet kleiner zijn dan 5MB",
+        variant: "destructive",
+      });
+      return;
     }
+
+    setResumeFile(file);
+    setResumeFileName(file.name);
   };
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="min-h-screen bg-gray-50/70">
-      <div className="flex min-h-screen">
-        <div className="hidden lg:flex lg:flex-shrink-0 w-64">
-          <Sidebar />
+    <>
+      <div className="flex flex-col flex-1 py-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+          <div className="flex flex-col sm:flex-row sm:justify-between items-center mb-6">
+            <div>
+              <h1 className="text-2xl sm:text-3xl tecnarit-blue-text font-bold text-center sm:text-left">
+                {isEditMode ? "Kandidaat Bewerken" : "Kandidaat Toevoegen"}
+              </h1>
+            </div>
+            <div className="mt-4 sm:mt-0 flex space-x-3">
+              <Button
+                onClick={() => setLocation("/")}
+                className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Dashboard
+              </Button>
+            </div>
+          </div>
         </div>
 
-        <div className="flex-1">
-          {/* Main Content Area */}
-          <div className="py-6 w-full mx-auto">
-            {/* Desktop Header */}
-            <div className="lg:max-w-4xl xl:max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-              <div className="text-center">
-                <h1 className="text-3xl md:text-4xl tecnarit-blue-text font-bold mb-6">
-                  {isEditMode ? "Kandidaat Bewerken" : "Kandidaat Toevoegen"}
-                </h1>
-                
-                <div className="flex justify-center sm:justify-end mb-6">
-                  <Button
-                    onClick={() => setLocation("/")}
-                    className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Dashboard
-                  </Button>
-                </div>
+        {/* Form Container - centering with responsive width */}
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 md:px-8">
+          <div className="glass-effect rounded-lg overflow-hidden">
+            {isEditMode && isCandidateLoading ? (
+              <div className="flex justify-center items-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
-            </div>
+            ) : isEditMode && candidateError ? (
+              <div className="text-center text-red-500 p-8">
+                Error loading candidate data. Please try again.
+              </div>
+            ) : (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-6">
+                  <div>
+                    <div className="py-4 sm:p-0">
+                      <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                        {/* Basic Information */}
+                        <div className="sm:col-span-6">
+                          <h2 className="text-lg font-medium text-primary-900">Basis Informatie</h2>
+                        </div>
 
-            {/* Form Container - centering with responsive width */}
-            <div className="lg:max-w-3xl xl:max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="overflow-hidden">
-                {isEditMode && isCandidateLoading ? (
-                  <div className="flex justify-center items-center h-64">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  </div>
-                ) : isEditMode && candidateError ? (
-                  <div className="text-center text-red-500 p-8">
-                    Error loading candidate data. Please try again.
-                  </div>
-                ) : (
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                      <div>
-                        <div className="py-4 sm:p-0">
-                          <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                            {/* Basic Information */}
-                            <div className="sm:col-span-6">
-                              <h2 className="text-lg font-medium text-primary-900">Basis Informatie</h2>
-                            </div>
-
-                            {/* Profile Image */}
-                            <div className="sm:col-span-6">
-                              <FormLabel>Profielfoto</FormLabel>
-                              <div className="mt-3 flex flex-col sm:flex-row items-center">
-                                <div className="mb-4 sm:mb-0 sm:mr-6">
-                                  <div 
-                                    className="cursor-pointer block"
-                                    onClick={() => {
-                                      // Programmatically click the hidden file input
-                                      document.getElementById('profile-upload')?.click();
-                                    }}
-                                  >
-                                    <Avatar className="h-28 w-28 border-2 border-primary hover:border-primary/70 transition-colors">
-                                      <AvatarImage 
-                                        src={profileImagePreview || undefined} 
-                                        className="object-cover"
-                                      />
-                                      <AvatarFallback className="gradient-bg text-white">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                          <circle cx="12" cy="7" r="4"></circle>
-                                        </svg>
-                                      </AvatarFallback>
-                                    </Avatar>
-                                  </div>
-                                </div>
-                                <div className="text-center sm:text-left">
-                                  <Button 
-                                    variant="outline" 
-                                    type="button" 
-                                    className="cursor-pointer mb-2"
-                                    onClick={() => {
-                                      // Programmatically click the hidden file input
-                                      document.getElementById('profile-upload')?.click();
-                                    }}
-                                  >
-                                    {profileImagePreview ? 'Foto wijzigen' : 'Foto uploaden'}
-                                  </Button>
-                                  <input
-                                    id="profile-upload"
-                                    type="file"
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={handleProfileImageChange}
+                        {/* Profile Image */}
+                        <div className="sm:col-span-6">
+                          <FormLabel>Profielfoto</FormLabel>
+                          <div className="mt-3 flex flex-col sm:flex-row items-center">
+                            <div className="mb-4 sm:mb-0 sm:mr-6">
+                              <div 
+                                className="cursor-pointer block"
+                                onClick={() => {
+                                  document.getElementById('profile-upload')?.click();
+                                }}
+                              >
+                                <Avatar className="h-28 w-28 border-2 border-primary hover:border-primary/70 transition-colors">
+                                  <AvatarImage 
+                                    src={profileImagePreview || undefined} 
+                                    className="object-cover"
                                   />
-                                  <p className="text-xs text-primary-500">Klik op de cirkel of de knop om een foto te uploaden</p>
-                                  <p className="mt-1 text-xs text-primary-500">JPG, PNG of GIF tot 2MB</p>
-                                </div>
+                                  <AvatarFallback className="gradient-bg text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                      <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                  </AvatarFallback>
+                                </Avatar>
                               </div>
                             </div>
-
-                            {/* First Name */}
-                            <div className="sm:col-span-3">
-                              <FormField
-                                control={form.control}
-                                name="firstName"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Voornaam</FormLabel>
-                                    <FormControl>
-                                      <Input {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
+                            <div className="text-center sm:text-left">
+                              <Button 
+                                variant="outline" 
+                                type="button" 
+                                className="cursor-pointer mb-2"
+                                onClick={() => {
+                                  document.getElementById('profile-upload')?.click();
+                                }}
+                              >
+                                {profileImagePreview ? 'Foto wijzigen' : 'Foto uploaden'}
+                              </Button>
+                              <input
+                                id="profile-upload"
+                                type="file"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleProfileImageChange}
                               />
-                            </div>
-
-                            {/* Last Name */}
-                            <div className="sm:col-span-3">
-                              <FormField
-                                control={form.control}
-                                name="lastName"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Achternaam</FormLabel>
-                                    <FormControl>
-                                      <Input {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-
-                            {/* Email */}
-                            <div className="sm:col-span-3">
-                              <FormField
-                                control={form.control}
-                                name="email"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>E-mailadres</FormLabel>
-                                    <FormControl>
-                                      <Input type="email" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-
-                            {/* Phone */}
-                            <div className="sm:col-span-3">
-                              <FormField
-                                control={form.control}
-                                name="phone"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Telefoonnummer</FormLabel>
-                                    <FormControl>
-                                      <Input type="tel" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-
-                            {/* LinkedIn Profile */}
-                            <div className="sm:col-span-3">
-                              <FormField
-                                control={form.control}
-                                name="linkedinProfile"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>LinkedIn Profiel</FormLabel>
-                                    <FormControl>
-                                      <Input {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-
-                            {/* Years of Experience */}
-                            <div className="sm:col-span-3">
-                              <FormField
-                                control={form.control}
-                                name="yearsOfExperience"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Jaren Ervaring</FormLabel>
-                                    <FormControl>
-                                      <Input 
-                                        type="number" 
-                                        {...field} 
-                                        value={field.value === null ? '' : field.value}
-                                        onChange={(e) => {
-                                          const value = e.target.value === '' ? null : Number(e.target.value);
-                                          field.onChange(value);
-                                        }}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-
-                            {/* Status */}
-                            <div className="sm:col-span-3">
-                              <FormField
-                                control={form.control}
-                                name="status"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Status</FormLabel>
-                                    <FormControl>
-                                      <Select
-                                        value={field.value}
-                                        onValueChange={field.onChange}
-                                      >
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Selecteer status" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="beschikbaar">Beschikbaar</SelectItem>
-                                          <SelectItem value="onbeschikbaar">Onbeschikbaar</SelectItem>
-                                          <SelectItem value="in_dienst">In Dienst</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-                            
-                            {/* Onbeschikbaar tot (alleen tonen als status "onbeschikbaar" is) */}
-                            {form.watch("status") === "onbeschikbaar" && (
-                              <div className="sm:col-span-3">
-                                <FormField
-                                  control={form.control}
-                                  name="unavailableUntil"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Onbeschikbaar tot</FormLabel>
-                                      <FormControl>
-                                        <Input 
-                                          type="date"
-                                          {...field}
-                                          value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                                          onChange={(e) => {
-                                            const value = e.target.value ? new Date(e.target.value) : null;
-                                            field.onChange(value);
-                                          }}
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                              </div>
-                            )}
-                            
-                            {/* Klant (alleen tonen als status "in_dienst" is) */}
-                            {form.watch("status") === "in_dienst" && (
-                              <div className="sm:col-span-3">
-                                <FormField
-                                  control={form.control}
-                                  name="client"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Klant</FormLabel>
-                                      <FormControl>
-                                        <Input {...field} />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                              </div>
-                            )}
-
-                            {/* Resume Upload */}
-                            <div className="sm:col-span-6">
-                              <h2 className="text-lg font-medium text-primary-900 mb-4">CV Upload</h2>
-                              <div className="mt-2">
-                                <label
-                                  htmlFor="file-upload"
-                                  className="relative cursor-pointer rounded-md bg-white font-medium text-primary-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-offset-2 hover:text-primary-500"
-                                >
-                                  <div className="mt-1 flex justify-center rounded-md border-2 border-dashed border-primary/30 px-6 pt-5 pb-6 hover:border-primary/60 transition-colors duration-200">
-                                    <div className="space-y-1 text-center">
-                                      {resumeFile ? (
-                                        <div className="flex flex-col items-center">
-                                          <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 gradient-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                            <polyline points="14 2 14 8 20 8"></polyline>
-                                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                                            <polyline points="10 9 9 9 8 9"></polyline>
-                                          </svg>
-                                          <div className="mt-3 text-center">
-                                            <p className="text-sm gradient-text font-medium">
-                                              {resumeFile.name}
-                                            </p>
-                                            <p className="text-xs text-primary/70 mt-1">
-                                              {(resumeFile.size / 1024 / 1024).toFixed(2)} MB
-                                            </p>
-                                            <Button
-                                              type="button"
-                                              variant="outline"
-                                              size="sm"
-                                              className="mt-3"
-                                              onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                setResumeFile(null);
-                                              }}
-                                            >
-                                              Bestand wijzigen
-                                            </Button>
-                                          </div>
-                                        </div>
-                                      ) : (
-                                        <>
-                                          <svg 
-                                            xmlns="http://www.w3.org/2000/svg" 
-                                            className="mx-auto h-12 w-12 text-primary" 
-                                            viewBox="0 0 24 24" 
-                                            fill="none" 
-                                            stroke="currentColor" 
-                                            strokeWidth="2" 
-                                            strokeLinecap="round" 
-                                            strokeLinejoin="round"
-                                          >
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                            <polyline points="14 2 14 8 20 8"></polyline>
-                                            <line x1="12" y1="18" x2="12" y2="12"></line>
-                                            <line x1="9" y1="15" x2="15" y2="15"></line>
-                                          </svg>
-                                          <div className="flex flex-col items-center mt-4">
-                                            <span className="text-sm font-medium gradient-text">Upload kandidaat CV</span>
-                                            <p className="text-xs text-primary/70 mt-1">
-                                              Drag and drop of klik om te bladeren
-                                            </p>
-                                            <p className="text-xs text-primary/60 mt-3">
-                                              PDF, DOC, DOCX tot 10MB
-                                            </p>
-                                          </div>
-                                        </>
-                                      )}
-                                      <Input
-                                        id="file-upload"
-                                        name="file-upload"
-                                        type="file"
-                                        className="sr-only"
-                                        onChange={handleResumeChange}
-                                        accept=".pdf,.doc,.docx"
-                                      />
-                                    </div>
-                                  </div>
-                                </label>
-                              </div>
-                            </div>
-
-                            {/* Notes */}
-                            <div className="sm:col-span-6">
-                              <FormField
-                                control={form.control}
-                                name="notes"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Notities</FormLabel>
-                                    <FormControl>
-                                      <Textarea rows={4} {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
+                              <p className="text-xs text-primary-500">Klik op de cirkel of de knop om een foto te uploaden</p>
+                              <p className="mt-1 text-xs text-primary-500">JPG, PNG of GIF tot 2MB</p>
                             </div>
                           </div>
                         </div>
-                        <div className="px-4 py-5 bg-gradient-to-r from-[#111827]/5 to-primary/5 text-right sm:px-6 rounded-b-lg">
-                          <Button
-                            type="submit"
-                            disabled={isPending}
-                            className="relative tecnarit-blue-bg transition-all hover-lift touch-friendly"
-                          >
-                            {isPending && (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin text-white" />
+
+                        {/* First Name */}
+                        <div className="sm:col-span-3">
+                          <FormField
+                            control={form.control}
+                            name="firstName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Voornaam</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
                             )}
-                            {isEditMode ? "Kandidaat Bijwerken" : "Kandidaat Aanmaken"}
+                          />
+                        </div>
+
+                        {/* Last Name */}
+                        <div className="sm:col-span-3">
+                          <FormField
+                            control={form.control}
+                            name="lastName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Achternaam</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Email */}
+                        <div className="sm:col-span-3">
+                          <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>E-mailadres</FormLabel>
+                                <FormControl>
+                                  <Input type="email" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Phone */}
+                        <div className="sm:col-span-3">
+                          <FormField
+                            control={form.control}
+                            name="phone"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Telefoonnummer</FormLabel>
+                                <FormControl>
+                                  <Input type="tel" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* LinkedIn Profile */}
+                        <div className="sm:col-span-3">
+                          <FormField
+                            control={form.control}
+                            name="linkedinProfile"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>LinkedIn Profiel</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Years of Experience */}
+                        <div className="sm:col-span-3">
+                          <FormField
+                            control={form.control}
+                            name="yearsOfExperience"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Jaren Ervaring</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="number" 
+                                    {...field} 
+                                    value={field.value === null ? '' : field.value}
+                                    onChange={(e) => {
+                                      const value = e.target.value === '' ? null : Number(e.target.value);
+                                      field.onChange(value);
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Status */}
+                        <div className="sm:col-span-3">
+                          <FormField
+                            control={form.control}
+                            name="status"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Status</FormLabel>
+                                <FormControl>
+                                  <Select
+                                    value={field.value}
+                                    onValueChange={field.onChange}
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Selecteer status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="beschikbaar">Beschikbaar</SelectItem>
+                                      <SelectItem value="onbeschikbaar">Onbeschikbaar</SelectItem>
+                                      <SelectItem value="in_dienst">In Dienst</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Unavailable Until - alleen tonen als status "onbeschikbaar" is */}
+                        {form.watch("status") === "onbeschikbaar" && (
+                          <div className="sm:col-span-3">
+                            <FormField
+                              control={form.control}
+                              name="unavailableUntil"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                  <FormLabel>Onbeschikbaar tot</FormLabel>
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <FormControl>
+                                        <Button
+                                          variant={"outline"}
+                                          className={cn(
+                                            "w-full pl-3 text-left font-normal",
+                                            !field.value && "text-muted-foreground"
+                                          )}
+                                        >
+                                          {field.value ? (
+                                            format(field.value, "PPP", { locale: nl })
+                                          ) : (
+                                            <span>Selecteer datum</span>
+                                          )}
+                                        </Button>
+                                      </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                      <Calendar
+                                        mode="single"
+                                        selected={field.value || undefined}
+                                        onSelect={field.onChange}
+                                        initialFocus
+                                        locale={nl}
+                                      />
+                                    </PopoverContent>
+                                  </Popover>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
+
+                        {/* Client - alleen tonen als status "in_dienst" is */}
+                        {form.watch("status") === "in_dienst" && (
+                          <div className="sm:col-span-3">
+                            <FormField
+                              control={form.control}
+                              name="client"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Klant</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
+
+                        {/* Resume Upload */}
+                        <div className="sm:col-span-6">
+                          <FormLabel>CV Upload</FormLabel>
+                          <div className="mt-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="w-full sm:w-auto"
+                              onClick={() => {
+                                document.getElementById('resume-upload')?.click();
+                              }}
+                            >
+                              {resumeFileName ? 'CV Wijzigen' : 'CV Uploaden'}
+                            </Button>
+                            <input
+                              id="resume-upload"
+                              type="file"
+                              className="hidden"
+                              accept=".pdf,.doc,.docx"
+                              onChange={handleResumeChange}
+                            />
+                            {resumeFileName && (
+                              <p className="mt-2 text-sm text-primary-800">
+                                Geselecteerd bestand: {resumeFileName}
+                              </p>
+                            )}
+                            <p className="mt-1 text-xs text-primary-500">
+                              PDF, DOCX tot 5MB
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Notes */}
+                        <div className="sm:col-span-6">
+                          <FormField
+                            control={form.control}
+                            name="notes"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Notities</FormLabel>
+                                <FormControl>
+                                  <Textarea rows={4} {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        <div className="sm:col-span-6 mt-4">
+                          <Button 
+                            type="submit"
+                            className="tecnarit-blue-bg tecnarit-blue-border hover-lift touch-friendly w-full sm:w-auto"
+                            disabled={isPending}
+                          >
+                            {isPending ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                {isEditMode ? "Bijwerken..." : "Toevoegen..."}
+                              </>
+                            ) : (
+                              <>
+                                {isEditMode ? "Kandidaat Bijwerken" : "Kandidaat Toevoegen"}
+                              </>
+                            )}
                           </Button>
                         </div>
                       </div>
-                    </form>
-                  </Form>
-                )}
-              </div>
-            </div>
+                    </div>
+                  </div>
+                </form>
+              </Form>
+            )}
           </div>
         </div>
       </div>
@@ -695,6 +698,6 @@ export default function CandidateForm() {
           onCropComplete={handleCroppedImage}
         />
       )}
-    </div>
+    </>
   );
 }
