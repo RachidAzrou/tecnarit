@@ -341,10 +341,10 @@ export default function CandidateForm() {
               </div>
             ) : (
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-6">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-8 md:p-10">
                   <div>
                     <div className="py-4 sm:p-0">
-                      <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                      <div className="grid grid-cols-1 gap-y-6 gap-x-6 sm:grid-cols-6">
                         {/* Basic Information */}
                         <div className="sm:col-span-6">
                           <h2 className="text-lg font-medium text-primary-900">Basis Informatie</h2>
