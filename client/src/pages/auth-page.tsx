@@ -86,15 +86,15 @@ export default function AuthPage() {
           <div className="h-2 bg-gradient-to-r from-[#233142] to-[#455d7a]"></div>
           
           <CardContent className="p-10">
-            {/* Logo with shadow for depth */}
+            {/* Logo with better styling */}
             <div className="flex justify-center mb-8">
-              <div className="relative">
+              <div className="relative p-2">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#233142] to-[#233142] rounded-xl"></div>
                 <img 
                   src={logoWithBg} 
                   alt="TECNARIT" 
-                  className="h-44 w-80 object-contain drop-shadow-lg" 
+                  className="h-36 w-[350px] relative object-contain" 
                 />
-                <div className="absolute -inset-0.5 bg-white/10 rounded-full blur-xl -z-10"></div>
               </div>
             </div>
             
