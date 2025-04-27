@@ -35,7 +35,8 @@ export default function MobileNavbar() {
 
   // Functie om naar de kandidaten zoekpagina te navigeren
   const goToSearch = () => {
-    setLocation("/?search=true");
+    const url = "/?search=true";
+    window.location.href = url;
   };
 
   // Functie om naar kandidaat toevoegen te navigeren
