@@ -10,15 +10,24 @@ export default function MobileNavbar() {
   const [location, setLocation] = useLocation();
   const [pageTitle, setPageTitle] = useState("Dashboard");
 
-  // Update page title based on current location
+  // Update page title based on current location and query parameters
   useEffect(() => {
-    if (location === '/') {
+    // URL query parameter controleren 
+    const hasSearchParam = window.location.search.includes('search=true');
+    
+    // State bijwerken op basis van URL om consistent te zijn
+    if (hasSearchParam && location === '/') {
+      // Dit zorgt ervoor dat op de zoekpagina de toestand altijd consistent is
+      setLocation('/?search=true');
+    }
+    
+    if (location === '/' && !hasSearchParam) {
       setPageTitle("Dashboard");
     } else if (location === '/profile') {
       setPageTitle("Profiel");
     } else if (location === '/candidates/new') {
       setPageTitle("Kandidaat Toevoegen");
-    } else if (location.includes('search=true')) {
+    } else if (location.includes('search=true') || hasSearchParam) {
       setPageTitle("Kandidaten zoeken");
     } else if (location.includes('/candidates/') && location.includes('/edit')) {
       setPageTitle("Kandidaat Bewerken");
@@ -27,7 +36,7 @@ export default function MobileNavbar() {
     } else {
       setPageTitle("TECNARIT");
     }
-  }, [location]);
+  }, [location, setLocation]);
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -35,7 +44,7 @@ export default function MobileNavbar() {
 
   // Functie om naar de kandidaten zoekpagina te navigeren
   const goToSearch = () => {
-    setLocation("/?search=true");
+    window.location.href = "/?search=true";
   };
 
   // Functie om naar kandidaat toevoegen te navigeren
@@ -58,12 +67,12 @@ export default function MobileNavbar() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button 
-                  variant={location === '/' && !location.includes('search=true') ? "default" : "ghost"}
+                  variant={location === '/' && !location.includes('search=true') && !window.location.search.includes('search=true') ? "default" : "ghost"}
                   size="icon" 
-                  className={`${location === '/' && !location.includes('search=true') ? 'h-14 w-14 rounded-full tecnarit-blue-bg -mt-5 shadow-lg' : 'h-12 w-12 rounded-full text-muted-foreground'}`}
+                  className={`${location === '/' && !location.includes('search=true') && !window.location.search.includes('search=true') ? 'h-14 w-14 rounded-full tecnarit-blue-bg -mt-5 shadow-lg' : 'h-12 w-12 rounded-full text-muted-foreground'}`}
                   onClick={goToDashboard}
                 >
-                  <Home className={`${location === '/' && !location.includes('search=true') ? 'h-6 w-6 text-white' : 'h-5 w-5'}`} />
+                  <Home className={`${location === '/' && !location.includes('search=true') && !window.location.search.includes('search=true') ? 'h-6 w-6 text-white' : 'h-5 w-5'}`} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">
@@ -75,12 +84,12 @@ export default function MobileNavbar() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button 
-                  variant={location.includes('search=true') ? "default" : "ghost"}
+                  variant={location.includes('search=true') || window.location.search.includes('search=true') ? "default" : "ghost"}
                   size="icon" 
-                  className={`${location.includes('search=true') ? 'h-14 w-14 rounded-full tecnarit-blue-bg -mt-5 shadow-lg' : 'h-12 w-12 rounded-full text-muted-foreground'}`}
+                  className={`${location.includes('search=true') || window.location.search.includes('search=true') ? 'h-14 w-14 rounded-full tecnarit-blue-bg -mt-5 shadow-lg' : 'h-12 w-12 rounded-full text-muted-foreground'}`}
                   onClick={goToSearch}
                 >
-                  <Search className={`${location.includes('search=true') ? 'h-6 w-6 text-white' : 'h-5 w-5'}`} />
+                  <Search className={`${location.includes('search=true') || window.location.search.includes('search=true') ? 'h-6 w-6 text-white' : 'h-5 w-5'}`} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">
