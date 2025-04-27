@@ -39,6 +39,14 @@ import { cn } from "@/lib/utils";
 import * as z from "zod";
 import ImageCropper from "@/components/ui/image-cropper";
 import { PageTitle } from "@/components/layout/page-title";
+// Firebase import
+import { 
+  createCandidate, 
+  updateCandidate, 
+  getCandidate,
+  uploadProfileImage as firebaseUploadProfileImage,
+  addCandidateFile
+} from "@/firebase/candidates";
 
 const formSchema = insertCandidateSchema.extend({
   unavailableUntil: z.date().optional().nullable(),
