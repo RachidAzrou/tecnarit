@@ -52,9 +52,9 @@ export default function MobileNavbar() {
     setLocation('/candidates/new');
   };
 
-  // Functie om naar het dashboard te navigeren
+  // Functie om naar kandidaten zoeken te navigeren
   const goToDashboard = () => {
-    setLocation('/');
+    setLocation('/candidates');
   };
 
   // Functie om naar het profiel te navigeren
@@ -122,7 +122,7 @@ export default function MobileNavbar() {
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">
-                <p>Dashboard</p>
+                <p>Kandidaten</p>
               </TooltipContent>
             </Tooltip>
 
