@@ -145,5 +145,34 @@
   .hover-lift {
     @apply hover:-translate-y-1 transition-transform duration-200;
   }
+  
+  /* Speciale mobiele actieknoppen */
+  .mobile-action-button {
+    @apply font-semibold shadow-md min-w-[44px] h-11 rounded-xl px-3.5 
+           flex items-center justify-center transition-all duration-200
+           active:scale-95 sm:px-4;
+  }
+  
+  /* TECNARIT specifieke kleuren en stijlen voor buttons */
+  .tecnarit-blue-button {
+    @apply bg-[#233142] hover:bg-[#1b2736] text-white shadow-[0_4px_10px_rgba(35,49,66,0.3)];
+  }
+  
+  /* Media queries voor responsieve knoppen */
+  @screen sm {
+    .responsive-button-text {
+      @apply block;
+    }
+  }
+  
+  @screen xs {
+    .responsive-button-icon-only {
+      @apply p-2.5 min-w-[40px] w-10 h-10;
+    }
+    
+    .responsive-button-icon-only span {
+      @apply hidden;
+    }
+  }
 }
 

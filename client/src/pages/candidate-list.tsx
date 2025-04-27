@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { Loader2, Plus, Search, Download, FileSpreadsheet, FileText, Home, Users } from "lucide-react";
+import { Loader2, Plus, Search, Download, FileSpreadsheet, FileText, Home, Users, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -183,18 +183,21 @@ export default function CandidateList() {
                 {showDashboard && (
                   <Button 
                     onClick={handleAddCandidate}
-                    className="tecnarit-blue-bg transition-all hover-lift touch-friendly mr-2"
+                    className="tecnarit-blue-bg mobile-action-button tecnarit-blue-button hover-lift mr-2"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Kandidaat Toevoegen
+                    <span className="responsive-button-text">Kandidaat Toevoegen</span>
                   </Button>
                 )}
                 {filteredCandidates.length > 0 && !showDashboard && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="border-primary/30">
+                      <Button 
+                        variant="outline" 
+                        className="border-primary/30 mobile-action-button hover-lift"
+                      >
                         <Download className="h-4 w-4 mr-2" />
-                        Exporteer
+                        <span className="responsive-button-text">Exporteer</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -212,10 +215,10 @@ export default function CandidateList() {
                 {!showDashboard && (
                   <Button 
                     onClick={handleAddCandidate}
-                    className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
+                    className="tecnarit-blue-bg mobile-action-button tecnarit-blue-button hover-lift"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Kandidaat Toevoegen
+                    <span className="responsive-button-text">Kandidaat Toevoegen</span>
                   </Button>
                 )}
               </div>
@@ -391,9 +394,10 @@ export default function CandidateList() {
                     </p>
                     <Button 
                       onClick={() => window.location.reload()} 
-                      className="mt-4 tecnarit-blue-bg hover-lift touch-friendly"
+                      className="mt-4 tecnarit-blue-bg mobile-action-button tecnarit-blue-button hover-lift"
                     >
-                      Vernieuwen
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      <span className="responsive-button-text">Vernieuwen</span>
                     </Button>
                   </div>
                 ) : filteredCandidates.length === 0 ? (
