@@ -439,7 +439,7 @@ export default function CandidateForm() {
                               <FormItem>
                                 <FormLabel>LinkedIn Profiel</FormLabel>
                                 <FormControl>
-                                  <Input {...field} />
+                                  <Input {...field} value={field.value || ''} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -555,7 +555,7 @@ export default function CandidateForm() {
                                 <FormItem>
                                   <FormLabel>Klant</FormLabel>
                                   <FormControl>
-                                    <Input {...field} />
+                                    <Input {...field} value={field.value || ''} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -605,7 +605,7 @@ export default function CandidateForm() {
                               <FormItem>
                                 <FormLabel>Notities</FormLabel>
                                 <FormControl>
-                                  <Textarea rows={4} {...field} />
+                                  <Textarea rows={4} {...field} value={field.value || ''} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
