@@ -212,10 +212,23 @@ export default function CandidateForm() {
   const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 2 * 1024 * 1024) { // 2MB max
+        toast({
+          title: "Bestand te groot",
+          description: "De afbeelding mag maximaal 2MB groot zijn.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       setProfileImageFile(file);
       const reader = new FileReader();
       reader.onload = () => {
         setProfileImagePreview(reader.result as string);
+        toast({
+          title: "Afbeelding geselecteerd",
+          description: "De profielfoto is klaar om opgeslagen te worden.",
+        });
       };
       reader.readAsDataURL(file);
     }
@@ -280,20 +293,25 @@ export default function CandidateForm() {
                             {/* Profile Image */}
                             <div className="sm:col-span-6">
                               <FormLabel>Profielfoto</FormLabel>
-                              <div className="mt-1 flex items-center space-x-5">
-                                <div className="flex-shrink-0">
-                                  <Avatar className="h-16 w-16">
-                                    <AvatarImage src={profileImagePreview || undefined} />
-                                    <AvatarFallback>
-                                      {form.getValues("firstName").charAt(0) || "K"}
-                                      {form.getValues("lastName").charAt(0) || ""}
-                                    </AvatarFallback>
-                                  </Avatar>
+                              <div className="mt-3 flex flex-col sm:flex-row items-center">
+                                <div className="mb-4 sm:mb-0 sm:mr-6">
+                                  <label htmlFor="profile-upload" className="cursor-pointer block">
+                                    <Avatar className="h-28 w-28 border-2 border-primary hover:border-primary/70 transition-colors">
+                                      <AvatarImage 
+                                        src={profileImagePreview || undefined} 
+                                        className="object-cover"
+                                      />
+                                      <AvatarFallback className="gradient-bg text-white text-2xl">
+                                        {form.getValues("firstName").charAt(0) || "K"}
+                                        {form.getValues("lastName").charAt(0) || ""}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                  </label>
                                 </div>
-                                <div>
+                                <div className="text-center sm:text-left">
                                   <label htmlFor="profile-upload" className="cursor-pointer">
-                                    <Button variant="outline" type="button" className="cursor-pointer">
-                                      Wijzigen
+                                    <Button variant="outline" type="button" className="cursor-pointer mb-2">
+                                      {profileImagePreview ? 'Foto wijzigen' : 'Foto uploaden'}
                                     </Button>
                                     <input
                                       id="profile-upload"
@@ -303,7 +321,8 @@ export default function CandidateForm() {
                                       onChange={handleProfileImageChange}
                                     />
                                   </label>
-                                  <p className="mt-2 text-xs text-primary-500">JPG, PNG of GIF tot 2MB</p>
+                                  <p className="text-xs text-primary-500">Klik op de cirkel of de knop om een foto te uploaden</p>
+                                  <p className="mt-1 text-xs text-primary-500">JPG, PNG of GIF tot 2MB</p>
                                 </div>
                               </div>
                             </div>
