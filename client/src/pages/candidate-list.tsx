@@ -177,7 +177,7 @@ export default function CandidateList() {
           <div className="py-6">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
               <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-semibold gradient-text">
+                <h1 className="text-2xl tecnarit-blue-text">
                   {showDashboard ? "Dashboard" : "Kandidaten Zoeken"}
                 </h1>
                 <div className="flex space-x-2">
@@ -341,7 +341,7 @@ export default function CandidateList() {
                     </div>
                     
                     {/* Recente kandidaten tabel */}
-                    <h2 className="text-xl font-medium mt-8 mb-4">Recente Kandidaten</h2>
+                    <h2 className="text-xl tecnarit-blue-text mt-8 mb-4">Recente Kandidaten</h2>
                     {isLoading ? (
                       <div className="flex justify-center items-center h-48 sm:h-64 glass-effect rounded-lg">
                         <Loader2 className="h-8 w-8 animate-spin gradient-text" />
