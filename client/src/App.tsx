@@ -11,8 +11,6 @@ import CandidateDetail from "@/pages/candidate-detail";
 import ProfilePage from "@/pages/profile-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "./hooks/use-auth";
-import MobileHeader from "@/components/layout/mobile-header";
-import MobileNavbar from "@/components/layout/mobile-navbar";
 
 function Router() {
   return (
@@ -34,9 +32,7 @@ function App() {
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
-          <MobileHeader />
           <Router />
-          <MobileNavbar />
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>
