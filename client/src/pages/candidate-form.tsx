@@ -63,7 +63,9 @@ export default function CandidateForm() {
       phone: "",
       linkedinProfile: "",
       yearsOfExperience: null,
-      status: "active",
+      status: "beschikbaar",
+      unavailableUntil: null,
+      client: "",
       notes: "",
       profileImage: null,
     },
@@ -81,6 +83,8 @@ export default function CandidateForm() {
         linkedinProfile: candidate.linkedinProfile || "",
         yearsOfExperience: candidate.yearsOfExperience || null,
         status: candidate.status,
+        unavailableUntil: candidate.unavailableUntil || null,
+        client: candidate.client || "",
         notes: candidate.notes || "",
         profileImage: candidate.profileImage || null,
       });
@@ -270,18 +274,18 @@ export default function CandidateForm() {
                           <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                             {/* Basic Information */}
                             <div className="sm:col-span-6">
-                              <h2 className="text-lg font-medium text-primary-900">Basic Information</h2>
+                              <h2 className="text-lg font-medium text-primary-900">Basis Informatie</h2>
                             </div>
 
                             {/* Profile Image */}
                             <div className="sm:col-span-6">
-                              <FormLabel>Profile Photo</FormLabel>
+                              <FormLabel>Profielfoto</FormLabel>
                               <div className="mt-1 flex items-center space-x-5">
                                 <div className="flex-shrink-0">
                                   <Avatar className="h-16 w-16">
                                     <AvatarImage src={profileImagePreview || undefined} />
                                     <AvatarFallback>
-                                      {form.getValues("firstName").charAt(0) || "U"}
+                                      {form.getValues("firstName").charAt(0) || "K"}
                                       {form.getValues("lastName").charAt(0) || ""}
                                     </AvatarFallback>
                                   </Avatar>
@@ -289,7 +293,7 @@ export default function CandidateForm() {
                                 <div>
                                   <label htmlFor="profile-upload" className="cursor-pointer">
                                     <Button variant="outline" type="button" className="cursor-pointer">
-                                      Change
+                                      Wijzigen
                                     </Button>
                                     <Input
                                       id="profile-upload"
@@ -299,7 +303,7 @@ export default function CandidateForm() {
                                       onChange={handleProfileImageChange}
                                     />
                                   </label>
-                                  <p className="mt-2 text-xs text-primary-500">JPG, PNG or GIF up to 2MB</p>
+                                  <p className="mt-2 text-xs text-primary-500">JPG, PNG of GIF tot 2MB</p>
                                 </div>
                               </div>
                             </div>
@@ -428,14 +432,12 @@ export default function CandidateForm() {
                                         onValueChange={field.onChange}
                                       >
                                         <SelectTrigger>
-                                          <SelectValue placeholder="Select status" />
+                                          <SelectValue placeholder="Selecteer status" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                          <SelectItem value="active">Active</SelectItem>
-                                          <SelectItem value="contacted">Contacted</SelectItem>
-                                          <SelectItem value="interview">Interview Scheduled</SelectItem>
-                                          <SelectItem value="hired">Hired</SelectItem>
-                                          <SelectItem value="rejected">Rejected</SelectItem>
+                                          <SelectItem value="beschikbaar">Beschikbaar</SelectItem>
+                                          <SelectItem value="onbeschikbaar">Onbeschikbaar</SelectItem>
+                                          <SelectItem value="in_dienst">In Dienst</SelectItem>
                                         </SelectContent>
                                       </Select>
                                     </FormControl>
@@ -444,6 +446,52 @@ export default function CandidateForm() {
                                 )}
                               />
                             </div>
+                            
+                            {/* Onbeschikbaar tot (alleen tonen als status "onbeschikbaar" is) */}
+                            {form.watch("status") === "onbeschikbaar" && (
+                              <div className="sm:col-span-3">
+                                <FormField
+                                  control={form.control}
+                                  name="unavailableUntil"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Onbeschikbaar tot</FormLabel>
+                                      <FormControl>
+                                        <Input 
+                                          type="date"
+                                          {...field}
+                                          value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                                          onChange={(e) => {
+                                            const value = e.target.value ? new Date(e.target.value) : null;
+                                            field.onChange(value);
+                                          }}
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            )}
+                            
+                            {/* Klant (alleen tonen als status "in_dienst" is) */}
+                            {form.watch("status") === "in_dienst" && (
+                              <div className="sm:col-span-3">
+                                <FormField
+                                  control={form.control}
+                                  name="client"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Klant</FormLabel>
+                                      <FormControl>
+                                        <Input {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            )}
 
                             {/* Resume Upload */}
                             <div className="sm:col-span-6">
