@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import logoWithBg from "@assets/Color logo with background.png";
+import hexBackground from "@assets/1259.jpg";
 
 // Create Firebase login schema
 const loginSchema = z.object({
@@ -67,95 +68,102 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-[#f5f5f5] p-4">
-      <div className="w-full max-w-md mb-8">
-        <div className="flex items-center justify-center">
-          <div className="bg-[#233142] p-4 rounded-full shadow-lg">
-            <img src={logoWithBg} alt="TECNARIT" className="h-20 w-20 object-contain" />
-          </div>
-        </div>
-        <h1 className="text-2xl font-bold text-center text-[#233142] mt-4">TECNARIT - EMS</h1>
-      </div>
+    <div 
+      className="flex min-h-screen w-full items-center justify-center p-4"
+      style={{ 
+        backgroundImage: `url(${hexBackground})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }}
+    >
+      <div className="absolute inset-0 bg-white/30 backdrop-blur-sm"></div>
       
-      <Card className="w-full max-w-md border-0 shadow-lg overflow-hidden">
-        <div className="h-1.5 bg-[#233142]"></div>
-        <CardContent className="pt-6 p-8">
-          <Form {...loginForm}>
-            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-5">
-              <FormField
-                control={loginForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-700 font-medium">E-mailadres</FormLabel>
-                    <FormControl>
-                      <Input 
-                        {...field} 
-                        type="email" 
-                        className="w-full p-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#233142] focus:border-[#233142]"
-                        placeholder="admin@tecnarit.com"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+      <div className="z-10 flex w-full max-w-md flex-col items-center">
+        <div className="mb-6 bg-white p-4 rounded-full shadow-lg">
+          <img src={logoWithBg} alt="TECNARIT" className="h-16 w-16" />
+        </div>
+        
+        <Card className="w-full border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+          <CardContent className="p-8">
+            <h1 className="text-2xl font-bold text-center mb-6 text-[#233142]">TECNARIT - EMS</h1>
+            
+            <Form {...loginForm}>
+              <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                <FormField
+                  control={loginForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#233142] font-medium">E-mailadres</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          type="email" 
+                          className="w-full p-2.5 bg-white/70 border border-gray-300 rounded-md focus:bg-white"
+                          placeholder="admin@tecnarit.com"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={loginForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-700 font-medium">Wachtwoord</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="password" 
-                        {...field} 
-                        className="w-full p-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#233142] focus:border-[#233142]"
-                        placeholder="admin123"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={loginForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#233142] font-medium">Wachtwoord</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="password" 
+                          {...field} 
+                          className="w-full p-2.5 bg-white/70 border border-gray-300 rounded-md focus:bg-white"
+                          placeholder="admin123"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={loginForm.control}
-                name="rememberMe"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="text-[#233142] focus:ring-1 focus:ring-[#233142] rounded"
-                      />
-                    </FormControl>
-                    <FormLabel className="text-sm text-gray-600 font-normal">Onthoud mij</FormLabel>
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={loginForm.control}
+                  name="rememberMe"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="text-[#83b74b] focus:ring-[#83b74b] rounded border-gray-400"
+                        />
+                      </FormControl>
+                      <FormLabel className="text-sm text-gray-700 font-normal">Onthoud mij</FormLabel>
+                    </FormItem>
+                  )}
+                />
 
-              <Button
-                type="submit"
-                className="w-full bg-[#233142] hover:bg-[#1a2430] py-2.5 text-white rounded-md mt-2 font-medium transition-colors"
-                disabled={loginMutation.isPending}
-              >
-                {loginMutation.isPending ? "Bezig met inloggen..." : "Inloggen"}
-              </Button>
-              
-              <div className="text-xs text-center text-gray-500 mt-4 p-3 bg-gray-100 rounded-md">
-                Gebruik de volgende demo inloggegevens:
-                <br />
-                E-mail: <span className="font-semibold">admin@tecnarit.com</span>
-                <br />
-                Wachtwoord: <span className="font-semibold">admin123</span>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+                <Button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-[#83b74b] to-[#95d75e] hover:opacity-90 py-2.5 text-white rounded-md mt-4 font-medium shadow-md transition-all"
+                  disabled={loginMutation.isPending}
+                >
+                  {loginMutation.isPending ? "Bezig met inloggen..." : "Inloggen"}
+                </Button>
+                
+                <div className="mt-5 rounded-md bg-[#233142]/10 p-3 text-center text-xs text-gray-700">
+                  Gebruik de volgende demo inloggegevens:
+                  <br />
+                  E-mail: <span className="font-semibold">admin@tecnarit.com</span>
+                  <br />
+                  Wachtwoord: <span className="font-semibold">admin123</span>
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
