@@ -284,14 +284,14 @@ export default function CandidateForm() {
 
         <div className="flex-1 relative z-0 overflow-y-auto focus:outline-none">
           <div className="py-6">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+            <div className="mx-auto max-w-5xl px-4 sm:px-6 md:px-8">
               <div className="text-center mb-6 lg:block hidden">
                 <h1 className="text-3xl md:text-4xl tecnarit-blue-text font-bold">
                   {isEditMode ? "Kandidaat Bewerken" : "Kandidaat Toevoegen"}
                 </h1>
               </div>
               
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex justify-center md:justify-between items-center mb-6">
                 <div>
                   {/* Linker deel - hier zou eventueel een knop kunnen staan */}
                 </div>
@@ -307,7 +307,7 @@ export default function CandidateForm() {
               </div>
             </div>
 
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+            <div className="mx-auto max-w-4xl px-4 sm:px-6 md:px-8">
               <div className="py-4">
                 {isEditMode && isCandidateLoading ? (
                   <div className="flex justify-center items-center h-64">
@@ -319,7 +319,7 @@ export default function CandidateForm() {
                   </div>
                 ) : (
                   <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mx-auto">
                       <div className="bg-white shadow-sm ring-1 ring-primary-200 sm:rounded-lg">
                         <div className="px-4 py-5 sm:p-6">
                           <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
