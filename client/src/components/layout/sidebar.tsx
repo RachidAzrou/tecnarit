@@ -32,10 +32,18 @@ export default function Sidebar({ onClose }: SidebarProps) {
   };
 
   const isActive = (path: string) => {
+    // Exact match for dashboard
     if (path === "/" && location === "/") {
       return true;
     }
-    if (path !== "/" && location.startsWith(path)) {
+    // Exact match for other paths to avoid multiple selections
+    if (path === "/candidates/new" && location === "/candidates/new") {
+      return true;
+    }
+    if (path === "/candidates" && location === "/candidates") {
+      return true;
+    }
+    if (path === "/export" && location === "/export") {
       return true;
     }
     return false;
@@ -50,20 +58,52 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
   return (
     <div className={`flex min-h-0 flex-1 flex-col border-r border-border bg-card transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'}`}>
-      <div className="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
-        <div className="flex flex-shrink-0 items-center px-4 justify-between">
-          {!collapsed && <img src={tecnaritLogo} alt="TECNARIT" className="h-12" />}
-          {collapsed && <div className="gradient-text text-2xl font-bold">T</div>}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 rounded-full text-primary hover:text-primary/80"
-            onClick={toggleSidebar}
-          >
-            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-          </Button>
+      {/* Logo Container */}
+      <div className="flex flex-shrink-0 items-center px-4 py-3 justify-between border-b border-border">
+        {!collapsed ? (
+          <div className="flex-1 flex justify-center">
+            <img src={tecnaritLogo} alt="TECNARIT" className="h-12 w-auto object-contain" />
+          </div>
+        ) : (
+          <div className="flex-1 flex justify-center">
+            <div className="gradient-text text-2xl font-bold">T</div>
+          </div>
+        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0 rounded-full text-primary hover:text-primary/80 ml-2"
+          onClick={toggleSidebar}
+        >
+          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+        </Button>
+      </div>
+      
+      {/* User Profile Section - Now at the top */}
+      <div className="flex flex-shrink-0 border-b border-border p-4">
+        <div className={`flex items-center ${collapsed ? 'justify-center' : 'w-full'}`}>
+          <Avatar className="h-10 w-10 border-2 border-primary">
+            <AvatarImage src="" alt={user?.username} />
+            <AvatarFallback className="gradient-bg text-white">{user?.username?.charAt(0).toUpperCase()}</AvatarFallback>
+          </Avatar>
+          {!collapsed && (
+            <div className="ml-3 flex-grow">
+              <p className="text-sm font-medium gradient-text">{user?.username}</p>
+              <Button
+                variant="link"
+                className="px-0 h-auto text-xs font-medium text-primary hover:text-primary/80"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-3 w-3 mr-1" /> Uitloggen
+              </Button>
+            </div>
+          )}
         </div>
-        <nav className="mt-5 flex-1 space-y-1 px-2">
+      </div>
+      
+      {/* Navigation Section */}
+      <div className="flex flex-1 flex-col overflow-y-auto pt-2 pb-4">
+        <nav className="flex-1 space-y-1 px-2">
           {navItems.map((item) => (
             <Link 
               key={item.path} 
@@ -83,26 +123,6 @@ export default function Sidebar({ onClose }: SidebarProps) {
             </Link>
           ))}
         </nav>
-      </div>
-      <div className="flex flex-shrink-0 border-t border-border p-4">
-        <div className={`flex items-center ${collapsed ? 'justify-center' : 'w-full'}`}>
-          <Avatar className="h-10 w-10 border-2 border-primary">
-            <AvatarImage src="" alt={user?.username} />
-            <AvatarFallback className="gradient-bg text-white">{user?.username?.charAt(0).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          {!collapsed && (
-            <div className="ml-3 flex-grow">
-              <p className="text-sm font-medium gradient-text">{user?.username}</p>
-              <Button
-                variant="link"
-                className="px-0 h-auto text-xs font-medium text-primary hover:text-primary/80"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-3 w-3 mr-1" /> Uitloggen
-              </Button>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

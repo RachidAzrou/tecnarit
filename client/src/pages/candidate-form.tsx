@@ -244,14 +244,14 @@ export default function CandidateForm() {
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
               <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-semibold text-primary-900">
-                  {isEditMode ? "Edit Candidate" : "Add New Candidate"}
+                  {isEditMode ? "Kandidaat Bewerken" : "Kandidaat Toevoegen"}
                 </h1>
                 <Button
                   variant="outline"
                   onClick={() => setLocation("/")}
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to List
+                  Terug naar Lijst
                 </Button>
               </div>
             </div>
@@ -295,7 +295,7 @@ export default function CandidateForm() {
                                     <Button variant="outline" type="button" className="cursor-pointer">
                                       Wijzigen
                                     </Button>
-                                    <Input
+                                    <input
                                       id="profile-upload"
                                       type="file"
                                       className="sr-only"
