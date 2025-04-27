@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { Loader2, Plus, Search } from "lucide-react";
+import { Loader2, Plus, Search, Download, FileSpreadsheet, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -10,17 +10,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import CandidateTable from "@/components/candidate/candidate-table";
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
 import { Candidate } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CandidateList() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [status, setStatus] = useState("");
   const [sortOrder, setSortOrder] = useState("name_asc");
+  const { toast } = useToast();
 
   const { data: candidates, isLoading, error } = useQuery<Candidate[]>({
     queryKey: ["/api/candidates"],
@@ -28,6 +36,78 @@ export default function CandidateList() {
 
   const handleAddCandidate = () => {
     setLocation("/candidates/new");
+  };
+  
+  // Functie voor het exporteren van kandidaten naar CSV
+  const exportToCSV = (candidates: Candidate[]) => {
+    // Headers voor de CSV
+    const headers = [
+      "Voornaam", 
+      "Achternaam", 
+      "E-mail", 
+      "Telefoon", 
+      "LinkedIn",
+      "Jaren Ervaring",
+      "Status", 
+      "Onbeschikbaar Tot", 
+      "Klant",
+      "Notities"
+    ];
+    
+    // Format DateTime to string
+    const formatDate = (date: Date | null) => {
+      if (!date) return "";
+      const d = new Date(date);
+      return d.toLocaleDateString('nl-NL');
+    };
+    
+    // Converteren van kandidaten naar rijen
+    const rows = candidates.map(candidate => [
+      candidate.firstName,
+      candidate.lastName,
+      candidate.email,
+      candidate.phone || "",
+      candidate.linkedinProfile || "",
+      candidate.yearsOfExperience ? candidate.yearsOfExperience.toString() : "",
+      candidate.status,
+      formatDate(candidate.unavailableUntil),
+      candidate.client || "",
+      candidate.notes || ""
+    ]);
+    
+    // Combineren van headers en rijen
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(","))
+    ].join("\n");
+    
+    // Creëer een Blob van de CSV data
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    
+    // Creëer een download link
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `tecnarit-kandidaten-${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.display = "none";
+    document.body.appendChild(link);
+    
+    // Klik op de link om het bestand te downloaden
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Export succesvol",
+      description: `${candidates.length} kandidaten geëxporteerd naar CSV`,
+    });
+  };
+  
+  // Export naar PDF
+  const exportToPDF = () => {
+    toast({
+      title: "PDF Export",
+      description: "PDF export-functionaliteit komt binnenkort beschikbaar.",
+    });
   };
 
   const filterCandidates = (candidates: Candidate[]) => {
@@ -87,13 +167,35 @@ export default function CandidateList() {
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
               <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-semibold gradient-text">Kandidaten</h1>
-                <Button 
-                  onClick={handleAddCandidate}
-                  className="gradient-bg hover:opacity-90 transition-opacity"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Kandidaat Toevoegen
-                </Button>
+                <div className="flex space-x-2">
+                  {filteredCandidates.length > 0 && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="border-primary/30">
+                          <Download className="h-4 w-4 mr-2" />
+                          Exporteer
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => exportToCSV(filteredCandidates)}>
+                          <FileSpreadsheet className="h-4 w-4 mr-2" />
+                          <span>Exporteer naar CSV</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={exportToPDF}>
+                          <FileText className="h-4 w-4 mr-2" />
+                          <span>Exporteer naar PDF</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                  <Button 
+                    onClick={handleAddCandidate}
+                    className="gradient-bg hover:opacity-90 transition-opacity"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Kandidaat Toevoegen
+                  </Button>
+                </div>
               </div>
             </div>
 
