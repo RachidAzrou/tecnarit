@@ -81,13 +81,12 @@ export default function AuthPage() {
       <div className="z-10 w-full max-w-sm">
         <Card className="w-full border-0 bg-white rounded-lg shadow-2xl">
           <CardContent className="p-6">
-            <div className="flex justify-center mb-6">
-              <img src={logoWithBg} alt="TECNARIT" className="h-16 w-24 object-contain" />
+            <div className="flex justify-center mb-8">
+              <img src={logoWithBg} alt="TECNARIT" className="h-28 w-48 object-contain" />
             </div>
             
             <div className="text-center mb-6">
-              <h1 className="text-xl font-bold text-[#233142]">TECNARIT - EMS</h1>
-              <p className="text-sm text-gray-600 mt-1">Employee Management System</p>
+              <h1 className="text-xl font-bold text-[#233142]">Employee Management System</h1>
             </div>
             
             <Form {...loginForm}>
