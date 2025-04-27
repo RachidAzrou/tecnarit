@@ -32,7 +32,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Candidate, insertCandidateSchema } from "@shared/schema";
+import { FirebaseCandidate, insertCandidateSchema } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
@@ -74,11 +74,11 @@ export default function CandidateForm() {
     data: candidate,
     isLoading: isCandidateLoading,
     error: candidateError,
-  } = useQuery<Candidate>({
+  } = useQuery<FirebaseCandidate>({
     queryKey: [`candidates/${id}`],
     queryFn: async () => {
       if (!id) throw new Error("No candidate ID provided");
-      return await getCandidate(parseInt(id));
+      return await getCandidate(id);
     },
     enabled: isEditMode,
   });
@@ -131,7 +131,7 @@ export default function CandidateForm() {
       // Gebruik Firebase in plaats van de API
       return await createCandidate(formData);
     },
-    onSuccess: async (data: Candidate) => {
+    onSuccess: async (data: FirebaseCandidate) => {
       // Upload profiel foto als die is geselecteerd
       if (profileImageFile) {
         await firebaseUploadProfileImage(data.id, profileImageFile);
@@ -162,9 +162,9 @@ export default function CandidateForm() {
     mutationFn: async (formData: FormValues) => {
       if (!id) throw new Error("Geen kandidaat ID opgegeven");
       // Gebruik Firebase in plaats van de API
-      return await updateCandidate(parseInt(id), formData);
+      return await updateCandidate(id, formData);
     },
-    onSuccess: async (data: Candidate) => {
+    onSuccess: async (data: FirebaseCandidate) => {
       // Upload profiel foto als die is geselecteerd
       if (profileImageFile) {
         await firebaseUploadProfileImage(data.id, profileImageFile);
