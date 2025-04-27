@@ -1,18 +1,12 @@
-import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Home,
   Users,
-  BarChart3,
-  DownloadCloud,
   LogOut,
-  ChevronLeft,
-  ChevronRight,
   Search
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import tecnaritLogo from "@assets/Color logo with background.png";
 
 interface SidebarProps {
@@ -22,14 +16,9 @@ interface SidebarProps {
 export default function Sidebar({ onClose }: SidebarProps) {
   const { user, logoutMutation } = useAuth();
   const [location] = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
-
+  
   const handleLogout = () => {
     logoutMutation.mutate();
-  };
-
-  const toggleSidebar = () => {
-    setCollapsed(!collapsed);
   };
 
   const isActive = (id: string) => {
@@ -62,24 +51,18 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
   return (
     <>
-      {/* Volledig inklapbare sidebar */}
-      <div className={`fixed top-0 bottom-0 left-0 z-40 flex min-h-0 flex-1 flex-col border-r border-border bg-card transition-all duration-300 ${collapsed ? 'w-[70px]' : 'w-64'}`}>
+      {/* Permanente sidebar */}
+      <div className="fixed top-0 bottom-0 left-0 z-40 flex min-h-0 flex-1 flex-col border-r border-border bg-card w-64">
         {/* Logo Container - Volledig gevuld */}
         <div className="flex flex-shrink-0 border-b border-border h-16 overflow-hidden p-0 bg-white">
-          {!collapsed ? (
-            <div className="w-full h-full p-0 m-0">
-              <img src={tecnaritLogo} alt="TECNARIT" className="h-full w-full object-contain" />
-            </div>
-          ) : (
-            <div className="flex-1 flex justify-center items-center h-full">
-              <img src={tecnaritLogo} alt="TECNARIT" className="h-10 w-10 object-contain" />
-            </div>
-          )}
+          <div className="w-full h-full p-0 m-0">
+            <img src={tecnaritLogo} alt="TECNARIT" className="h-full w-full object-contain" />
+          </div>
         </div>
         
         {/* User Profile Section - Now at the top */}
         <div className="flex flex-shrink-0 border-b border-border p-4">
-          <div className={`flex items-center ${collapsed ? 'justify-center' : 'w-full'}`}>
+          <div className="flex items-center w-full">
             <Avatar className="h-10 w-10 border-2 border-primary">
               <AvatarImage src="" alt={user?.username} />
               <AvatarFallback className="gradient-bg text-white">
@@ -89,11 +72,9 @@ export default function Sidebar({ onClose }: SidebarProps) {
                 </svg>
               </AvatarFallback>
             </Avatar>
-            {!collapsed && (
-              <div className="ml-3 flex-grow">
-                <p className="text-sm font-medium gradient-text">{user?.username}</p>
-              </div>
-            )}
+            <div className="ml-3 flex-grow">
+              <p className="text-sm font-medium gradient-text">{user?.username}</p>
+            </div>
           </div>
         </div>
         
@@ -101,7 +82,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
         <div className="flex flex-1 flex-col overflow-y-auto pt-2 pb-4">
           <nav className="flex-1 space-y-1 px-2">
             {navItems.map((item) => (
-                  <div 
+              <div 
                 key={item.id} 
                 onClick={() => {
                   window.location.href = item.path;
@@ -116,7 +97,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
                 <span className={isActive(item.id) ? "text-white" : "text-primary"}>
                   {item.icon}
                 </span>
-                {!collapsed && <span className="ml-2">{item.label}</span>}
+                <span className="ml-2">{item.label}</span>
               </div>
             ))}
           </nav>
@@ -130,26 +111,14 @@ export default function Sidebar({ onClose }: SidebarProps) {
               <span className="text-primary">
                 <LogOut className="h-5 w-5" />
               </span>
-              {!collapsed && <span className="ml-2">Uitloggen</span>}
+              <span className="ml-2">Uitloggen</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Toggle knop - altijd zichtbaar */}
-      <div className={`fixed top-4 z-50 transition-all duration-300 ${collapsed ? 'left-[15px]' : 'left-[254px]'}`}>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 rounded-full bg-white shadow-md text-primary hover:text-primary/80"
-          onClick={toggleSidebar}
-        >
-          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        </Button>
-      </div>
-
-      {/* Lege container om ruimte te behouden voor de inhoud als sidebar open is */}
-      <div className={`hidden lg:block transition-all duration-300 ${collapsed ? 'w-[70px]' : 'w-64'}`}></div>
+      {/* Lege container om ruimte te behouden voor de inhoud */}
+      <div className="hidden lg:block w-64"></div>
     </>
   );
 }

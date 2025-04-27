@@ -328,8 +328,8 @@ export default function CandidateForm() {
           </div>
         </div>
 
-        {/* Form Container - centering with responsive width */}
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+        {/* Form Container - full width with margin away from sidebar */}
+        <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6 md:px-8">
           <div className="glass-effect rounded-lg overflow-hidden">
             {isEditMode && isCandidateLoading ? (
               <div className="flex justify-center items-center h-64">
