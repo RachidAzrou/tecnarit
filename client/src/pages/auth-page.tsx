@@ -76,35 +76,60 @@ export default function AuthPage() {
         backgroundPosition: 'center'
       }}
     >
-      <div className="absolute inset-0 bg-black/40"></div>
+      {/* Gradient overlay for better contrast */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-black/30"></div>
       
       <div className="z-10 w-full max-w-md">
-        <Card className="w-full border-0 bg-white rounded-lg shadow-2xl">
-          <CardContent className="p-8">
+        {/* White container with subtle border and shadow */}
+        <Card className="w-full border-0 bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl overflow-hidden">
+          {/* Top accent border with gradient */}
+          <div className="h-2 bg-gradient-to-r from-[#233142] to-[#455d7a]"></div>
+          
+          <CardContent className="p-10">
+            {/* Logo with shadow for depth */}
             <div className="flex justify-center mb-8">
-              <img src={logoWithBg} alt="TECNARIT" className="h-40 w-72 object-contain" />
+              <div className="relative">
+                <img 
+                  src={logoWithBg} 
+                  alt="TECNARIT" 
+                  className="h-44 w-80 object-contain drop-shadow-lg" 
+                />
+                <div className="absolute -inset-0.5 bg-white/10 rounded-full blur-xl -z-10"></div>
+              </div>
             </div>
             
-            <div className="text-center mb-6">
-              <h1 className="text-xl font-bold text-[#233142]">Employee Management System</h1>
+            {/* Title with more emphasis */}
+            <div className="text-center mb-8">
+              <h1 className="text-2xl font-bold text-[#233142]">
+                Employee Management System
+              </h1>
+              <div className="mt-2 w-20 h-1 bg-gradient-to-r from-[#83b74b] to-[#95d75e] mx-auto rounded-full"></div>
             </div>
             
             <Form {...loginForm}>
-              <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+              <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-5">
                 <FormField
                   control={loginForm.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">E-mailadres</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          type="email" 
-                          className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#233142]"
-                          placeholder="admin@tecnarit.com"
-                        />
-                      </FormControl>
+                      <FormLabel className="text-gray-700 font-medium">E-mailadres</FormLabel>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M22 5L11 13 2 5" />
+                            <path d="M2 5H22V19H2z" />
+                          </svg>
+                        </div>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            type="email" 
+                            className="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#233142]/25 focus:border-[#233142]"
+                            placeholder="admin@tecnarit.com"
+                          />
+                        </FormControl>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -115,21 +140,29 @@ export default function AuthPage() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Wachtwoord</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="password" 
-                          {...field} 
-                          className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#233142]"
-                          placeholder="admin123"
-                        />
-                      </FormControl>
+                      <FormLabel className="text-gray-700 font-medium">Wachtwoord</FormLabel>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                          </svg>
+                        </div>
+                        <FormControl>
+                          <Input 
+                            type="password" 
+                            {...field} 
+                            className="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#233142]/25 focus:border-[#233142]"
+                            placeholder="admin123"
+                          />
+                        </FormControl>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mt-2">
                   <FormField
                     control={loginForm.control}
                     name="rememberMe"
@@ -139,7 +172,7 @@ export default function AuthPage() {
                           <Checkbox
                             checked={field.value}
                             onCheckedChange={field.onChange}
-                            className="text-[#233142] focus:ring-1 focus:ring-[#233142] rounded"
+                            className="text-[#233142] focus:ring-1 focus:ring-[#233142] rounded-sm h-4 w-4"
                           />
                         </FormControl>
                         <FormLabel className="text-sm text-gray-600 font-normal">Onthoud mij</FormLabel>
@@ -150,10 +183,18 @@ export default function AuthPage() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-[#233142] hover:bg-[#192331] py-2 text-white rounded font-medium transition-colors"
+                  className="w-full mt-2 bg-gradient-to-r from-[#233142] to-[#455d7a] hover:from-[#1d2a39] hover:to-[#3a4d65] py-3 text-white rounded-lg font-medium transition-all shadow-lg hover:shadow-xl"
                   disabled={loginMutation.isPending}
                 >
-                  {loginMutation.isPending ? "Bezig met inloggen..." : "Inloggen"}
+                  {loginMutation.isPending ? (
+                    <div className="flex items-center justify-center">
+                      <svg className="animate-spin mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Bezig met inloggen...
+                    </div>
+                  ) : "Inloggen"}
                 </Button>
               </form>
             </Form>
