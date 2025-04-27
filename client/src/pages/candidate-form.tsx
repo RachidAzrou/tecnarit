@@ -422,7 +422,7 @@ export default function CandidateForm() {
                               <FormItem>
                                 <FormLabel>Telefoonnummer</FormLabel>
                                 <FormControl>
-                                  <Input type="tel" {...field} />
+                                  <Input type="tel" {...field} value={field.value || ''} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>

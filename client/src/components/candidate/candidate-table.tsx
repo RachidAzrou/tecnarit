@@ -67,12 +67,12 @@ export default function CandidateTable({ candidates }: CandidateTableProps) {
         <Table>
           <TableHeader className="bg-primary-50">
             <TableRow>
-              <TableHead className="w-[300px]">Name</TableHead>
-              <TableHead>Years Exp.</TableHead>
+              <TableHead className="w-[300px]">Naam</TableHead>
+              <TableHead>Jaren Erv.</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>LinkedIn</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-right">Acties</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -102,10 +102,10 @@ export default function CandidateTable({ candidates }: CandidateTableProps) {
                       rel="noopener noreferrer"
                       className="text-primary hover:underline"
                     >
-                      View Profile
+                      Bekijk Profiel
                     </a>
                   ) : (
-                    <span className="text-gray-400">Not provided</span>
+                    <span className="text-gray-400">Niet opgegeven</span>
                   )}
                 </TableCell>
                 <TableCell>
@@ -150,14 +150,14 @@ export default function CandidateTable({ candidates }: CandidateTableProps) {
       {/* Pagination - Simplified for this implementation */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-primary-700">
-          Showing <span className="font-medium">1</span> to <span className="font-medium">{candidates.length}</span> of <span className="font-medium">{candidates.length}</span> results
+          Toont <span className="font-medium">1</span> tot <span className="font-medium">{candidates.length}</span> van <span className="font-medium">{candidates.length}</span> resultaten
         </div>
         <div className="flex space-x-2">
           <Button variant="outline" disabled>
-            Previous
+            Vorige
           </Button>
           <Button variant="outline" disabled>
-            Next
+            Volgende
           </Button>
         </div>
       </div>
