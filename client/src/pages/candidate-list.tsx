@@ -465,7 +465,7 @@ export default function CandidateList() {
                           {isLoadingState ? (
                             <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
                           ) : (
-                            candidates?.filter(c => c.status === "in_dienst").length || 0
+                            candidatesToUse?.filter(c => c.status === "in_dienst").length || 0
                           )}
                         </p>
                       </CardContent>
@@ -481,9 +481,9 @@ export default function CandidateList() {
                     <div className="flex justify-center items-center h-48 sm:h-64 glass-effect rounded-lg">
                       <Loader2 className="h-8 w-8 animate-spin gradient-text" />
                     </div>
-                  ) : candidates?.length ? (
+                  ) : candidatesToUse?.length ? (
                     <div className="glass-effect rounded-lg overflow-hidden">
-                      <CandidateTable candidates={candidates.slice(0, 5)} />
+                      <CandidateTable candidates={candidatesToUse.slice(0, 5)} />
                     </div>
                   ) : (
                     <div className="text-center py-8 px-4 border-2 border-dashed border-primary/30 rounded-lg glass-effect">
