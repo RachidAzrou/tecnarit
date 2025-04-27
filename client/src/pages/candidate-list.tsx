@@ -271,7 +271,7 @@ export default function CandidateList() {
                 {showDashboard ? (
                   // Dashboard weergave
                   <div className="mb-8">
-                    <h2 className="text-xl font-medium mb-4">Dashboard</h2>
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       {/* Totaal aantal kandidaten */}
                       <Card className="bg-white shadow-sm">
