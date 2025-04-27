@@ -64,14 +64,14 @@ export default function Sidebar({ onClose }: SidebarProps) {
     <>
       {/* Volledig inklapbare sidebar */}
       <div className={`fixed top-0 bottom-0 left-0 z-40 flex min-h-0 flex-1 flex-col border-r border-border bg-card transition-all duration-300 ${collapsed ? 'w-[70px] translate-x-[-70px]' : 'w-64'}`}>
-        {/* Logo Container */}
-        <div className="flex flex-shrink-0 items-center px-0 py-2 justify-center border-b border-border h-16">
+        {/* Logo Container - Volledig gevuld */}
+        <div className="flex flex-shrink-0 border-b border-border h-16 overflow-hidden p-0 bg-white">
           {!collapsed ? (
-            <div className="w-full flex justify-center bg-white">
-              <img src={tecnaritLogo} alt="TECNARIT" className="h-full w-full object-contain px-2" />
+            <div className="w-full h-full p-0 m-0">
+              <img src={tecnaritLogo} alt="TECNARIT" className="h-full w-full object-cover" />
             </div>
           ) : (
-            <div className="flex-1 flex justify-center">
+            <div className="flex-1 flex justify-center items-center h-full">
               <div className="gradient-text text-2xl font-bold">T</div>
             </div>
           )}
