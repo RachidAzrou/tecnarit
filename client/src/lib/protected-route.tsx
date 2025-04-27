@@ -1,6 +1,9 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { Redirect, Route, useLocation } from "wouter";
+import MobileHeader from "@/components/layout/mobile-header";
+import MobileNavbar from "@/components/layout/mobile-navbar";
+import Sidebar from "@/components/layout/sidebar";
 
 export function ProtectedRoute({
   path,
@@ -30,5 +33,25 @@ export function ProtectedRoute({
     );
   }
 
-  return <Route path={path} component={Component} />;
+  return (
+    <Route path={path}>
+      <div className="flex h-screen">
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:block">
+          <Sidebar />
+        </div>
+        
+        {/* Mobile header */}
+        <MobileHeader />
+        
+        {/* Main content */}
+        <div className="flex-1 overflow-auto pb-20 lg:pb-4">
+          <Component />
+        </div>
+        
+        {/* Mobile navbar at bottom */}
+        <MobileNavbar />
+      </div>
+    </Route>
+  );
 }
