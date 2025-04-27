@@ -61,71 +61,63 @@ export default function EmployeeForm() {
       lastName: "",
       email: "",
       phone: "",
-      position: "",
-      department: "",
-      startDate: new Date().toISOString().substring(0, 10),
+      linkedinProfile: "",
+      yearsOfExperience: null,
       status: "active",
-      address: "",
-      city: "",
-      state: "",
-      zip: "",
       notes: "",
+      profileImage: null,
     },
   });
 
-  // Update form values when employee data is loaded
+  // Update form values when candidate data is loaded
   useEffect(() => {
-    if (employee) {
-      // Populate form with employee data
+    if (candidate) {
+      // Populate form with candidate data
       form.reset({
-        firstName: employee.firstName,
-        lastName: employee.lastName,
-        email: employee.email,
-        phone: employee.phone || "",
-        position: employee.position,
-        department: employee.department,
-        startDate: employee.startDate,
-        status: employee.status,
-        address: employee.address || "",
-        city: employee.city || "",
-        state: employee.state || "",
-        zip: employee.zip || "",
-        notes: employee.notes || "",
+        firstName: candidate.firstName,
+        lastName: candidate.lastName,
+        email: candidate.email,
+        phone: candidate.phone || "",
+        linkedinProfile: candidate.linkedinProfile || "",
+        yearsOfExperience: candidate.yearsOfExperience || null,
+        status: candidate.status,
+        notes: candidate.notes || "",
+        profileImage: candidate.profileImage || null,
       });
 
       // Set profile image preview if available
-      if (employee.profileImage) {
-        setProfileImagePreview(`/${employee.profileImage}`);
+      if (candidate.profileImage) {
+        setProfileImagePreview(`/${candidate.profileImage}`);
       }
     }
-  }, [employee, form]);
+  }, [candidate, form]);
 
   const createMutation = useMutation({
     mutationFn: async (data: z.infer<typeof candidateFormSchema>) => {
       const res = await apiRequest("POST", "/api/candidates", data);
       return await res.json();
     },
-    onSuccess: async (newEmployee) => {
+    onSuccess: async (newCandidate) => {
       // Upload profile image if selected
       if (profileImageFile) {
-        await uploadProfileImage(newEmployee.id, profileImageFile);
+        await uploadProfileImage(newCandidate.id, profileImageFile);
       }
       
       // Upload resume if selected
       if (resumeFile) {
-        await uploadResume(newEmployee.id, resumeFile);
+        await uploadResume(newCandidate.id, resumeFile);
       }
       
-      queryClient.invalidateQueries({ queryKey: ["/api/employees"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/candidates"] });
       toast({
-        title: "Employee created",
-        description: "New employee has been successfully created.",
+        title: "Candidate created",
+        description: "New candidate has been successfully created.",
       });
       setLocation("/");
     },
     onError: (error) => {
       toast({
-        title: "Failed to create employee",
+        title: "Failed to create candidate",
         description: error.message,
         variant: "destructive",
       });
@@ -137,40 +129,40 @@ export default function EmployeeForm() {
       const res = await apiRequest("PATCH", `/api/candidates/${data.id}`, data.formData);
       return await res.json();
     },
-    onSuccess: async (updatedEmployee) => {
+    onSuccess: async (updatedCandidate) => {
       // Upload profile image if selected
       if (profileImageFile) {
-        await uploadProfileImage(updatedEmployee.id, profileImageFile);
+        await uploadProfileImage(updatedCandidate.id, profileImageFile);
       }
       
       // Upload resume if selected
       if (resumeFile) {
-        await uploadResume(updatedEmployee.id, resumeFile);
+        await uploadResume(updatedCandidate.id, resumeFile);
       }
       
-      queryClient.invalidateQueries({ queryKey: ["/api/employees"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/employees/${params.id}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/candidates"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/candidates/${params.id}`] });
       toast({
-        title: "Employee updated",
-        description: "Employee has been successfully updated.",
+        title: "Candidate updated",
+        description: "Candidate has been successfully updated.",
       });
       setLocation("/");
     },
     onError: (error) => {
       toast({
-        title: "Failed to update employee",
+        title: "Failed to update candidate",
         description: error.message,
         variant: "destructive",
       });
     },
   });
 
-  const uploadProfileImage = async (employeeId: number, file: File) => {
+  const uploadProfileImage = async (candidateId: number, file: File) => {
     const formData = new FormData();
     formData.append("profileImage", file);
     
     try {
-      await fetch(`/api/employees/${employeeId}/profile-image`, {
+      await fetch(`/api/candidates/${candidateId}/profile-image`, {
         method: "POST",
         body: formData,
         credentials: "include",
@@ -185,12 +177,12 @@ export default function EmployeeForm() {
     }
   };
 
-  const uploadResume = async (employeeId: number, file: File) => {
+  const uploadResume = async (candidateId: number, file: File) => {
     const formData = new FormData();
     formData.append("document", file);
     
     try {
-      await fetch(`/api/employees/${employeeId}/documents`, {
+      await fetch(`/api/candidates/${candidateId}/documents`, {
         method: "POST",
         body: formData,
         credentials: "include",
@@ -206,8 +198,8 @@ export default function EmployeeForm() {
   };
 
   const onSubmit = (data: z.infer<typeof candidateFormSchema>) => {
-    if (isEditMode && employee) {
-      updateMutation.mutate({ id: employee.id, formData: data });
+    if (isEditMode && candidate) {
+      updateMutation.mutate({ id: candidate.id, formData: data });
     } else {
       createMutation.mutate(data);
     }
@@ -248,7 +240,7 @@ export default function EmployeeForm() {
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
               <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-semibold text-primary-900">
-                  {isEditMode ? "Edit Employee" : "Add New Employee"}
+                  {isEditMode ? "Edit Candidate" : "Add New Candidate"}
                 </h1>
                 <Button
                   variant="outline"
@@ -262,13 +254,13 @@ export default function EmployeeForm() {
 
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
               <div className="py-4">
-                {isEditMode && isEmployeeLoading ? (
+                {isEditMode && isCandidateLoading ? (
                   <div className="flex justify-center items-center h-64">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
-                ) : isEditMode && employeeError ? (
+                ) : isEditMode && candidateError ? (
                   <div className="text-center text-red-500 p-4">
-                    Error loading employee data. Please try again.
+                    Error loading candidate data. Please try again.
                   </div>
                 ) : (
                   <Form {...form}>
