@@ -318,12 +318,12 @@ export default function CandidateForm() {
     <>
       <div className="flex flex-col flex-1 py-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-center mb-6">
+          <div className="flex flex-col mb-6">
             <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <h1 className="text-2xl sm:text-3xl tecnarit-blue-text font-bold">
-                  {isEditMode ? "Kandidaat Bewerken" : "Kandidaat Toevoegen"}
-                </h1>
+              <h1 className="text-2xl sm:text-3xl tecnarit-blue-text font-bold text-center">
+                {isEditMode ? "Kandidaat Bewerken" : "Kandidaat Toevoegen"}
+              </h1>
+              <div className="flex justify-center mt-4">
                 <Button
                   onClick={() => setLocation("/")}
                   className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
@@ -337,7 +337,7 @@ export default function CandidateForm() {
         </div>
 
         {/* Form Container - centering with responsive width */}
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 md:px-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
           <div className="glass-effect rounded-lg overflow-hidden">
             {isEditMode && isCandidateLoading ? (
               <div className="flex justify-center items-center h-64">
