@@ -67,17 +67,21 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#f5f5f5] p-4">
-      <div className="text-center mb-6">
-        <img src={logoWithBg} alt="TECNARIT" className="h-16 mx-auto mb-2" />
-        <h1 className="text-2xl font-bold text-[#233142]">TECNARIT - EMS</h1>
-        <p className="text-sm text-gray-600 mb-6">Log in op het Employee Management System</p>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-[#f5f5f5] p-4">
+      <div className="w-full max-w-md mb-8">
+        <div className="flex items-center justify-center">
+          <div className="bg-[#233142] p-4 rounded-full shadow-lg">
+            <img src={logoWithBg} alt="TECNARIT" className="h-20 w-20 object-contain" />
+          </div>
+        </div>
+        <h1 className="text-2xl font-bold text-center text-[#233142] mt-4">TECNARIT - EMS</h1>
       </div>
       
-      <Card className="w-full max-w-md border shadow-md">
-        <CardContent className="pt-6 p-6">
+      <Card className="w-full max-w-md border-0 shadow-lg overflow-hidden">
+        <div className="h-1.5 bg-[#233142]"></div>
+        <CardContent className="pt-6 p-8">
           <Form {...loginForm}>
-            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-5">
               <FormField
                 control={loginForm.control}
                 name="email"
@@ -88,7 +92,7 @@ export default function AuthPage() {
                       <Input 
                         {...field} 
                         type="email" 
-                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#233142]"
+                        className="w-full p-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#233142] focus:border-[#233142]"
                         placeholder="admin@tecnarit.com"
                       />
                     </FormControl>
@@ -107,7 +111,7 @@ export default function AuthPage() {
                       <Input 
                         type="password" 
                         {...field} 
-                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#233142]"
+                        className="w-full p-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#233142] focus:border-[#233142]"
                         placeholder="admin123"
                       />
                     </FormControl>
@@ -135,20 +139,18 @@ export default function AuthPage() {
 
               <Button
                 type="submit"
-                className="w-full bg-[#233142] hover:bg-[#1a2430] py-2 text-white rounded-md mt-2"
+                className="w-full bg-[#233142] hover:bg-[#1a2430] py-2.5 text-white rounded-md mt-2 font-medium transition-colors"
                 disabled={loginMutation.isPending}
               >
                 {loginMutation.isPending ? "Bezig met inloggen..." : "Inloggen"}
               </Button>
               
               <div className="text-xs text-center text-gray-500 mt-4 p-3 bg-gray-100 rounded-md">
-                <p>
-                  Gebruik de volgende demo inloggegevens:
-                  <br />
-                  E-mail: <span className="font-semibold">admin@tecnarit.com</span>
-                  <br />
-                  Wachtwoord: <span className="font-semibold">admin123</span>
-                </p>
+                Gebruik de volgende demo inloggegevens:
+                <br />
+                E-mail: <span className="font-semibold">admin@tecnarit.com</span>
+                <br />
+                Wachtwoord: <span className="font-semibold">admin123</span>
               </div>
             </form>
           </Form>
