@@ -388,8 +388,8 @@ export default function CandidateList() {
                       <circle cx="11" cy="11" r="8"></circle>
                       <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                    <h3 className="mt-4 text-lg font-medium text-primary/80">Geen kandidaten gevonden</h3>
-                    <p className="mt-2 text-primary/70 max-w-md mx-auto">
+                    <h3 className="mt-4 text-lg font-medium tecnarit-blue-text">Geen kandidaten gevonden</h3>
+                    <p className="mt-2 tecnarit-blue-text/70 max-w-md mx-auto">
                       Voeg je eerste kandidaat toe om te beginnen.
                     </p>
                     <Button 
@@ -405,8 +405,8 @@ export default function CandidateList() {
                       <circle cx="11" cy="11" r="8"></circle>
                       <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                    <h3 className="mt-4 text-lg font-medium text-primary-800">Geen kandidaten gevonden</h3>
-                    <p className="mt-2 text-primary/70 max-w-md mx-auto">
+                    <h3 className="mt-4 text-lg font-medium tecnarit-blue-text">Geen kandidaten gevonden</h3>
+                    <p className="mt-2 tecnarit-blue-text/70 max-w-md mx-auto">
                       {searchQuery || (status && status !== "all") 
                         ? "Pas je zoekcriteria aan of verwijder filters om meer resultaten te zien." 
                         : "Voeg je eerste kandidaat toe om te beginnen."}
