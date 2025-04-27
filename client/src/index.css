@@ -71,11 +71,11 @@
   }
 
   .tecnarit-blue-bg {
-    @apply bg-[#00417A] hover:bg-[#003365] text-white;
+    @apply bg-[#233142] hover:bg-[#1A2430] text-white;
   }
   
   .tecnarit-blue-text {
-    @apply text-[#00417A] font-semibold;
+    @apply text-[#233142] font-semibold;
   }
   
   .tecnarit-card {
