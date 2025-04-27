@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Sidebar from "@/components/layout/sidebar";
-// Verwijderd: import MobileHeader
+import { PageTitle } from "@/components/layout/page-title";
 import { Employee, EmployeeFile } from "@shared/schema";
 
 export default function EmployeeDetail() {
@@ -103,19 +103,25 @@ export default function EmployeeDetail() {
         <div className="flex-1 relative z-0 overflow-y-auto focus:outline-none">
           <div className="py-6">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-              <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-semibold text-primary-900 lg:block hidden">Employee Details</h1>
+              <PageTitle title="Medewerker Details" />
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  {/* Linker deel leeg gelaten */}
+                </div>
                 <div className="flex space-x-3">
                   <Button
-                    variant="outline"
                     onClick={handleBackToList}
+                    className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to List
+                    Dashboard
                   </Button>
-                  <Button onClick={handleEdit}>
+                  <Button 
+                    onClick={handleEdit}
+                    className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
+                  >
                     <PencilIcon className="h-4 w-4 mr-2" />
-                    Edit
+                    Bewerken
                   </Button>
                 </div>
               </div>
