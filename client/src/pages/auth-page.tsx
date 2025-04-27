@@ -16,10 +16,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { insertUserSchema } from "@shared/schema";
 import tecnaritLogo from "../assets/tecnarit-logo.png";
 
-const loginSchema = insertUserSchema.extend({
+// Create Firebase login schema
+const loginSchema = z.object({
+  email: z.string().email({ message: "Voer een geldig e-mailadres in" }),
+  password: z.string().min(6, { message: "Wachtwoord moet minstens 6 tekens bevatten" }),
   rememberMe: z.boolean().optional(),
 });
 
@@ -34,29 +36,23 @@ export default function AuthPage() {
     }
   }, [user, setLocation]);
 
-  // Create test user if none exists
+  // Demo login credentials message
   useEffect(() => {
-    // In a real app, this would be handled through proper user management
-    const createTestUser = async () => {
-      // This is just for demo purposes - in a real app, you would verify the user exists
-      console.log("Test user credentials available: username: admin, password: admin123");
-    };
-    
-    createTestUser();
+    console.log("Test user credentials available: email: admin@tecnarit.com, password: admin123");
   }, []);
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
       rememberMe: false,
     },
   });
 
   const onLoginSubmit = (values: z.infer<typeof loginSchema>) => {
-    const { username, password } = values;
-    loginMutation.mutate({ username, password });
+    const { email, password } = values;
+    loginMutation.mutate({ email, password });
   };
 
   return (
@@ -82,12 +78,12 @@ export default function AuthPage() {
                 <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-6">
                   <FormField
                     control={loginForm.control}
-                    name="username"
+                    name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Gebruikersnaam</FormLabel>
+                        <FormLabel>E-mailadres</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} type="email" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -135,7 +131,7 @@ export default function AuthPage() {
                   </Button>
                   
                   <div className="text-xs text-center text-muted-foreground mt-4">
-                    <p>Demo Inloggegevens: gebruikersnaam: <span className="font-bold">admin</span>, wachtwoord: <span className="font-bold">admin123</span></p>
+                    <p>Demo Inloggegevens: e-mail: <span className="font-bold">admin@tecnarit.com</span>, wachtwoord: <span className="font-bold">admin123</span></p>
                   </div>
                 </form>
               </Form>

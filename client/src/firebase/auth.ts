@@ -5,9 +5,31 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   onAuthStateChanged,
-  User
+  User,
+  fetchSignInMethodsForEmail
 } from 'firebase/auth';
 import { auth } from './config';
+
+// This function is used to create a test user for the demo
+export const createTestUserIfNeeded = async (email: string, password: string) => {
+  try {
+    // Check if the email is already in use
+    const methods = await fetchSignInMethodsForEmail(auth, email);
+    if (methods.length === 0) {
+      // Email is not in use, create the user
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log('Demo user created successfully');
+      return true;
+    } else {
+      // User already exists
+      console.log('Demo user already exists');
+      return true;
+    }
+  } catch (error: any) {
+    console.error('Failed to create demo user:', error.message);
+    return false;
+  }
+};
 
 // Sign in with email and password
 export const loginWithEmail = async (email: string, password: string) => {
