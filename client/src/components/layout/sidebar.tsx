@@ -63,16 +63,16 @@ export default function Sidebar({ onClose }: SidebarProps) {
   return (
     <>
       {/* Volledig inklapbare sidebar */}
-      <div className={`fixed top-0 bottom-0 left-0 z-40 flex min-h-0 flex-1 flex-col border-r border-border bg-card transition-all duration-300 ${collapsed ? 'w-[70px] translate-x-[-70px]' : 'w-64'}`}>
+      <div className={`fixed top-0 bottom-0 left-0 z-40 flex min-h-0 flex-1 flex-col border-r border-border bg-card transition-all duration-300 ${collapsed ? 'w-[70px]' : 'w-64'}`}>
         {/* Logo Container - Volledig gevuld */}
         <div className="flex flex-shrink-0 border-b border-border h-16 overflow-hidden p-0 bg-white">
           {!collapsed ? (
             <div className="w-full h-full p-0 m-0">
-              <img src={tecnaritLogo} alt="TECNARIT" className="h-full w-full object-cover" />
+              <img src={tecnaritLogo} alt="TECNARIT" className="h-full w-full object-contain" />
             </div>
           ) : (
             <div className="flex-1 flex justify-center items-center h-full">
-              <div className="gradient-text text-2xl font-bold">T</div>
+              <img src={tecnaritLogo} alt="TECNARIT" className="h-10 w-10 object-contain" />
             </div>
           )}
         </div>
