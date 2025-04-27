@@ -103,7 +103,7 @@ export const getCandidate = async (id: string): Promise<FirebaseCandidate | unde
 };
 
 // Create a new candidate
-export const createCandidate = async (candidate: InsertCandidate): Promise<Candidate> => {
+export const createCandidate = async (candidate: InsertCandidate): Promise<FirebaseCandidate> => {
   try {
     // Zorg ervoor dat de gebruiker is ingelogd
     if (!auth.currentUser) {
@@ -123,9 +123,9 @@ export const createCandidate = async (candidate: InsertCandidate): Promise<Candi
     
     const docRef = await addDoc(candidatesCol, candidateData);
     
-    // Return the created candidate with ID
+    // Return the created candidate with string ID
     return {
-      id: parseInt(docRef.id),
+      id: docRef.id, // Gebruik de string ID direct
       firstName: candidate.firstName,
       lastName: candidate.lastName,
       email: candidate.email,
@@ -152,7 +152,7 @@ export const createCandidate = async (candidate: InsertCandidate): Promise<Candi
 };
 
 // Update a candidate
-export const updateCandidate = async (id: number, candidate: Partial<InsertCandidate>): Promise<Candidate | undefined> => {
+export const updateCandidate = async (id: string, candidate: Partial<InsertCandidate>): Promise<FirebaseCandidate | undefined> => {
   try {
     // Zorg ervoor dat de gebruiker is ingelogd
     if (!auth.currentUser) {
@@ -212,7 +212,7 @@ export const updateCandidate = async (id: number, candidate: Partial<InsertCandi
 };
 
 // Delete a candidate
-export const deleteCandidate = async (id: number): Promise<boolean> => {
+export const deleteCandidate = async (id: string): Promise<boolean> => {
   try {
     console.log(`Verwijderen van kandidaat met ID: ${id}`);
     
@@ -288,7 +288,7 @@ export const deleteCandidate = async (id: number): Promise<boolean> => {
 };
 
 // Upload profile image
-export const uploadProfileImage = async (candidateId: number, file: File): Promise<string> => {
+export const uploadProfileImage = async (candidateId: string, file: File): Promise<string> => {
   try {
     // Zorg ervoor dat de gebruiker is ingelogd
     if (!auth.currentUser) {
@@ -322,7 +322,7 @@ export const uploadProfileImage = async (candidateId: number, file: File): Promi
 
 // Add candidate file (document like CV)
 export const addCandidateFile = async (
-  candidateId: number, 
+  candidateId: string, 
   file: File, 
   fileName: string
 ): Promise<CandidateFile> => {
@@ -371,7 +371,7 @@ export const addCandidateFile = async (
 };
 
 // Get candidate files
-export const getCandidateFiles = async (candidateId: number): Promise<CandidateFile[]> => {
+export const getCandidateFiles = async (candidateId: string): Promise<CandidateFile[]> => {
   try {
     const filesCol = collection(db, FILES_COLLECTION);
     const q = query(filesCol, where("candidateId", "==", candidateId));
@@ -434,7 +434,7 @@ export const deleteCandidateFile = async (fileId: number): Promise<boolean> => {
 };
 
 // Get candidates filtered by status
-export const getCandidatesByStatus = async (status: string): Promise<Candidate[]> => {
+export const getCandidatesByStatus = async (status: string): Promise<FirebaseCandidate[]> => {
   try {
     const candidatesCol = collection(db, CANDIDATES_COLLECTION);
     const q = query(candidatesCol, where("status", "==", status));

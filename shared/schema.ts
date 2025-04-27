@@ -41,7 +41,7 @@ export const insertCandidateSchema = createInsertSchema(candidates).omit({
 
 export const candidateFileSchema = z.object({
   id: z.number(),
-  candidateId: z.number(),
+  candidateId: z.union([z.string(), z.number()]), // Ondersteuning voor zowel string als number ID's
   fileName: z.string(),
   fileType: z.string(),
   filePath: z.string(),
