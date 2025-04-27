@@ -49,7 +49,7 @@ export function ProtectedRoute({
         </div>
         
         {/* Main content */}
-        <div className="flex-1 overflow-auto pt-24 pb-20 lg:pt-0 lg:pb-4">
+        <div className="flex-1 overflow-auto pt-4 pb-20 lg:pt-0 lg:pb-4">
           <Component />
         </div>
         
