@@ -82,7 +82,12 @@ export default function Sidebar({ onClose }: SidebarProps) {
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'w-full'}`}>
             <Avatar className="h-10 w-10 border-2 border-primary">
               <AvatarImage src="" alt={user?.username} />
-              <AvatarFallback className="gradient-bg text-white">{user?.username?.charAt(0).toUpperCase()}</AvatarFallback>
+              <AvatarFallback className="gradient-bg text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </AvatarFallback>
             </Avatar>
             {!collapsed && (
               <div className="ml-3 flex-grow">

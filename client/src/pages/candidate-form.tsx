@@ -114,14 +114,14 @@ export default function CandidateForm() {
       
       queryClient.invalidateQueries({ queryKey: ["/api/candidates"] });
       toast({
-        title: "Candidate created",
-        description: "New candidate has been successfully created.",
+        title: "Kandidaat aangemaakt",
+        description: "Nieuwe kandidaat is succesvol aangemaakt.",
       });
       setLocation("/");
     },
     onError: (error) => {
       toast({
-        title: "Failed to create candidate",
+        title: "Fout bij aanmaken kandidaat",
         description: error.message,
         variant: "destructive",
       });
@@ -147,14 +147,14 @@ export default function CandidateForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/candidates"] });
       queryClient.invalidateQueries({ queryKey: [`/api/candidates/${params.id}`] });
       toast({
-        title: "Candidate updated",
-        description: "Candidate has been successfully updated.",
+        title: "Kandidaat bijgewerkt",
+        description: "Kandidaat is succesvol bijgewerkt.",
       });
       setLocation("/");
     },
     onError: (error) => {
       toast({
-        title: "Failed to update candidate",
+        title: "Fout bij bijwerken kandidaat",
         description: error.message,
         variant: "destructive",
       });
@@ -174,8 +174,8 @@ export default function CandidateForm() {
     } catch (error) {
       console.error("Error uploading profile image:", error);
       toast({
-        title: "Failed to upload profile image",
-        description: "The profile image could not be uploaded.",
+        title: "Fout bij uploaden profielfoto",
+        description: "De profielfoto kon niet worden geüpload.",
         variant: "destructive",
       });
     }
@@ -307,9 +307,11 @@ export default function CandidateForm() {
                                         src={profileImagePreview || undefined} 
                                         className="object-cover"
                                       />
-                                      <AvatarFallback className="gradient-bg text-white text-2xl">
-                                        {form.getValues("firstName").charAt(0) || "K"}
-                                        {form.getValues("lastName").charAt(0) || ""}
+                                      <AvatarFallback className="gradient-bg text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                          <circle cx="12" cy="7" r="4"></circle>
+                                        </svg>
                                       </AvatarFallback>
                                     </Avatar>
                                   </div>
