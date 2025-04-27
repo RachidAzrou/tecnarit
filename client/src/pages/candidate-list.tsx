@@ -287,16 +287,7 @@ export default function CandidateList() {
             {/* Aparte rij voor knoppen onder de titel */}
             <div className="flex justify-between items-center mb-6">
               <div>
-                {/* Vernieuwknop om data te verversen */}
-                <Button 
-                  onClick={fetchDirectCandidates}
-                  variant="outline"
-                  className="border-primary/30 hover-lift"
-                  disabled={isLoadingState}
-                >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingState ? 'animate-spin' : ''}`} />
-                  <span className="responsive-button-text">Vernieuwen</span>
-                </Button>
+                {/* Linker deel leeg gelaten */}
               </div>
               <div className="flex space-x-2">
                 {showDashboard && (
