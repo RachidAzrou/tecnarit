@@ -42,7 +42,7 @@ export default function CandidateList() {
     setShowDashboard(!hasSearchParam);
   }, []);
 
-  const { data: candidates, isLoading, error } = useQuery<Candidate[]>({
+  const { data: candidates, isLoading, error, refetch } = useQuery<Candidate[]>({
     queryKey: ["candidates"],
     queryFn: async () => {
       return await getCandidates();
@@ -51,6 +51,9 @@ export default function CandidateList() {
     retryDelay: 1000,
     // Voorkom dat 401-fouten als error worden beschouwd
     gcTime: 0,
+    // Forceer een refetch bij iedere focus om candidate lijst vers te houden
+    refetchOnWindowFocus: true,
+    staleTime: 0
   });
 
   const handleAddCandidate = () => {

@@ -1,4 +1,6 @@
-import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { 
   AlertDialog, 
   AlertDialogCancel, 
@@ -10,7 +12,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
 import { Candidate } from "@shared/schema";
 import { deleteCandidate as deleteFirebaseCandidate } from "@/firebase/candidates";
 
@@ -26,42 +27,45 @@ export default function DeleteCandidateDialog({
   onClose,
 }: DeleteCandidateDialogProps) {
   const { toast } = useToast();
+  const [, navigate] = useLocation();
+  const queryClient = useQueryClient();
+  const [isDeleting, setIsDeleting] = useState(false);
   
-  const deleteCandidate = useMutation({
-    mutationFn: async (id: number) => {
-      return await deleteFirebaseCandidate(id);
-    },
-    onSuccess: () => {
+  // Eenvoudigere benadering zonder complexe caching logica
+  const handleDelete = async () => {
+    if (!candidate || isDeleting) return;
+    
+    try {
+      setIsDeleting(true);
+      
+      // Verwijder de kandidaat rechtstreeks
+      await deleteFirebaseCandidate(candidate.id);
+      
+      // Toon succes bericht
       toast({
         title: "Kandidaat verwijderd",
         description: "De kandidaat is succesvol verwijderd.",
       });
       
-      // Invalideer alle caches om problemen met oude data te voorkomen
-      queryClient.invalidateQueries();
+      // Invalideer alle kandidaat-gerelateerde queries
+      queryClient.invalidateQueries({ queryKey: ['candidates'] });
       
-      // Sluit de dialog en laat de calling component de UI updaten
-      setTimeout(() => {
-        // Gebruik de wouter navigate functie en ga terug naar de hoofdpagina als we in detail view zijn
-        if (window.location.pathname.includes("/candidates/") && !window.location.pathname.includes("/new")) {
-          window.location.href = "/";
-        }
-      }, 500);
+      // Als we op de detailpagina zijn, ga terug naar de hoofdpagina
+      if (window.location.pathname.includes(`/candidates/${candidate.id}`)) {
+        navigate("/");
+      }
       
+      // Sluit de dialog
       onClose();
-    },
-    onError: (error: Error) => {
+    } catch (error) {
+      console.error("Fout bij het verwijderen van kandidaat:", error);
       toast({
         title: "Fout bij verwijderen",
-        description: error.message,
+        description: error instanceof Error ? error.message : "Er is een onbekende fout opgetreden",
         variant: "destructive",
       });
-    },
-  });
-
-  const handleDelete = () => {
-    if (candidate) {
-      deleteCandidate.mutate(candidate.id);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -79,13 +83,13 @@ export default function DeleteCandidateDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={deleteCandidate.isPending}>Annuleren</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting}>Annuleren</AlertDialogCancel>
           <Button 
             variant="destructive" 
             onClick={handleDelete}
-            disabled={deleteCandidate.isPending}
+            disabled={isDeleting}
           >
-            {deleteCandidate.isPending ? "Bezig met verwijderen..." : "Verwijderen"}
+            {isDeleting ? "Bezig met verwijderen..." : "Verwijderen"}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
