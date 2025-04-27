@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { 
   AlertDialog, 
@@ -13,7 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Candidate } from "@shared/schema";
-import { deleteCandidate as deleteFirebaseCandidate } from "@/firebase/candidates";
+import { deleteDoc, doc } from "firebase/firestore";
+import { db } from "@/firebase/config";
 
 interface DeleteCandidateDialogProps {
   candidate: Candidate | null;
@@ -28,18 +28,21 @@ export default function DeleteCandidateDialog({
 }: DeleteCandidateDialogProps) {
   const { toast } = useToast();
   const [, navigate] = useLocation();
-  const queryClient = useQueryClient();
   const [isDeleting, setIsDeleting] = useState(false);
   
-  // Eenvoudigere benadering zonder complexe caching logica
+  // Directe verwijdering zonder tussenlagen
   const handleDelete = async () => {
     if (!candidate || isDeleting) return;
     
     try {
       setIsDeleting(true);
       
-      // Verwijder de kandidaat rechtstreeks
-      await deleteFirebaseCandidate(candidate.id);
+      // Direct naar Firebase verwijderen (geen omweg via andere functies)
+      const id = candidate.id.toString(); // Zorg ervoor dat ID een string is!
+      console.log(`[DeleteDialog] Direct verwijderen van kandidaat met ID: ${id}`);
+      
+      const candidateRef = doc(db, 'candidates', id);
+      await deleteDoc(candidateRef);
       
       // Toon succes bericht
       toast({
@@ -47,12 +50,12 @@ export default function DeleteCandidateDialog({
         description: "De kandidaat is succesvol verwijderd.",
       });
       
-      // Invalideer alle kandidaat-gerelateerde queries
-      queryClient.invalidateQueries({ queryKey: ['candidates'] });
-      
       // Als we op de detailpagina zijn, ga terug naar de hoofdpagina
       if (window.location.pathname.includes(`/candidates/${candidate.id}`)) {
         navigate("/");
+      } else {
+        // Vernieuw de pagina om de lijst opnieuw te laden
+        window.location.reload();
       }
       
       // Sluit de dialog
