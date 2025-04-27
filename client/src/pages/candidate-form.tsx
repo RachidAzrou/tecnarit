@@ -318,20 +318,20 @@ export default function CandidateForm() {
     <>
       <div className="flex flex-col flex-1 py-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-          <div className="flex flex-col sm:flex-row sm:justify-between items-center mb-6">
-            <div>
-              <h1 className="text-2xl sm:text-3xl tecnarit-blue-text font-bold text-center sm:text-left">
-                {isEditMode ? "Kandidaat Bewerken" : "Kandidaat Toevoegen"}
-              </h1>
-            </div>
-            <div className="mt-4 sm:mt-0 flex space-x-3">
-              <Button
-                onClick={() => setLocation("/")}
-                className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Dashboard
-              </Button>
+          <div className="flex flex-col sm:flex-row sm:items-center mb-6">
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl sm:text-3xl tecnarit-blue-text font-bold">
+                  {isEditMode ? "Kandidaat Bewerken" : "Kandidaat Toevoegen"}
+                </h1>
+                <Button
+                  onClick={() => setLocation("/")}
+                  className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Dashboard
+                </Button>
+              </div>
             </div>
           </div>
         </div>
