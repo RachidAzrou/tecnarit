@@ -16,7 +16,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import logoWithBg from "@assets/Color logo with background.png";
+import cactusLogo from "@assets/browser.png";
+import blueBackground from "@assets/v915-wit-011-a.jpg";
 
 // Create Firebase login schema
 const loginSchema = z.object({
@@ -67,18 +68,23 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-[#f5f5f5] p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#233142] p-4"
+         style={{
+           backgroundImage: `url(${blueBackground})`,
+           backgroundSize: 'cover',
+           backgroundPosition: 'center',
+           backgroundBlendMode: 'overlay',
+           backgroundColor: 'rgba(35, 49, 66, 0.92)',
+         }}>
       <div className="w-full max-w-md mb-8">
         <div className="flex items-center justify-center">
-          <div className="bg-[#233142] p-4 rounded-full shadow-lg">
-            <img src={logoWithBg} alt="TECNARIT" className="h-20 w-20 object-contain" />
-          </div>
+          <img src={cactusLogo} alt="TECNARIT" className="h-28 w-auto drop-shadow-xl" />
         </div>
-        <h1 className="text-2xl font-bold text-center text-[#233142] mt-4">TECNARIT - EMS</h1>
+        <h1 className="text-2xl font-bold text-center text-white mt-4">TECNARIT - EMS</h1>
       </div>
       
       <Card className="w-full max-w-md border-0 shadow-lg overflow-hidden">
-        <div className="h-1.5 bg-[#233142]"></div>
+        <div className="h-1.5 bg-[#65C366]"></div>
         <CardContent className="pt-6 p-8">
           <Form {...loginForm}>
             <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-5">
@@ -139,7 +145,7 @@ export default function AuthPage() {
 
               <Button
                 type="submit"
-                className="w-full bg-[#233142] hover:bg-[#1a2430] py-2.5 text-white rounded-md mt-2 font-medium transition-colors"
+                className="w-full bg-[#65C366] hover:bg-[#559e56] py-2.5 text-white rounded-md mt-2 font-medium transition-colors"
                 disabled={loginMutation.isPending}
               >
                 {loginMutation.isPending ? "Bezig met inloggen..." : "Inloggen"}
