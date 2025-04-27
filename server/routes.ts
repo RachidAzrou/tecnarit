@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { setupFileRoutes } from "./upload";
-import { insertEmployeeSchema } from "@shared/schema";
+import { insertCandidateSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -13,52 +13,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Set up file upload routes
   setupFileRoutes(app);
 
-  // Employee CRUD routes
-  app.get("/api/employees", async (req, res, next) => {
+  // Candidate CRUD routes
+  app.get("/api/candidates", async (req, res, next) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
-      const employees = await storage.getEmployees();
-      res.status(200).json(employees);
+      const candidates = await storage.getCandidates();
+      res.status(200).json(candidates);
     } catch (error) {
       next(error);
     }
   });
 
-  app.get("/api/employees/:id", async (req, res, next) => {
+  app.get("/api/candidates/:id", async (req, res, next) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
       const id = parseInt(req.params.id, 10);
-      const employee = await storage.getEmployee(id);
+      const candidate = await storage.getCandidate(id);
       
-      if (!employee) {
-        return res.status(404).json({ message: "Employee not found" });
+      if (!candidate) {
+        return res.status(404).json({ message: "Candidate not found" });
       }
       
-      res.status(200).json(employee);
+      res.status(200).json(candidate);
     } catch (error) {
       next(error);
     }
   });
 
-  app.post("/api/employees", async (req, res, next) => {
+  app.post("/api/candidates", async (req, res, next) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
       // Validate request body
-      const validatedData = insertEmployeeSchema.parse(req.body);
+      const validatedData = insertCandidateSchema.parse(req.body);
       
-      // Create employee
-      const employee = await storage.createEmployee(validatedData);
+      // Create candidate
+      const candidate = await storage.createCandidate(validatedData);
       
-      res.status(201).json(employee);
+      res.status(201).json(candidate);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ 
@@ -70,7 +70,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/employees/:id", async (req, res, next) => {
+  app.patch("/api/candidates/:id", async (req, res, next) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
@@ -79,16 +79,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id, 10);
       
       // Validate request body
-      const validatedData = insertEmployeeSchema.partial().parse(req.body);
+      const validatedData = insertCandidateSchema.partial().parse(req.body);
       
-      // Update employee
-      const employee = await storage.updateEmployee(id, validatedData);
+      // Update candidate
+      const candidate = await storage.updateCandidate(id, validatedData);
       
-      if (!employee) {
-        return res.status(404).json({ message: "Employee not found" });
+      if (!candidate) {
+        return res.status(404).json({ message: "Candidate not found" });
       }
       
-      res.status(200).json(employee);
+      res.status(200).json(candidate);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ 
@@ -100,7 +100,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/employees/:id", async (req, res, next) => {
+  app.delete("/api/candidates/:id", async (req, res, next) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
@@ -108,19 +108,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const id = parseInt(req.params.id, 10);
       
-      // Get all files for the employee
-      const files = await storage.getEmployeeFiles(id);
+      // Get all files for the candidate
+      const files = await storage.getCandidateFiles(id);
       
-      // Delete the employee
-      const result = await storage.deleteEmployee(id);
+      // Delete the candidate
+      const result = await storage.deleteCandidate(id);
       
       if (!result) {
-        return res.status(404).json({ message: "Employee not found" });
+        return res.status(404).json({ message: "Candidate not found" });
       }
       
-      // Delete all files associated with the employee
+      // Delete all files associated with the candidate
       for (const file of files) {
-        await storage.deleteEmployeeFile(file.id);
+        await storage.deleteCandidateFile(file.id);
       }
       
       res.status(200).json({ success: true });

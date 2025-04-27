@@ -16,33 +16,28 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
-export const employees = pgTable("employees", {
+export const candidates = pgTable("candidates", {
   id: serial("id").primaryKey(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),
-  position: text("position").notNull(),
-  department: text("department").notNull(),
-  startDate: text("start_date").notNull(),
+  linkedinProfile: text("linkedin_profile"),
+  yearsOfExperience: integer("years_of_experience"),
   status: text("status").notNull().default("active"),
-  address: text("address"),
-  city: text("city"),
-  state: text("state"),
-  zip: text("zip"),
   notes: text("notes"),
   profileImage: text("profile_image"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertEmployeeSchema = createInsertSchema(employees).omit({
+export const insertCandidateSchema = createInsertSchema(candidates).omit({
   id: true,
   createdAt: true,
 });
 
-export const employeeFileSchema = z.object({
+export const candidateFileSchema = z.object({
   id: z.number(),
-  employeeId: z.number(),
+  candidateId: z.number(),
   fileName: z.string(),
   fileType: z.string(),
   filePath: z.string(),
@@ -50,6 +45,6 @@ export const employeeFileSchema = z.object({
   uploadDate: z.date(),
 });
 
-export type InsertEmployee = z.infer<typeof insertEmployeeSchema>;
-export type Employee = typeof employees.$inferSelect;
-export type EmployeeFile = z.infer<typeof employeeFileSchema>;
+export type InsertCandidate = z.infer<typeof insertCandidateSchema>;
+export type Candidate = typeof candidates.$inferSelect;
+export type CandidateFile = z.infer<typeof candidateFileSchema>;

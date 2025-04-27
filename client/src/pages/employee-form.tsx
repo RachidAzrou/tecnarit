@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { insertEmployeeSchema, Employee } from "@shared/schema";
+import { insertCandidateSchema, Candidate } from "@shared/schema";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import Sidebar from "@/components/layout/sidebar";
@@ -31,8 +31,8 @@ import MobileHeader from "@/components/layout/mobile-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Extend the schema for form validation
-const employeeFormSchema = insertEmployeeSchema.extend({
-  startDate: z.string().min(1, "Start date is required"),
+const candidateFormSchema = insertCandidateSchema.extend({
+  yearsOfExperience: z.number().optional().nullable(),
 });
 
 export default function EmployeeForm() {
@@ -44,18 +44,18 @@ export default function EmployeeForm() {
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
 
-  // Fetch employee data when in edit mode
+  // Fetch candidate data when in edit mode
   const {
-    data: employee,
-    isLoading: isEmployeeLoading,
-    error: employeeError,
-  } = useQuery<Employee>({
-    queryKey: [isEditMode ? `/api/employees/${params.id}` : null],
+    data: candidate,
+    isLoading: isCandidateLoading,
+    error: candidateError,
+  } = useQuery<Candidate>({
+    queryKey: [isEditMode ? `/api/candidates/${params.id}` : null],
     enabled: isEditMode,
   });
 
-  const form = useForm<z.infer<typeof employeeFormSchema>>({
-    resolver: zodResolver(employeeFormSchema),
+  const form = useForm<z.infer<typeof candidateFormSchema>>({
+    resolver: zodResolver(candidateFormSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -101,8 +101,8 @@ export default function EmployeeForm() {
   }, [employee, form]);
 
   const createMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof employeeFormSchema>) => {
-      const res = await apiRequest("POST", "/api/employees", data);
+    mutationFn: async (data: z.infer<typeof candidateFormSchema>) => {
+      const res = await apiRequest("POST", "/api/candidates", data);
       return await res.json();
     },
     onSuccess: async (newEmployee) => {
@@ -133,8 +133,8 @@ export default function EmployeeForm() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: { id: number; formData: z.infer<typeof employeeFormSchema> }) => {
-      const res = await apiRequest("PATCH", `/api/employees/${data.id}`, data.formData);
+    mutationFn: async (data: { id: number; formData: z.infer<typeof candidateFormSchema> }) => {
+      const res = await apiRequest("PATCH", `/api/candidates/${data.id}`, data.formData);
       return await res.json();
     },
     onSuccess: async (updatedEmployee) => {
@@ -205,7 +205,7 @@ export default function EmployeeForm() {
     }
   };
 
-  const onSubmit = (data: z.infer<typeof employeeFormSchema>) => {
+  const onSubmit = (data: z.infer<typeof candidateFormSchema>) => {
     if (isEditMode && employee) {
       updateMutation.mutate({ id: employee.id, formData: data });
     } else {

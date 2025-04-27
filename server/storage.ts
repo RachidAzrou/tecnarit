@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, employees, type Employee, type InsertEmployee, type EmployeeFile } from "@shared/schema";
+import { users, type User, type InsertUser, candidates, type Candidate, type InsertCandidate, type CandidateFile } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 
@@ -10,34 +10,34 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   sessionStore: session.SessionStore;
   
-  // Employee CRUD operations
-  getEmployees(): Promise<Employee[]>;
-  getEmployee(id: number): Promise<Employee | undefined>;
-  createEmployee(employee: InsertEmployee): Promise<Employee>;
-  updateEmployee(id: number, employee: Partial<InsertEmployee>): Promise<Employee | undefined>;
-  deleteEmployee(id: number): Promise<boolean>;
+  // Candidate CRUD operations
+  getCandidates(): Promise<Candidate[]>;
+  getCandidate(id: number): Promise<Candidate | undefined>;
+  createCandidate(candidate: InsertCandidate): Promise<Candidate>;
+  updateCandidate(id: number, candidate: Partial<InsertCandidate>): Promise<Candidate | undefined>;
+  deleteCandidate(id: number): Promise<boolean>;
   
   // File handling
-  getEmployeeFiles(employeeId: number): Promise<EmployeeFile[]>;
-  addEmployeeFile(file: Omit<EmployeeFile, "id">): Promise<EmployeeFile>;
-  deleteEmployeeFile(id: number): Promise<boolean>;
+  getCandidateFiles(candidateId: number): Promise<CandidateFile[]>;
+  addCandidateFile(file: Omit<CandidateFile, "id">): Promise<CandidateFile>;
+  deleteCandidateFile(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
-  private employees: Map<number, Employee>;
-  private files: Map<number, EmployeeFile>;
+  private candidates: Map<number, Candidate>;
+  private files: Map<number, CandidateFile>;
   currentUserId: number;
-  currentEmployeeId: number;
+  currentCandidateId: number;
   currentFileId: number;
   sessionStore: session.SessionStore;
 
   constructor() {
     this.users = new Map();
-    this.employees = new Map();
+    this.candidates = new Map();
     this.files = new Map();
     this.currentUserId = 1;
-    this.currentEmployeeId = 1;
+    this.currentCandidateId = 1;
     this.currentFileId = 1;
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // 24h in ms
@@ -61,56 +61,65 @@ export class MemStorage implements IStorage {
     return user;
   }
 
-  async getEmployees(): Promise<Employee[]> {
-    return Array.from(this.employees.values());
+  async getCandidates(): Promise<Candidate[]> {
+    return Array.from(this.candidates.values());
   }
 
-  async getEmployee(id: number): Promise<Employee | undefined> {
-    return this.employees.get(id);
+  async getCandidate(id: number): Promise<Candidate | undefined> {
+    return this.candidates.get(id);
   }
 
-  async createEmployee(employee: InsertEmployee): Promise<Employee> {
-    const id = this.currentEmployeeId++;
-    const newEmployee: Employee = {
-      ...employee, 
+  async createCandidate(candidate: InsertCandidate): Promise<Candidate> {
+    const id = this.currentCandidateId++;
+    
+    // Ensure all nullable fields have default values
+    const newCandidate: Candidate = {
+      ...candidate, 
       id,
+      status: candidate.status || "active",
+      profileImage: candidate.profileImage || null,
+      phone: candidate.phone || null,
+      notes: candidate.notes || null,
+      linkedinProfile: candidate.linkedinProfile || null,
+      yearsOfExperience: candidate.yearsOfExperience || null,
       createdAt: new Date()
     };
-    this.employees.set(id, newEmployee);
-    return newEmployee;
+    
+    this.candidates.set(id, newCandidate);
+    return newCandidate;
   }
 
-  async updateEmployee(id: number, updates: Partial<InsertEmployee>): Promise<Employee | undefined> {
-    const employee = this.employees.get(id);
-    if (!employee) return undefined;
+  async updateCandidate(id: number, updates: Partial<InsertCandidate>): Promise<Candidate | undefined> {
+    const candidate = this.candidates.get(id);
+    if (!candidate) return undefined;
     
-    const updatedEmployee: Employee = {
-      ...employee,
+    const updatedCandidate: Candidate = {
+      ...candidate,
       ...updates,
     };
     
-    this.employees.set(id, updatedEmployee);
-    return updatedEmployee;
+    this.candidates.set(id, updatedCandidate);
+    return updatedCandidate;
   }
 
-  async deleteEmployee(id: number): Promise<boolean> {
-    return this.employees.delete(id);
+  async deleteCandidate(id: number): Promise<boolean> {
+    return this.candidates.delete(id);
   }
 
-  async getEmployeeFiles(employeeId: number): Promise<EmployeeFile[]> {
+  async getCandidateFiles(candidateId: number): Promise<CandidateFile[]> {
     return Array.from(this.files.values()).filter(
-      (file) => file.employeeId === employeeId
+      (file) => file.candidateId === candidateId
     );
   }
 
-  async addEmployeeFile(file: Omit<EmployeeFile, "id">): Promise<EmployeeFile> {
+  async addCandidateFile(file: Omit<CandidateFile, "id">): Promise<CandidateFile> {
     const id = this.currentFileId++;
-    const newFile: EmployeeFile = { ...file, id };
+    const newFile: CandidateFile = { ...file, id };
     this.files.set(id, newFile);
     return newFile;
   }
 
-  async deleteEmployeeFile(id: number): Promise<boolean> {
+  async deleteCandidateFile(id: number): Promise<boolean> {
     return this.files.delete(id);
   }
 }

@@ -6,7 +6,7 @@ import * as crypto from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import multer from "multer";
-import { EmployeeFile } from "@shared/schema";
+import { CandidateFile } from "@shared/schema";
 
 const mkdir = promisify(fs.mkdir);
 
@@ -19,15 +19,15 @@ if (!fs.existsSync(uploadDir)) {
 // Configure storage for multer
 const fileStorage = multer.diskStorage({
   destination: async (req, file, cb) => {
-    const employeeId = req.params.id;
-    const employeeDir = path.join(uploadDir, employeeId);
+    const candidateId = req.params.id;
+    const candidateDir = path.join(uploadDir, candidateId);
     
-    // Create directory for employee if it doesn't exist
-    if (!fs.existsSync(employeeDir)) {
-      await mkdir(employeeDir, { recursive: true });
+    // Create directory for candidate if it doesn't exist
+    if (!fs.existsSync(candidateDir)) {
+      await mkdir(candidateDir, { recursive: true });
     }
     
-    cb(null, employeeDir);
+    cb(null, candidateDir);
   },
   filename: (req, file, cb) => {
     // Generate unique filename to prevent overwriting
@@ -65,53 +65,53 @@ export const upload = multer({
 
 export function setupFileRoutes(app: Express) {
   // Upload profile image
-  app.post("/api/employees/:id/profile-image", upload.single("profileImage"), async (req, res, next) => {
+  app.post("/api/candidates/:id/profile-image", upload.single("profileImage"), async (req, res, next) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const employeeId = parseInt(req.params.id, 10);
-      const employee = await storage.getEmployee(employeeId);
+      const candidateId = parseInt(req.params.id, 10);
+      const candidate = await storage.getCandidate(candidateId);
       
-      if (!employee) {
-        // Delete the uploaded file if employee not found
+      if (!candidate) {
+        // Delete the uploaded file if candidate not found
         fs.unlinkSync(req.file.path);
-        return res.status(404).json({ message: "Employee not found" });
+        return res.status(404).json({ message: "Candidate not found" });
       }
       
-      // Update employee with profile image path
+      // Update candidate with profile image path
       const relativePath = path.relative(process.cwd(), req.file.path).replace(/\\/g, '/');
-      const updatedEmployee = await storage.updateEmployee(employeeId, {
+      const updatedCandidate = await storage.updateCandidate(candidateId, {
         profileImage: relativePath
       });
       
-      res.status(200).json(updatedEmployee);
+      res.status(200).json(updatedCandidate);
     } catch (error) {
       next(error);
     }
   });
   
-  // Upload document for employee
-  app.post("/api/employees/:id/documents", upload.single("document"), async (req, res, next) => {
+  // Upload document for candidate
+  app.post("/api/candidates/:id/documents", upload.single("document"), async (req, res, next) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const employeeId = parseInt(req.params.id, 10);
-      const employee = await storage.getEmployee(employeeId);
+      const candidateId = parseInt(req.params.id, 10);
+      const candidate = await storage.getCandidate(candidateId);
       
-      if (!employee) {
-        // Delete the uploaded file if employee not found
+      if (!candidate) {
+        // Delete the uploaded file if candidate not found
         fs.unlinkSync(req.file.path);
-        return res.status(404).json({ message: "Employee not found" });
+        return res.status(404).json({ message: "Candidate not found" });
       }
       
       // Save file metadata
       const relativePath = path.relative(process.cwd(), req.file.path).replace(/\\/g, '/');
-      const file = await storage.addEmployeeFile({
-        employeeId,
+      const file = await storage.addCandidateFile({
+        candidateId,
         fileName: req.file.originalname,
         fileType: req.file.mimetype,
         filePath: relativePath,
@@ -125,11 +125,11 @@ export function setupFileRoutes(app: Express) {
     }
   });
   
-  // Get employee files
-  app.get("/api/employees/:id/files", async (req, res, next) => {
+  // Get candidate files
+  app.get("/api/candidates/:id/files", async (req, res, next) => {
     try {
-      const employeeId = parseInt(req.params.id, 10);
-      const files = await storage.getEmployeeFiles(employeeId);
+      const candidateId = parseInt(req.params.id, 10);
+      const files = await storage.getCandidateFiles(candidateId);
       res.status(200).json(files);
     } catch (error) {
       next(error);
@@ -139,9 +139,9 @@ export function setupFileRoutes(app: Express) {
   // Download file
   app.get("/api/files/:id", async (req, res, next) => {
     try {
-      const employeeId = parseInt(req.params.employeeId, 10);
+      const candidateId = parseInt(req.params.candidateId, 10);
       const fileId = parseInt(req.params.id, 10);
-      const files = await storage.getEmployeeFiles(employeeId);
+      const files = await storage.getCandidateFiles(candidateId);
       const file = files.find(f => f.id === fileId);
       
       if (!file) {
@@ -159,7 +159,7 @@ export function setupFileRoutes(app: Express) {
     try {
       const fileId = parseInt(req.params.id, 10);
       const allFiles = Array.from(await Promise.all(
-        (await storage.getEmployees()).map(e => storage.getEmployeeFiles(e.id))
+        (await storage.getCandidates()).map(c => storage.getCandidateFiles(c.id))
       )).flat();
       
       const file = allFiles.find(f => f.id === fileId);
@@ -172,7 +172,7 @@ export function setupFileRoutes(app: Express) {
       fs.unlinkSync(path.join(process.cwd(), file.filePath));
       
       // Delete file metadata from storage
-      await storage.deleteEmployeeFile(fileId);
+      await storage.deleteCandidateFile(fileId);
       
       res.status(200).json({ success: true });
     } catch (error) {
