@@ -5,19 +5,19 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
-import EmployeeList from "@/pages/employee-list";
+import CandidateList from "@/pages/candidate-list";
 import CandidateForm from "@/pages/candidate-form";
-import EmployeeDetail from "@/pages/employee-detail";
+import CandidateDetail from "@/pages/candidate-detail";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "./hooks/use-auth";
 
 function Router() {
   return (
     <Switch>
-      <ProtectedRoute path="/" component={EmployeeList} />
+      <ProtectedRoute path="/" component={CandidateList} />
       <ProtectedRoute path="/candidates/new" component={CandidateForm} />
       <ProtectedRoute path="/candidates/:id/edit" component={CandidateForm} />
-      <ProtectedRoute path="/candidates/:id" component={EmployeeDetail} />
+      <ProtectedRoute path="/candidates/:id" component={CandidateDetail} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
