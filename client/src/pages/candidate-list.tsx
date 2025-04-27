@@ -86,10 +86,13 @@ export default function CandidateList() {
           <div className="py-6">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
               <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-semibold text-primary-900">Candidates</h1>
-                <Button onClick={handleAddCandidate}>
+                <h1 className="text-2xl font-semibold gradient-text">Kandidaten</h1>
+                <Button 
+                  onClick={handleAddCandidate}
+                  className="gradient-bg hover:opacity-90 transition-opacity"
+                >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Candidate
+                  Kandidaat Toevoegen
                 </Button>
               </div>
             </div>
@@ -101,11 +104,11 @@ export default function CandidateList() {
                   <div className="sm:col-span-3">
                     <div className="relative rounded-md">
                       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <Search className="h-4 w-4 text-primary-400" />
+                        <Search className="h-4 w-4 text-primary/60" />
                       </div>
                       <Input
-                        placeholder="Search candidates..."
-                        className="pl-10"
+                        placeholder="Zoek kandidaten..."
+                        className="pl-10 border-primary/30 focus-visible:ring-primary"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
@@ -116,16 +119,16 @@ export default function CandidateList() {
                       value={status}
                       onValueChange={setStatus}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Statuses" />
+                      <SelectTrigger className="border-primary/30 focus:ring-primary">
+                        <SelectValue placeholder="Alle Statussen" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Statuses</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="contacted">Contacted</SelectItem>
-                        <SelectItem value="interview">Interview Scheduled</SelectItem>
-                        <SelectItem value="hired">Hired</SelectItem>
-                        <SelectItem value="rejected">Rejected</SelectItem>
+                        <SelectItem value="">Alle Statussen</SelectItem>
+                        <SelectItem value="active">Actief</SelectItem>
+                        <SelectItem value="contacted">Gecontacteerd</SelectItem>
+                        <SelectItem value="interview">Interview Gepland</SelectItem>
+                        <SelectItem value="hired">Aangenomen</SelectItem>
+                        <SelectItem value="rejected">Afgewezen</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -134,14 +137,14 @@ export default function CandidateList() {
                       value={sortOrder}
                       onValueChange={setSortOrder}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sort by" />
+                      <SelectTrigger className="border-primary/30 focus:ring-primary">
+                        <SelectValue placeholder="Sorteer op" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="name_asc">Name A-Z</SelectItem>
-                        <SelectItem value="name_desc">Name Z-A</SelectItem>
-                        <SelectItem value="experience_asc">Experience (Low-High)</SelectItem>
-                        <SelectItem value="experience_desc">Experience (High-Low)</SelectItem>
+                        <SelectItem value="name_asc">Naam A-Z</SelectItem>
+                        <SelectItem value="name_desc">Naam Z-A</SelectItem>
+                        <SelectItem value="experience_asc">Ervaring (Laag-Hoog)</SelectItem>
+                        <SelectItem value="experience_desc">Ervaring (Hoog-Laag)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -150,15 +153,45 @@ export default function CandidateList() {
                 {/* Candidate Table */}
                 {isLoading ? (
                   <div className="flex justify-center items-center h-64">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <Loader2 className="h-8 w-8 animate-spin gradient-text" />
                   </div>
                 ) : error ? (
-                  <div className="text-center text-red-500 p-4">
-                    Error loading candidates. Please try again.
+                  <div className="text-center p-8 border-2 border-red-300 rounded-lg bg-red-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <h3 className="mt-4 text-lg font-medium text-red-800">Fout bij het laden van kandidaten</h3>
+                    <p className="mt-2 text-red-600">Probeer het later opnieuw of neem contact op met ondersteuning.</p>
+                    <Button 
+                      onClick={() => window.location.reload()} 
+                      className="mt-4 bg-red-600 hover:bg-red-700"
+                    >
+                      Opnieuw proberen
+                    </Button>
                   </div>
                 ) : filteredCandidates.length === 0 ? (
-                  <div className="text-center text-gray-500 p-4">
-                    No candidates found. {searchQuery || status ? "Try adjusting your search." : ""}
+                  <div className="text-center py-16 px-4 border-2 border-dashed border-primary/30 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-primary/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <h3 className="mt-4 text-lg font-medium text-primary-800">Geen kandidaten gevonden</h3>
+                    <p className="mt-2 text-primary/70">
+                      {searchQuery || status 
+                        ? "Pas je zoekcriteria aan of verwijder filters om meer resultaten te zien." 
+                        : "Voeg je eerste kandidaat toe om te beginnen."}
+                    </p>
+                    {!searchQuery && !status && (
+                      <Button 
+                        onClick={handleAddCandidate}
+                        className="mt-4 gradient-bg hover:opacity-90 transition-opacity"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Kandidaat Toevoegen
+                      </Button>
+                    )}
                   </div>
                 ) : (
                   <CandidateTable candidates={filteredCandidates} />
