@@ -79,17 +79,17 @@ export default function AuthPage() {
       <div className="absolute inset-0 bg-black/40"></div>
       
       <div className="z-10 w-full max-w-sm">
-        <div className="flex justify-center mb-8">
-          <img src={logoWithBg} alt="TECNARIT" className="h-14 w-14" />
-        </div>
-        
-        <div className="text-center mb-6">
-          <h1 className="text-xl font-bold text-white">TECNARIT - EMS</h1>
-          <p className="text-sm text-white/80 mt-1">Employee Management System</p>
-        </div>
-        
         <Card className="w-full border-0 bg-white rounded-lg shadow-2xl">
           <CardContent className="p-6">
+            <div className="flex justify-center mb-6">
+              <img src={logoWithBg} alt="TECNARIT" className="h-14 w-14" />
+            </div>
+            
+            <div className="text-center mb-6">
+              <h1 className="text-xl font-bold text-[#233142]">TECNARIT - EMS</h1>
+              <p className="text-sm text-gray-600 mt-1">Employee Management System</p>
+            </div>
+            
             <Form {...loginForm}>
               <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
                 <FormField
