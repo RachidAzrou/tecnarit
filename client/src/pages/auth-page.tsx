@@ -36,9 +36,20 @@ export default function AuthPage() {
     }
   }, [user, setLocation]);
 
-  // Demo login credentials message
+  // Create demo user and display login credentials
   useEffect(() => {
-    console.log("Test user credentials available: email: admin@tecnarit.com, password: admin123");
+    // Create the demo user in Firebase
+    const setupDemoUser = async () => {
+      try {
+        const { createTestUserIfNeeded } = await import('../firebase/auth');
+        await createTestUserIfNeeded('admin@tecnarit.com', 'admin123');
+        console.log("Test user credentials available: email: admin@tecnarit.com, password: admin123");
+      } catch (error) {
+        console.error("Error setting up demo user:", error);
+      }
+    };
+    
+    setupDemoUser();
   }, []);
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
