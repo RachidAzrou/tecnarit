@@ -201,13 +201,15 @@ export default function CandidateList() {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
-                  <Button 
-                    onClick={handleAddCandidate}
-                    className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Kandidaat Toevoegen
-                  </Button>
+                  {!showDashboard && (
+                    <Button 
+                      onClick={handleAddCandidate}
+                      className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Kandidaat Toevoegen
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -341,7 +343,16 @@ export default function CandidateList() {
                     </div>
                     
                     {/* Recente kandidaten tabel */}
-                    <h2 className="text-xl tecnarit-blue-text mt-8 mb-4">Recente Kandidaten</h2>
+                    <div className="flex justify-between items-center mt-8 mb-4">
+                      <h2 className="text-xl tecnarit-blue-text">Recente Kandidaten</h2>
+                      <Button 
+                        onClick={handleAddCandidate}
+                        className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Kandidaat Toevoegen
+                      </Button>
+                    </div>
                     {isLoading ? (
                       <div className="flex justify-center items-center h-48 sm:h-64 glass-effect rounded-lg">
                         <Loader2 className="h-8 w-8 animate-spin gradient-text" />
