@@ -69,29 +69,27 @@ export default function AuthPage() {
 
   return (
     <div 
-      className="flex min-h-screen w-full items-center justify-center p-4"
+      className="flex min-h-screen w-full items-center justify-center px-4 py-12"
       style={{ 
         backgroundImage: `url(${hexBackground})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center'
       }}
     >
-      <div className="absolute inset-0 bg-gray-900/20"></div>
+      <div className="absolute inset-0 bg-black/40"></div>
       
-      <div className="z-10 w-full max-w-md">
-        <div className="flex flex-col items-center mb-8">
-          <img src={logoWithBg} alt="TECNARIT" className="h-20 w-20 drop-shadow-lg" />
-          <h1 className="text-2xl font-bold mt-4 text-white drop-shadow-md">TECNARIT - EMS</h1>
+      <div className="z-10 w-full max-w-sm">
+        <div className="flex justify-center mb-8">
+          <img src={logoWithBg} alt="TECNARIT" className="h-14 w-14" />
         </div>
         
-        <Card className="overflow-hidden border-0 shadow-2xl bg-white">
-          <div className="h-2 bg-[#233142]"></div>
+        <div className="text-center mb-6">
+          <h1 className="text-xl font-bold text-white">TECNARIT - EMS</h1>
+          <p className="text-sm text-white/80 mt-1">Employee Management System</p>
+        </div>
+        
+        <Card className="w-full border-0 bg-white rounded-lg shadow-2xl">
           <CardContent className="p-6">
-            <div className="text-center mb-6">
-              <h2 className="text-lg font-semibold text-gray-800">Log in op je account</h2>
-              <p className="text-sm text-gray-500">Voer je inloggegevens in om toegang te krijgen</p>
-            </div>
-            
             <Form {...loginForm}>
               <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
                 <FormField
@@ -99,22 +97,15 @@ export default function AuthPage() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 text-sm font-medium">E-mailadres</FormLabel>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                          </svg>
-                        </div>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            type="email" 
-                            className="pl-10 w-full p-2.5 border border-gray-300 rounded-md shadow-sm focus:border-[#233142] focus:ring-1 focus:ring-[#233142]"
-                            placeholder="admin@tecnarit.com"
-                          />
-                        </FormControl>
-                      </div>
+                      <FormLabel className="text-gray-700">E-mailadres</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          type="email" 
+                          className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#233142]"
+                          placeholder="admin@tecnarit.com"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -125,22 +116,15 @@ export default function AuthPage() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 text-sm font-medium">Wachtwoord</FormLabel>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                          </svg>
-                        </div>
-                        <FormControl>
-                          <Input 
-                            type="password" 
-                            {...field} 
-                            className="pl-10 w-full p-2.5 border border-gray-300 rounded-md shadow-sm focus:border-[#233142] focus:ring-1 focus:ring-[#233142]"
-                            placeholder="admin123"
-                          />
-                        </FormControl>
-                      </div>
+                      <FormLabel className="text-gray-700">Wachtwoord</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="password" 
+                          {...field} 
+                          className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#233142]"
+                          placeholder="admin123"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -167,38 +151,16 @@ export default function AuthPage() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-[#233142] hover:bg-[#192331] py-2.5 text-white rounded-md font-medium transition-colors"
+                  className="w-full bg-[#233142] hover:bg-[#192331] py-2 text-white rounded font-medium transition-colors"
                   disabled={loginMutation.isPending}
                 >
-                  {loginMutation.isPending ? 
-                    <div className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Bezig met inloggen...
-                    </div> : 
-                    "Inloggen"
-                  }
+                  {loginMutation.isPending ? "Bezig met inloggen..." : "Inloggen"}
                 </Button>
                 
-                <div className="p-4 bg-blue-50 rounded-md border border-blue-100 mt-5">
-                  <div className="flex items-center mb-2">
-                    <svg className="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"></path>
-                    </svg>
-                    <span className="text-sm font-medium text-blue-600">Demo inloggegevens</span>
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    <div className="flex mb-1">
-                      <span className="font-medium w-24">E-mail:</span>
-                      <span>admin@tecnarit.com</span>
-                    </div>
-                    <div className="flex">
-                      <span className="font-medium w-24">Wachtwoord:</span>
-                      <span>admin123</span>
-                    </div>
-                  </div>
+                <div className="bg-gray-50 rounded p-3 text-xs text-center text-gray-600 mt-4">
+                  <p className="mb-1 font-medium">Demo inloggegevens:</p>
+                  <p>E-mail: <span className="font-semibold">admin@tecnarit.com</span></p>
+                  <p>Wachtwoord: <span className="font-semibold">admin123</span></p>
                 </div>
               </form>
             </Form>
