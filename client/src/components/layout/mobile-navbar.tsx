@@ -19,7 +19,7 @@ export default function MobileNavbar() {
     } else if (location === '/candidates/new') {
       setPageTitle("Kandidaat Toevoegen");
     } else if (location.includes('search=true')) {
-      setPageTitle("Zoeken");
+      setPageTitle("Kandidaten Zoeken");
     } else if (location.includes('/candidates/') && location.includes('/edit')) {
       setPageTitle("Kandidaat Bewerken");
     } else if (location.includes('/candidates/')) {
@@ -33,10 +33,19 @@ export default function MobileNavbar() {
     logoutMutation.mutate();
   };
 
-  // Functie om naar de zoekpagina te navigeren
+  // Functie om naar de kandidaten zoekpagina te navigeren
   const goToSearch = () => {
-    // Gebruik de kandidaten zoekpagina in plaats van dashboard
-    setLocation("/candidates");
+    // Navigeer naar kandidaten pagina met zoekquery flag
+    setLocation("/");
+    // Push history state na een korte time-out om de routing de tijd te geven
+    setTimeout(() => {
+      window.history.pushState({}, "", "?search=true");
+      // Trigger handmatig de status update voor de zoekmodus
+      if (window.location.search.includes('search=true')) {
+        const searchEvent = new Event('searchmodechanged');
+        window.dispatchEvent(searchEvent);
+      }
+    }, 10);
   };
 
   // Functie om naar kandidaat toevoegen te navigeren
@@ -81,7 +90,7 @@ export default function MobileNavbar() {
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">
-                <p>Zoeken</p>
+                <p>Kandidaten Zoeken</p>
               </TooltipContent>
             </Tooltip>
 
