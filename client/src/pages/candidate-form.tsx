@@ -447,45 +447,81 @@ export default function CandidateForm() {
 
                             {/* Resume Upload */}
                             <div className="sm:col-span-6">
-                              <FormLabel>Resume / CV</FormLabel>
+                              <h2 className="text-lg font-medium text-primary-900 mb-4">CV / Resume Upload</h2>
                               <div className="mt-2">
                                 <label
                                   htmlFor="file-upload"
                                   className="relative cursor-pointer rounded-md bg-white font-medium text-primary-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-offset-2 hover:text-primary-500"
                                 >
-                                  <div className="mt-1 flex justify-center rounded-md border-2 border-dashed border-primary-300 px-6 pt-5 pb-6">
+                                  <div className="mt-1 flex justify-center rounded-md border-2 border-dashed border-primary/30 px-6 pt-5 pb-6 hover:border-primary/60 transition-colors duration-200">
                                     <div className="space-y-1 text-center">
-                                      <svg
-                                        className="mx-auto h-12 w-12 text-primary-400"
-                                        stroke="currentColor"
-                                        fill="none"
-                                        viewBox="0 0 48 48"
-                                        aria-hidden="true"
-                                      >
-                                        <path
-                                          d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                                          strokeWidth={2}
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                        />
-                                      </svg>
-                                      <div className="flex text-sm text-primary-600">
-                                        <span>Upload a file</span>
-                                        <Input
-                                          id="file-upload"
-                                          name="file-upload"
-                                          type="file"
-                                          className="sr-only"
-                                          onChange={handleResumeChange}
-                                          accept=".pdf,.doc,.docx"
-                                        />
-                                      </div>
-                                      <p className="text-xs text-primary-500">PDF, DOC up to 10MB</p>
-                                      {resumeFile && (
-                                        <p className="text-sm text-primary-700 font-medium mt-2">
-                                          Selected: {resumeFile.name}
-                                        </p>
+                                      {resumeFile ? (
+                                        <div className="flex flex-col items-center">
+                                          <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 gradient-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                          </svg>
+                                          <div className="mt-3 text-center">
+                                            <p className="text-sm gradient-text font-medium">
+                                              {resumeFile.name}
+                                            </p>
+                                            <p className="text-xs text-primary/70 mt-1">
+                                              {(resumeFile.size / 1024 / 1024).toFixed(2)} MB
+                                            </p>
+                                            <Button
+                                              type="button"
+                                              variant="outline"
+                                              size="sm"
+                                              className="mt-3"
+                                              onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setResumeFile(null);
+                                              }}
+                                            >
+                                              Change file
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <>
+                                          <svg 
+                                            xmlns="http://www.w3.org/2000/svg" 
+                                            className="mx-auto h-12 w-12 text-primary" 
+                                            viewBox="0 0 24 24" 
+                                            fill="none" 
+                                            stroke="currentColor" 
+                                            strokeWidth="2" 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round"
+                                          >
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="12" y1="18" x2="12" y2="12"></line>
+                                            <line x1="9" y1="15" x2="15" y2="15"></line>
+                                          </svg>
+                                          <div className="flex flex-col items-center mt-4">
+                                            <span className="text-sm font-medium gradient-text">Upload kandidaat CV</span>
+                                            <p className="text-xs text-primary/70 mt-1">
+                                              Drag and drop of klik om te bladeren
+                                            </p>
+                                            <p className="text-xs text-primary/60 mt-3">
+                                              PDF, DOC, DOCX tot 10MB
+                                            </p>
+                                          </div>
+                                        </>
                                       )}
+                                      <Input
+                                        id="file-upload"
+                                        name="file-upload"
+                                        type="file"
+                                        className="sr-only"
+                                        onChange={handleResumeChange}
+                                        accept=".pdf,.doc,.docx"
+                                      />
                                     </div>
                                   </div>
                                 </label>
@@ -510,16 +546,16 @@ export default function CandidateForm() {
                             </div>
                           </div>
                         </div>
-                        <div className="px-4 py-3 bg-primary-50 text-right sm:px-6">
+                        <div className="px-4 py-5 bg-gradient-to-r from-[#111827]/5 to-primary/5 text-right sm:px-6 rounded-b-lg">
                           <Button
                             type="submit"
                             disabled={isPending}
-                            className="relative"
+                            className="relative gradient-bg hover:opacity-90 transition-opacity"
                           >
                             {isPending && (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin text-white" />
                             )}
-                            {isEditMode ? "Update Candidate" : "Create Candidate"}
+                            {isEditMode ? "Kandidaat Bijwerken" : "Kandidaat Aanmaken"}
                           </Button>
                         </div>
                       </div>
