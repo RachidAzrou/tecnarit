@@ -78,11 +78,11 @@ export default function AuthPage() {
     >
       <div className="absolute inset-0 bg-black/40"></div>
       
-      <div className="z-10 w-full max-w-sm">
+      <div className="z-10 w-full max-w-md">
         <Card className="w-full border-0 bg-white rounded-lg shadow-2xl">
-          <CardContent className="p-6">
+          <CardContent className="p-8">
             <div className="flex justify-center mb-8">
-              <img src={logoWithBg} alt="TECNARIT" className="h-28 w-48 object-contain" />
+              <img src={logoWithBg} alt="TECNARIT" className="h-40 w-72 object-contain" />
             </div>
             
             <div className="text-center mb-6">
@@ -155,12 +155,6 @@ export default function AuthPage() {
                 >
                   {loginMutation.isPending ? "Bezig met inloggen..." : "Inloggen"}
                 </Button>
-                
-                <div className="bg-gray-50 rounded p-3 text-xs text-center text-gray-600 mt-4">
-                  <p className="mb-1 font-medium">Demo inloggegevens:</p>
-                  <p>E-mail: <span className="font-semibold">admin@tecnarit.com</span></p>
-                  <p>Wachtwoord: <span className="font-semibold">admin123</span></p>
-                </div>
               </form>
             </Form>
           </CardContent>
