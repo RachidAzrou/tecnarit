@@ -27,7 +27,7 @@ import { insertCandidateSchema, Candidate } from "@shared/schema";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import Sidebar from "@/components/layout/sidebar";
-import MobileHeader from "@/components/layout/mobile-header";
+// Verwijderd: import MobileHeader
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ImageCropper from "@/components/ui/image-cropper";
 
