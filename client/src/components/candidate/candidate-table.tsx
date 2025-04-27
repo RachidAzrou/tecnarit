@@ -44,7 +44,7 @@ export default function CandidateTable({ candidates }: CandidateTableProps) {
       case "interview":
         return "bg-amber-500 bg-opacity-10 text-amber-500";
       case "hired":
-        return "bg-purple-500 bg-opacity-10 text-purple-500";
+        return "bg-primary bg-opacity-10 text-primary";
       case "rejected":
         return "bg-red-500 bg-opacity-10 text-red-500";
       default:
@@ -52,14 +52,31 @@ export default function CandidateTable({ candidates }: CandidateTableProps) {
     }
   };
 
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case "active":
+        return "Active";
+      case "contacted":
+        return "Contacted";
+      case "interview":
+        return "Interview Scheduled";
+      case "hired":
+        return "Hired";
+      case "rejected":
+        return "Rejected";
+      default:
+        return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+  };
+
   return (
     <>
-      <div className="rounded-md border shadow-sm overflow-hidden mb-8">
+      <div className="rounded-md border shadow-sm overflow-hidden mb-8 tecnarit-card">
         <Table>
           <TableHeader className="bg-primary-50">
             <TableRow>
               <TableHead className="w-[300px]">Name</TableHead>
-              <TableHead>Experience</TableHead>
+              <TableHead>Years Exp.</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>LinkedIn</TableHead>
               <TableHead>Status</TableHead>
@@ -83,28 +100,25 @@ export default function CandidateTable({ candidates }: CandidateTableProps) {
                     <div className="font-medium">{candidate.firstName} {candidate.lastName}</div>
                   </div>
                 </TableCell>
-                <TableCell>{candidate.yearsOfExperience} {candidate.yearsOfExperience === 1 ? 'year' : 'years'}</TableCell>
+                <TableCell>{candidate.yearsOfExperience}</TableCell>
                 <TableCell>{candidate.email}</TableCell>
                 <TableCell>
                   {candidate.linkedinProfile ? (
                     <a 
-                      href={candidate.linkedinProfile.startsWith('http') ? candidate.linkedinProfile : `https://${candidate.linkedinProfile}`}
+                      href={candidate.linkedinProfile.startsWith('http') ? candidate.linkedinProfile : `https://${candidate.linkedinProfile}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
+                      className="text-primary hover:underline"
                     >
-                      Profile
+                      View Profile
                     </a>
                   ) : (
-                    "Not provided"
+                    <span className="text-gray-400">Not provided</span>
                   )}
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline" className={getStatusBadgeVariant(candidate.status)}>
-                    {candidate.status === "active" ? "Active" : 
-                     candidate.status === "contacted" ? "Contacted" :
-                     candidate.status === "interview" ? "Interview" :
-                     candidate.status === "hired" ? "Hired" : "Rejected"}
+                    {getStatusText(candidate.status)}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
@@ -121,7 +135,7 @@ export default function CandidateTable({ candidates }: CandidateTableProps) {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleEdit(candidate.id)}
-                      className="text-primary-500 hover:text-primary-700"
+                      className="text-primary hover:text-primary/80"
                     >
                       <PencilIcon className="h-4 w-4" />
                     </Button>

@@ -42,22 +42,22 @@ export default function Sidebar({ onClose }: SidebarProps) {
   };
 
   const navItems = [
-    { path: "/", label: "Dashboard", icon: <Home className="mr-3 h-5 w-5 text-primary-500" /> },
-    { path: "/candidates/add", label: "Kandidaat toevoegen", icon: <Users className="mr-3 h-5 w-5 text-primary-500" /> },
-    { path: "/candidates", label: "Kandidaat zoeken", icon: <Users className="mr-3 h-5 w-5 text-primary-500" /> },
-    { path: "/export", label: "Exporteer", icon: <BarChart3 className="mr-3 h-5 w-5 text-primary-500" /> },
+    { path: "/", label: "Dashboard", icon: <Home className="mr-3 h-5 w-5" /> },
+    { path: "/candidates/new", label: "Kandidaat toevoegen", icon: <Users className="mr-3 h-5 w-5" /> },
+    { path: "/candidates", label: "Kandidaat zoeken", icon: <Users className="mr-3 h-5 w-5" /> },
+    { path: "/export", label: "Exporteer", icon: <DownloadCloud className="mr-3 h-5 w-5" /> },
   ];
 
   return (
-    <div className={`flex min-h-0 flex-1 flex-col border-r border-primary-200 bg-white transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'}`}>
+    <div className={`flex min-h-0 flex-1 flex-col border-r border-border bg-card transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'}`}>
       <div className="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
         <div className="flex flex-shrink-0 items-center px-4 justify-between">
           {!collapsed && <img src={tecnaritLogo} alt="TECNARIT" className="h-12" />}
-          {collapsed && <div className="text-2xl font-bold text-primary-700">T</div>}
+          {collapsed && <div className="gradient-text text-2xl font-bold">T</div>}
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 rounded-full"
+            className="h-8 w-8 p-0 rounded-full text-primary hover:text-primary/80"
             onClick={toggleSidebar}
           >
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
@@ -70,33 +70,35 @@ export default function Sidebar({ onClose }: SidebarProps) {
               href={item.path}
               onClick={onClose}
             >
-              <a className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+              <a className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
                 isActive(item.path)
-                  ? "bg-primary-100 text-primary-900"
-                  : "text-primary-700 hover:bg-primary-100 hover:text-primary-900"
+                  ? "gradient-bg text-white font-medium"
+                  : "text-foreground hover:bg-muted"
               }`}>
-                {item.icon}
+                <span className={isActive(item.path) ? "text-white" : "text-primary"}>
+                  {item.icon}
+                </span>
                 {!collapsed && item.label}
               </a>
             </Link>
           ))}
         </nav>
       </div>
-      <div className="flex flex-shrink-0 border-t border-primary-200 p-4">
+      <div className="flex flex-shrink-0 border-t border-border p-4">
         <div className={`flex items-center ${collapsed ? 'justify-center' : 'w-full'}`}>
-          <Avatar className="h-10 w-10">
-            <AvatarImage src="https://github.com/shadcn.png" alt={user?.username} />
-            <AvatarFallback>{user?.username?.charAt(0).toUpperCase()}</AvatarFallback>
+          <Avatar className="h-10 w-10 border-2 border-primary">
+            <AvatarImage src="" alt={user?.username} />
+            <AvatarFallback className="gradient-bg text-white">{user?.username?.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="ml-3 flex-grow">
-              <p className="text-sm font-medium text-primary-700">{user?.username}</p>
+              <p className="text-sm font-medium gradient-text">{user?.username}</p>
               <Button
                 variant="link"
-                className="px-0 h-auto text-xs font-medium text-primary-500 hover:text-primary-700"
+                className="px-0 h-auto text-xs font-medium text-primary hover:text-primary/80"
                 onClick={handleLogout}
               >
-                <LogOut className="h-3 w-3 mr-1" /> Logout
+                <LogOut className="h-3 w-3 mr-1" /> Uitloggen
               </Button>
             </div>
           )}
