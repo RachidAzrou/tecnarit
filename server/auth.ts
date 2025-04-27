@@ -31,11 +31,15 @@ async function comparePasswords(supplied: string, stored: string) {
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "employeecrm-secret-key",
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
     store: storage.sessionStore,
     cookie: {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      httpOnly: true,
+      // Replit heeft veilige omgeving, maar in productie zou je dit op true moeten zetten
+      secure: false,
+      sameSite: 'lax'
     }
   };
 
@@ -116,5 +120,50 @@ export function setupAuth(app: Express) {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     const { password, ...userWithoutPassword } = req.user as SelectUser;
     res.json(userWithoutPassword);
+  });
+  
+  // Speciale route voor Firebase-authenticatie synchronisatie
+  app.post("/api/firebase-auth", async (req, res, next) => {
+    try {
+      console.log('Firebase-auth aangeroepen met:', req.body);
+      const { email, firebaseUid } = req.body;
+      
+      if (!email || !firebaseUid) {
+        console.log('Email of Firebase UID ontbreekt');
+        return res.status(400).json({ message: "Email en Firebase UID zijn vereist" });
+      }
+      
+      // Controleer of de gebruiker al bestaat
+      let user = await storage.getUserByUsername(email);
+      console.log('Bestaande gebruiker gevonden:', user ? 'Ja' : 'Nee');
+      
+      if (!user) {
+        // Als de gebruiker niet bestaat, maak een nieuwe aan met een willekeurig wachtwoord
+        // Dit wachtwoord wordt niet gebruikt, omdat we vertrouwen op Firebase-authenticatie
+        const randomPassword = randomBytes(16).toString('hex');
+        const hashedPassword = await hashPassword(randomPassword);
+        
+        user = await storage.createUser({
+          username: email,
+          password: hashedPassword,
+          name: email.split('@')[0] // Gebruik eerste deel van email als naam
+        });
+        console.log('Nieuwe gebruiker aangemaakt:', user.id);
+      }
+      
+      // Log de gebruiker in door een sessie te maken
+      req.login(user, (err) => {
+        if (err) {
+          console.log('Login error:', err);
+          return next(err);
+        }
+        console.log('Gebruiker ingelogd in sessie:', user.id);
+        const { password, ...userWithoutPassword } = user;
+        res.status(200).json(userWithoutPassword);
+      });
+    } catch (error) {
+      console.error('Error in firebase-auth route:', error);
+      next(error);
+    }
   });
 }

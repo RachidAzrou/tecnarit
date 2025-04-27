@@ -20,7 +20,7 @@ export type UserType = {
   email: string | null;
   displayName: string | null;
   photoURL: string | null;
-  username?: string;
+  username?: string | null;
 };
 
 type AuthContextType = {
@@ -51,22 +51,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Listen for Firebase auth state changes
+  // Listen for Firebase auth state changes and sync with backend
   useEffect(() => {
     const unsubscribe = subscribeToAuthChanges((firebaseUser: FirebaseUser | null) => {
-      setIsLoading(false);
-      
       if (firebaseUser) {
         // Transform Firebase user to our user type
-        setUser({
+        const transformedUser: UserType = {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           displayName: firebaseUser.displayName,
           photoURL: firebaseUser.photoURL,
           username: firebaseUser.email?.split('@')[0] || firebaseUser.displayName
+        };
+        
+        // Sync the Firebase authentication with our backend
+        fetch('/api/firebase-auth', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: firebaseUser.email,
+            firebaseUid: firebaseUser.uid,
+          }),
+          credentials: 'include',
+        })
+        .then(response => {
+          if (response.ok) {
+            console.log('Firebase auth synced with backend');
+            // Invalidate any relevant queries
+            queryClient.invalidateQueries({queryKey: ['/api/candidates']});
+          } else {
+            console.error('Failed to sync Firebase auth with backend');
+          }
+        })
+        .catch(error => {
+          console.error('Error syncing Firebase auth with backend:', error);
+        })
+        .finally(() => {
+          setUser(transformedUser);
+          setIsLoading(false);
         });
       } else {
         setUser(null);
+        setIsLoading(false);
       }
     });
 
