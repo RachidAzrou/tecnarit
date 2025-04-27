@@ -42,9 +42,9 @@ export function ProtectedRoute({
         </div>
         
         {/* Mobile logo header - centered logo voor mobiel, volledig opgevuld */}
-        <div className="lg:hidden fixed top-0 left-0 right-0 z-10 border-b border-border bg-card overflow-hidden h-14 flex items-center justify-center p-0">
+        <div className="lg:hidden fixed top-0 left-0 right-0 z-10 border-b border-border bg-[#233142] overflow-hidden h-14 flex items-center justify-center p-0">
           <div className="w-full h-full flex justify-center items-center overflow-hidden">
-            <img src={tecnaritLogo} alt="TECNARIT" className="w-full h-full object-cover" />
+            <img src={tecnaritLogo} alt="TECNARIT" className="h-full object-contain max-w-xs" />
           </div>
         </div>
         
