@@ -41,6 +41,10 @@ export default function CandidateList() {
 
   const { data: candidates, isLoading, error } = useQuery<Candidate[]>({
     queryKey: ["/api/candidates"],
+    retry: 3,
+    retryDelay: 1000,
+    // Voorkom dat 401-fouten als error worden beschouwd
+    gcTime: 0,
   });
 
   const handleAddCandidate = () => {

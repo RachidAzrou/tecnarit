@@ -115,7 +115,7 @@ export default function MobileNavbar() {
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">
-                <p>Kandidaten</p>
+                <p>Dashboard</p>
               </TooltipContent>
             </Tooltip>
 
