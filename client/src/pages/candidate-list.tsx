@@ -240,9 +240,9 @@ export default function CandidateList() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">Alle Statussen</SelectItem>
-                          <SelectItem value="active">Beschikbaar</SelectItem>
-                          <SelectItem value="unavailable">Onbeschikbaar</SelectItem>
-                          <SelectItem value="hired">In Dienst</SelectItem>
+                          <SelectItem value="beschikbaar">Beschikbaar</SelectItem>
+                          <SelectItem value="onbeschikbaar">Onbeschikbaar</SelectItem>
+                          <SelectItem value="in_dienst">In Dienst</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -272,7 +272,14 @@ export default function CandidateList() {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       {/* Totaal aantal kandidaten */}
-                      <Card className="bg-white shadow-sm">
+                      <Card 
+                        className="bg-white shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                        onClick={() => {
+                          setShowDashboard(false);
+                          setStatus("all");
+                          window.history.pushState({}, "", "?search=true");
+                        }}
+                      >
                         <CardContent className="flex flex-col items-center justify-center p-6">
                           <div className="rounded-full bg-blue-100 p-3 mb-3">
                             <Users className="h-8 w-8 text-blue-600" />
@@ -284,8 +291,15 @@ export default function CandidateList() {
                         </CardContent>
                       </Card>
                       
-                      {/* Actieve kandidaten */}
-                      <Card className="bg-white shadow-sm">
+                      {/* Beschikbare kandidaten */}
+                      <Card 
+                        className="bg-white shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                        onClick={() => {
+                          setShowDashboard(false);
+                          setStatus("beschikbaar");
+                          window.history.pushState({}, "", "?search=true&status=beschikbaar");
+                        }}
+                      >
                         <CardContent className="flex flex-col items-center justify-center p-6">
                           <div className="rounded-full bg-green-100 p-3 mb-3">
                             <Users className="h-8 w-8 text-green-600" />
@@ -295,14 +309,21 @@ export default function CandidateList() {
                             {isLoading ? (
                               <Loader2 className="h-6 w-6 animate-spin" />
                             ) : (
-                              candidates?.filter(c => c.status === "active").length || 0
+                              candidates?.filter(c => c.status === "beschikbaar").length || 0
                             )}
                           </p>
                         </CardContent>
                       </Card>
                       
                       {/* Kandidaten in dienst */}
-                      <Card className="bg-white shadow-sm">
+                      <Card 
+                        className="bg-white shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                        onClick={() => {
+                          setShowDashboard(false);
+                          setStatus("in_dienst");
+                          window.history.pushState({}, "", "?search=true&status=in_dienst");
+                        }}
+                      >
                         <CardContent className="flex flex-col items-center justify-center p-6">
                           <div className="rounded-full bg-purple-100 p-3 mb-3">
                             <Users className="h-8 w-8 text-purple-600" />
@@ -312,7 +333,7 @@ export default function CandidateList() {
                             {isLoading ? (
                               <Loader2 className="h-6 w-6 animate-spin" />
                             ) : (
-                              candidates?.filter(c => c.status === "hired").length || 0
+                              candidates?.filter(c => c.status === "in_dienst").length || 0
                             )}
                           </p>
                         </CardContent>
