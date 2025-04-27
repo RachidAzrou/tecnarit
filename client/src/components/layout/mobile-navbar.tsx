@@ -57,8 +57,8 @@ export default function MobileNavbar() {
 
   return (
     <>
-      {/* Pagina titel in mobiele header - sticky titel bij scrollen */}
-      <div className="lg:hidden bg-transparent z-5 py-2 sticky top-14">
+      {/* Pagina titel in mobiele header */}
+      <div className="lg:hidden fixed top-16 left-0 right-0 bg-transparent z-5 py-2">
         <h1 className="text-center text-2xl font-bold tecnarit-blue-text">
           {pageTitle}
         </h1>

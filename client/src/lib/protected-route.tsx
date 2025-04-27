@@ -41,15 +41,15 @@ export function ProtectedRoute({
           <Sidebar />
         </div>
         
-        {/* Mobile logo header - centered logo voor mobiel */}
-        <div className="lg:hidden fixed top-0 left-0 right-0 z-10 border-b border-border bg-[#233142] h-14 flex items-center justify-center">
-          <div className="flex-1 flex justify-center items-center h-full">
-            <img src={tecnaritLogo} alt="TECNARIT" className="h-10 w-auto object-contain" />
+        {/* Mobile logo header - centered logo voor mobiel, volledig opgevuld */}
+        <div className="lg:hidden fixed top-0 left-0 right-0 z-10 border-b border-border bg-[#233142] overflow-hidden h-14 flex items-center justify-center p-0">
+          <div className="w-full h-full flex justify-center items-center overflow-hidden">
+            <img src={tecnaritLogo} alt="TECNARIT" className="h-full object-contain max-w-xs" />
           </div>
         </div>
         
         {/* Main content */}
-        <div className="flex-1 overflow-auto pt-20 pb-20 lg:pt-0 lg:pb-4">
+        <div className="flex-1 overflow-auto pt-24 pb-20 lg:pt-0 lg:pb-4">
           <Component />
         </div>
         
