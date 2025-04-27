@@ -285,17 +285,26 @@ export default function CandidateForm() {
         <div className="flex-1 relative z-0 overflow-y-auto focus:outline-none">
           <div className="py-6">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-              <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-semibold text-primary-900">
+              <div className="text-center mb-6">
+                <h1 className="text-3xl md:text-4xl tecnarit-blue-text font-bold">
                   {isEditMode ? "Kandidaat Bewerken" : "Kandidaat Toevoegen"}
                 </h1>
-                <Button
-                  variant="outline"
-                  onClick={() => setLocation("/")}
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Terug naar Lijst
-                </Button>
+              </div>
+              
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  {/* Linker deel - hier zou eventueel een knop kunnen staan */}
+                </div>
+                <div className="flex space-x-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setLocation("/")}
+                    className="text-primary hover:text-primary-700 hover:bg-primary/5 border-primary/30"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Terug naar Lijst
+                  </Button>
+                </div>
               </div>
             </div>
 

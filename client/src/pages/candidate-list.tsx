@@ -176,10 +176,25 @@ export default function CandidateList() {
         <div className="flex-1 relative z-0 overflow-y-auto focus:outline-none">
           <div className="py-6">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-              <div className="flex justify-between items-center">
-                <h1 className="text-2xl tecnarit-blue-text">
+              <div className="text-center mb-6">
+                <h1 className="text-3xl md:text-4xl tecnarit-blue-text font-bold">
                   {showDashboard ? "Dashboard" : "Kandidaten Zoeken"}
                 </h1>
+              </div>
+              
+              {/* Aparte rij voor knoppen onder de titel */}
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  {showDashboard && (
+                    <Button 
+                      onClick={handleAddCandidate}
+                      className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Kandidaat Toevoegen
+                    </Button>
+                  )}
+                </div>
                 <div className="flex space-x-2">
                   {filteredCandidates.length > 0 && !showDashboard && (
                     <DropdownMenu>
@@ -212,17 +227,6 @@ export default function CandidateList() {
                   )}
                 </div>
               </div>
-              {showDashboard && (
-                <div className="flex justify-center mt-4 mb-6">
-                  <Button 
-                    onClick={handleAddCandidate}
-                    className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Kandidaat Toevoegen
-                  </Button>
-                </div>
-              )}
             </div>
 
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">

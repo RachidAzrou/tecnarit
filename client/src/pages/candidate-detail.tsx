@@ -94,8 +94,16 @@ export default function CandidateDetail() {
         <div className="flex-1 relative z-0 overflow-y-auto focus:outline-none">
           <div className="py-6">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-              <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-semibold gradient-text">Kandidaat Details</h1>
+              <div className="text-center mb-6">
+                <h1 className="text-3xl md:text-4xl tecnarit-blue-text font-bold">
+                  Kandidaat Details
+                </h1>
+              </div>
+              
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  {/* Linker deel - hier zou eventueel een knop kunnen staan */}
+                </div>
                 <div className="flex space-x-3">
                   <Button
                     variant="outline"
@@ -107,7 +115,7 @@ export default function CandidateDetail() {
                   </Button>
                   <Button 
                     onClick={handleEdit}
-                    className="gradient-bg hover:opacity-90 transition-opacity"
+                    className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
                   >
                     <PencilIcon className="h-4 w-4 mr-2" />
                     Bewerken
