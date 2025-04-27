@@ -280,7 +280,7 @@ export default function CandidateForm() {
       </div>
 
       <div className="flex flex-col w-0 flex-1 overflow-hidden">
-        <MobileHeader />
+        {/* Mobile header is verwijderd */}
 
         <div className="flex-1 relative z-0 overflow-y-auto focus:outline-none">
           <div className="py-6">
