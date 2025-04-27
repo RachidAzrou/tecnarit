@@ -53,8 +53,18 @@ export default function MobileNavbar() {
   };
 
   // Functie om naar kandidaten zoeken te navigeren
-  const goToDashboard = () => {
-    setLocation('/candidates');
+  const goToCandidateSearch = () => {
+    // Zelfde functionaliteit als de zoekknop maar met een duidelijkere functienaam
+    setLocation("/");
+    // Push history state na een korte time-out om de routing de tijd te geven
+    setTimeout(() => {
+      window.history.pushState({}, "", "?search=true");
+      // Trigger handmatig de status update voor de zoekmodus
+      if (window.location.search.includes('search=true')) {
+        const searchEvent = new Event('searchmodechanged');
+        window.dispatchEvent(searchEvent);
+      }
+    }, 10);
   };
 
   // Functie om naar het profiel te navigeren
@@ -116,7 +126,7 @@ export default function MobileNavbar() {
                   variant="default" 
                   size="icon" 
                   className="h-14 w-14 rounded-full tecnarit-blue-bg -mt-5 shadow-lg"
-                  onClick={goToDashboard}
+                  onClick={goToCandidateSearch}
                 >
                   <Home className="h-6 w-6" />
                 </Button>
