@@ -16,7 +16,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import tecnaritLogo from "../assets/tecnarit-logo.png";
+import logoWithBg from "@assets/Color logo with background.png";
+import blueBackground from "@assets/v915-wit-011-a.jpg";
 
 // Create Firebase login schema
 const loginSchema = z.object({
@@ -67,24 +68,96 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-secondary/95">
-      {/* Login Form Section */}
-      <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="flex justify-center mb-8">
-            <img src={tecnaritLogo} alt="TECNARIT" className="h-24 object-contain" />
+    <div className="min-h-screen flex flex-col md:flex-row bg-white">
+      {/* Hero Section - Now on the left for desktop */}
+      <div className="hidden md:flex md:flex-1 items-center justify-center relative overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat" 
+          style={{ backgroundImage: `url(${blueBackground})` }}
+        ></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#233142]/90 to-[#233142]/80"></div>
+        
+        <div className="relative z-10 max-w-xl mx-auto px-8 py-16 text-white">
+          <div className="mb-8">
+            <img src={logoWithBg} alt="TECNARIT" className="h-20 object-contain" />
           </div>
-          <h2 className="text-center text-3xl font-bold tracking-tight gradient-text">
-            Inloggen bij TECNARIT
+          
+          <h1 className="text-4xl font-bold mb-6 text-white">
+            <span className="block">EMS - Employee</span>
+            <span className="block">Management System</span>
+          </h1>
+          
+          <p className="text-xl mb-8 text-white/90">
+            Een geavanceerd platform voor het beheren van kandidaten en werknemers
+          </p>
+          
+          <div className="space-y-6 mb-8">
+            <div className="flex items-start">
+              <div className="rounded-full h-8 w-8 flex items-center justify-center bg-[#233142] border-2 border-primary mr-4 mt-1 flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-1">Efficiënt werknemersbeheer</h3>
+                <p className="text-white/80">Beheer uw kandidaten en volg hun voortgang in een intuïtieve interface</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start">
+              <div className="rounded-full h-8 w-8 flex items-center justify-center bg-[#233142] border-2 border-primary mr-4 mt-1 flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-1">Document management</h3>
+                <p className="text-white/80">Upload en organiseer CV's en andere belangrijke documenten</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start">
+              <div className="rounded-full h-8 w-8 flex items-center justify-center bg-[#233142] border-2 border-primary mr-4 mt-1 flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-1">Realtime statistieken</h3>
+                <p className="text-white/80">Krijg direct inzicht in de status van uw kandidaatpool</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="inline-flex rounded-md shadow">
+            <div className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-[#233142] bg-white hover:bg-white/90 transition">
+              Powered by TECNARIT
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Login Form Section - Now on the right for desktop */}
+      <div className="flex-1 flex flex-col justify-center py-12 px-6 sm:px-8 lg:px-12 relative">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md z-10">
+          <div className="text-center mb-10 md:hidden">
+            <img src={logoWithBg} alt="TECNARIT" className="h-20 mx-auto mb-6" />
+            <h1 className="text-2xl font-bold text-[#233142]">TECNARIT - EMS</h1>
+            <p className="text-sm text-gray-600 mt-1">Employee Management System</p>
+          </div>
+          
+          <h2 className="text-center text-3xl font-bold tecnarit-blue-text hidden md:block">
+            Welkom Terug
           </h2>
-          <p className="mt-2 text-center text-sm text-foreground">
-            Kandidaatbeheer Systeem
+          <p className="mt-2 text-center text-gray-600 text-sm hidden md:block">
+            Log in om door te gaan naar het Employee Management System
           </p>
         </div>
 
-        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          <Card className="tecnarit-card border-primary/20 shadow-lg">
-            <CardContent className="pt-6">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          <Card className="overflow-hidden shadow-xl rounded-xl border-0">
+            <div className="h-1 bg-gradient-to-r from-primary via-primary to-accent"></div>
+            <CardContent className="pt-6 p-8">
               <Form {...loginForm}>
                 <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-6">
                   <FormField
@@ -92,9 +165,14 @@ export default function AuthPage() {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>E-mailadres</FormLabel>
+                        <FormLabel className="text-[#233142] font-medium">E-mailadres</FormLabel>
                         <FormControl>
-                          <Input {...field} type="email" />
+                          <Input 
+                            {...field} 
+                            type="email" 
+                            className="rounded-lg border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary"
+                            placeholder="voer je e-mailadres in"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -106,9 +184,16 @@ export default function AuthPage() {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Wachtwoord</FormLabel>
+                        <div className="flex items-center justify-between">
+                          <FormLabel className="text-[#233142] font-medium">Wachtwoord</FormLabel>
+                        </div>
                         <FormControl>
-                          <Input type="password" {...field} />
+                          <Input 
+                            type="password" 
+                            {...field} 
+                            className="rounded-lg border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary"
+                            placeholder="voer je wachtwoord in"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -125,9 +210,10 @@ export default function AuthPage() {
                             <Checkbox
                               checked={field.value}
                               onCheckedChange={field.onChange}
+                              className="text-primary focus:ring-primary"
                             />
                           </FormControl>
-                          <FormLabel className="text-sm font-normal">Onthoud mij</FormLabel>
+                          <FormLabel className="text-sm text-gray-600 font-normal">Onthoud mij</FormLabel>
                         </FormItem>
                       )}
                     />
@@ -135,44 +221,22 @@ export default function AuthPage() {
 
                   <Button
                     type="submit"
-                    className="w-full gradient-bg hover:opacity-90 transition-opacity"
+                    className="w-full tecnarit-blue-bg py-3 rounded-lg font-medium text-white"
                     disabled={loginMutation.isPending}
                   >
                     {loginMutation.isPending ? "Bezig met inloggen..." : "Inloggen"}
                   </Button>
                   
-                  <div className="text-xs text-center text-muted-foreground mt-4">
-                    <p>Demo Inloggegevens: e-mail: <span className="font-bold">admin@tecnarit.com</span>, wachtwoord: <span className="font-bold">admin123</span></p>
+                  <div className="text-xs text-center text-gray-500 mt-4 p-3 bg-gray-50 rounded-lg">
+                    <p>Demo Inloggegevens: <br/> 
+                      E-mail: <span className="font-bold">admin@tecnarit.com</span><br/> 
+                      Wachtwoord: <span className="font-bold">admin123</span>
+                    </p>
                   </div>
                 </form>
               </Form>
             </CardContent>
           </Card>
-        </div>
-      </div>
-
-      {/* Hero Section */}
-      <div className="hidden md:flex md:flex-1 navy-bg items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-tr from-secondary/80 via-secondary/50 to-transparent"></div>
-        <div className="z-10 max-w-2xl mx-auto px-8 text-white">
-          <h1 className="text-4xl font-bold mb-4 gradient-text">TECNARIT Kandidaatbeheer</h1>
-          <p className="text-xl mb-6">
-            Een moderne, intuïtieve oplossing voor het beheren van kandidaten.
-          </p>
-          <ul className="space-y-2 mb-8">
-            <li className="flex items-center">
-              <div className="rounded-full h-6 w-6 flex items-center justify-center gradient-bg mr-2">✓</div>
-              <span>Eenvoudig kandidaten toevoegen en beheren</span>
-            </li>
-            <li className="flex items-center">
-              <div className="rounded-full h-6 w-6 flex items-center justify-center gradient-bg mr-2">✓</div>
-              <span>CV's en documenten uploaden en delen</span>
-            </li>
-            <li className="flex items-center">
-              <div className="rounded-full h-6 w-6 flex items-center justify-center gradient-bg mr-2">✓</div>
-              <span>Volg de status van ieder kandidaatproces</span>
-            </li>
-          </ul>
         </div>
       </div>
     </div>
