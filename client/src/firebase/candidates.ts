@@ -21,9 +21,11 @@ const FILES_COLLECTION = 'candidateFiles';
 // Get all candidates
 export const getCandidates = async (): Promise<Candidate[]> => {
   try {
+    console.log("Ophalen van kandidaten van Firebase...");
     const candidatesCol = collection(db, CANDIDATES_COLLECTION);
     const candidateSnapshot = await getDocs(candidatesCol);
-    return candidateSnapshot.docs.map(doc => {
+    
+    const candidates = candidateSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
         id: parseInt(doc.id),
@@ -41,6 +43,9 @@ export const getCandidates = async (): Promise<Candidate[]> => {
         createdAt: data.createdAt ? new Date(data.createdAt.toDate()) : new Date(),
       };
     });
+    
+    console.log(`${candidates.length} kandidaten opgehaald uit Firebase`);
+    return candidates;
   } catch (error) {
     console.error("Error getting candidates:", error);
     throw error;
@@ -192,33 +197,55 @@ export const updateCandidate = async (id: number, candidate: Partial<InsertCandi
 // Delete a candidate
 export const deleteCandidate = async (id: number): Promise<boolean> => {
   try {
+    console.log(`Verwijderen van kandidaat met ID: ${id}`);
+    
     // Zorg ervoor dat de gebruiker is ingelogd
     if (!auth.currentUser) {
       throw new Error("Je moet ingelogd zijn om een kandidaat te verwijderen");
     }
     
+    // Controleer eerst of de kandidaat bestaat
     const candidateRef = doc(db, CANDIDATES_COLLECTION, id.toString());
-    await deleteDoc(candidateRef);
+    const candidateSnap = await getDoc(candidateRef);
     
-    // Also delete any files related to this candidate
+    if (!candidateSnap.exists()) {
+      console.warn(`Kandidaat met ID ${id} bestaat niet meer, mogelijk al verwijderd`);
+      return true;
+    }
+    
+    // Verwijder de kandidaat uit Firestore
+    await deleteDoc(candidateRef);
+    console.log(`Kandidaat document met ID ${id} verwijderd uit Firestore`);
+    
+    // Ook alle bijbehorende bestanden verwijderen
     const filesCol = collection(db, FILES_COLLECTION);
     const q = query(filesCol, where("candidateId", "==", id));
     const filesSnapshot = await getDocs(q);
     
+    console.log(`${filesSnapshot.docs.length} bijbehorende bestanden gevonden om te verwijderen`);
+    
     const deletePromises = filesSnapshot.docs.map(async (fileDoc) => {
       const fileData = fileDoc.data();
+      const fileId = fileDoc.id;
       
-      // Delete from Storage if there's a path
+      // Verwijder uit Storage als er een pad is
       if (fileData.filePath) {
         const storageRef = ref(storage, fileData.filePath);
-        await deleteObject(storageRef);
+        try {
+          await deleteObject(storageRef);
+          console.log(`Bestand verwijderd uit Storage: ${fileData.filePath}`);
+        } catch (storageError) {
+          console.error(`Fout bij verwijderen bestand uit Storage: ${fileData.filePath}`, storageError);
+        }
       }
       
-      // Delete the file document
+      // Verwijder het document
       await deleteDoc(fileDoc.ref);
+      console.log(`Bestandsmetadata met ID ${fileId} verwijderd uit Firestore`);
     });
     
     await Promise.all(deletePromises);
+    console.log(`Kandidaat en alle bijbehorende bestanden succesvol verwijderd`);
     
     return true;
   } catch (error) {

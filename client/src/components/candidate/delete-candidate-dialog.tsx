@@ -36,7 +36,17 @@ export default function DeleteCandidateDialog({
         title: "Kandidaat verwijderd",
         description: "De kandidaat is succesvol verwijderd.",
       });
+      
+      // Invalideer alle kandidaat-gerelateerde queries om caching-problemen te voorkomen
       queryClient.invalidateQueries({queryKey: ["candidates"]});
+      
+      // Forceer de pagina om helemaal opnieuw te laden voor volledige verversing
+      setTimeout(() => {
+        window.location.href = window.location.pathname === "/candidates" 
+          ? "/candidates" 
+          : "/candidates?freshLoad=" + new Date().getTime();
+      }, 500);
+      
       onClose();
     },
     onError: (error: Error) => {
