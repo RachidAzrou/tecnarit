@@ -250,9 +250,9 @@ export default function EmployeeDetail() {
                                   </div>
                                   <div>
                                     <a href={`/${file.filePath}`} download={file.fileName} target="_blank" rel="noopener noreferrer">
-                                      <Button variant="outline" size="sm">
+                                      <Button variant="outline" size="sm" className="mobile-action-button hover-lift">
                                         <Download className="h-4 w-4 mr-2" />
-                                        Download
+                                        <span className="responsive-button-text">Download</span>
                                       </Button>
                                     </a>
                                   </div>

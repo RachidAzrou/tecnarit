@@ -103,17 +103,17 @@ export default function CandidateDetail() {
                 <div className="flex space-x-3">
                   <Button
                     onClick={handleBackToList}
-                    className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
+                    className="tecnarit-blue-bg mobile-action-button tecnarit-blue-button hover-lift"
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
-                    Dashboard
+                    <span className="responsive-button-text">Dashboard</span>
                   </Button>
                   <Button 
                     onClick={handleEdit}
-                    className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
+                    className="tecnarit-blue-bg mobile-action-button tecnarit-blue-button hover-lift"
                   >
                     <PencilIcon className="h-4 w-4 mr-2" />
-                    Bewerken
+                    <span className="responsive-button-text">Bewerken</span>
                   </Button>
                 </div>
               </div>
@@ -219,11 +219,11 @@ export default function CandidateDetail() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="mt-4"
+                              className="mt-4 mobile-action-button hover-lift"
                               onClick={handleEdit}
                             >
                               <PencilIcon className="h-4 w-4 mr-2" />
-                              CV toevoegen
+                              <span className="responsive-button-text">CV toevoegen</span>
                             </Button>
                           </div>
                         ) : (
@@ -279,10 +279,10 @@ export default function CandidateDetail() {
                                       <Button 
                                         variant="outline" 
                                         size="sm"
-                                        className="text-primary hover:text-primary-700 hover:bg-primary/5"
+                                        className="text-primary hover:text-primary-700 hover:bg-primary/5 mobile-action-button hover-lift"
                                       >
                                         <Download className="h-4 w-4 mr-2" />
-                                        Download
+                                        <span className="responsive-button-text">Download</span>
                                       </Button>
                                     </a>
                                   </div>
