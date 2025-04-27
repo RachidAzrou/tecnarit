@@ -35,16 +35,8 @@ export default function MobileNavbar() {
 
   // Functie om naar de zoekpagina te navigeren
   const goToSearch = () => {
-    setLocation("/");
-    // Push history state na een korte time-out om de routing de tijd te geven
-    setTimeout(() => {
-      window.history.pushState({}, "", "?search=true");
-      // Trigger handmatig de status update voor de zoekmodus
-      if (window.location.search.includes('search=true')) {
-        const searchEvent = new Event('searchmodechanged');
-        window.dispatchEvent(searchEvent);
-      }
-    }, 10);
+    // Gebruik de kandidaten zoekpagina in plaats van dashboard
+    setLocation("/candidates");
   };
 
   // Functie om naar kandidaat toevoegen te navigeren
@@ -54,17 +46,8 @@ export default function MobileNavbar() {
 
   // Functie om naar kandidaten zoeken te navigeren
   const goToCandidateSearch = () => {
-    // Zelfde functionaliteit als de zoekknop maar met een duidelijkere functienaam
-    setLocation("/");
-    // Push history state na een korte time-out om de routing de tijd te geven
-    setTimeout(() => {
-      window.history.pushState({}, "", "?search=true");
-      // Trigger handmatig de status update voor de zoekmodus
-      if (window.location.search.includes('search=true')) {
-        const searchEvent = new Event('searchmodechanged');
-        window.dispatchEvent(searchEvent);
-      }
-    }, 10);
+    // Gebruik precies dezelfde functionaliteit als de zoekknop voor consistentie
+    setLocation("/candidates");
   };
 
   // Functie om naar het profiel te navigeren
