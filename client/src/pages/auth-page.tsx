@@ -82,7 +82,7 @@ export default function AuthPage() {
         <Card className="w-full border-0 bg-white rounded-lg shadow-2xl">
           <CardContent className="p-6">
             <div className="flex justify-center mb-6">
-              <img src={logoWithBg} alt="TECNARIT" className="h-14 w-14" />
+              <img src={logoWithBg} alt="TECNARIT" className="h-16 w-24 object-contain" />
             </div>
             
             <div className="text-center mb-6">
