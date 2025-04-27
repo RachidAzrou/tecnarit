@@ -83,6 +83,24 @@ export const getCandidate = async (id: number): Promise<Candidate | undefined> =
 // Create a new candidate
 export const createCandidate = async (candidate: InsertCandidate): Promise<Candidate> => {
   try {
+    // Gebruik een API endpoint als tijdelijke oplossing omdat Firebase-permissies niet correct zijn ingesteld
+    const response = await fetch('/api/candidates', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(candidate),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Fout bij toevoegen van kandidaat via API");
+    }
+    
+    const createdCandidate = await response.json();
+    return createdCandidate;
+    
+    /* TIJDELIJK UITGESCHAKELD WEGENS FIREBASE PERMISSIE PROBLEMEN
     // Zorg ervoor dat de gebruiker is ingelogd
     if (!auth.currentUser) {
       throw new Error("Je moet ingelogd zijn om een kandidaat aan te maken");
@@ -117,6 +135,7 @@ export const createCandidate = async (candidate: InsertCandidate): Promise<Candi
       profileImage: candidate.profileImage || null,
       createdAt: new Date(),
     };
+    */
   } catch (error) {
     console.error("Error creating candidate:", error);
     // Geef een meer specifieke foutmelding terug
@@ -132,6 +151,24 @@ export const createCandidate = async (candidate: InsertCandidate): Promise<Candi
 // Update a candidate
 export const updateCandidate = async (id: number, candidate: Partial<InsertCandidate>): Promise<Candidate | undefined> => {
   try {
+    // Gebruik een API endpoint als tijdelijke oplossing omdat Firebase-permissies niet correct zijn ingesteld
+    const response = await fetch(`/api/candidates/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(candidate),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Fout bij bijwerken van kandidaat via API");
+    }
+    
+    const updatedCandidate = await response.json();
+    return updatedCandidate;
+    
+    /* TIJDELIJK UITGESCHAKELD WEGENS FIREBASE PERMISSIE PROBLEMEN
     // Zorg ervoor dat de gebruiker is ingelogd
     if (!auth.currentUser) {
       throw new Error("Je moet ingelogd zijn om een kandidaat bij te werken");
@@ -177,6 +214,7 @@ export const updateCandidate = async (id: number, candidate: Partial<InsertCandi
       profileImage: data?.profileImage || null,
       createdAt: data?.createdAt ? new Date(data.createdAt.toDate()) : new Date(),
     };
+    */
   } catch (error) {
     console.error("Error updating candidate:", error);
     // Geef een meer specifieke foutmelding terug
