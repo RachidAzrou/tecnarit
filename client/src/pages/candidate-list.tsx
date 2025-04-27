@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import CandidateTable from "@/components/candidate/candidate-table";
-import { Candidate } from "@shared/schema";
+import { FirebaseCandidate } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { PageTitle } from "@/components/layout/page-title";
 // Firebase import
@@ -45,7 +45,7 @@ export default function CandidateList() {
   }, []);
 
   // Directe kandidatenlijst uit Firebase (omzeilt cachingproblemen)
-  const [directCandidates, setDirectCandidates] = useState<Candidate[]>([]);
+  const [directCandidates, setDirectCandidates] = useState<FirebaseCandidate[]>([]);
   const [directLoading, setDirectLoading] = useState(false);
   
   // Deze functie haalt kandidaten direct uit Firebase op
@@ -59,8 +59,12 @@ export default function CandidateList() {
       
       const candidates = candidatesSnapshot.docs.map(doc => {
         const data = doc.data();
+        console.log(`Preparing candidate data - Document ID: ${doc.id}`);
+        
+        // Store the original document ID string
         return {
-          id: parseInt(doc.id),
+          // BELANGRIJK: We gebruiken het originele document ID als string
+          id: doc.id,
           firstName: data.firstName,
           lastName: data.lastName,
           email: data.email,
@@ -96,7 +100,7 @@ export default function CandidateList() {
   }, []);
   
   // De originele query behouden we voor compatibiliteit, maar we gebruiken deze niet actief
-  const { data: candidates, isLoadingState: queryIsLoading, error, refetch } = useQuery<Candidate[]>({
+  const { data: candidates, isLoading: queryIsLoading, error, refetch } = useQuery<FirebaseCandidate[]>({
     queryKey: ["candidates"],
     queryFn: async () => {
       await fetchDirectCandidates(); // Direct ophalen bij elke query
@@ -116,7 +120,7 @@ export default function CandidateList() {
   };
   
   // Functie voor het exporteren van kandidaten naar CSV
-  const exportToCSV = (candidates: Candidate[]) => {
+  const exportToCSV = (candidates: FirebaseCandidate[]) => {
     // Headers voor de CSV
     const headers = [
       "Voornaam", 
@@ -187,7 +191,7 @@ export default function CandidateList() {
     });
   };
 
-  const filterCandidates = (candidates: Candidate[]) => {
+  const filterCandidates = (candidates: FirebaseCandidate[]) => {
     if (!candidates) return [];
 
     // Filter by search query
@@ -230,7 +234,7 @@ export default function CandidateList() {
 
   // Prioritize direct candidates over query-fetched candidates
   const candidatesToUse = directCandidates.length > 0 ? directCandidates : (candidates || []);
-  const isLoadingStateState = directLoading || queryIsLoading;
+  const isLoadingState = directLoading || queryIsLoading;
   const filteredCandidates = candidatesToUse ? filterCandidates(candidatesToUse) : [];
 
   return (

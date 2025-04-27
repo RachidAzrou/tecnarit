@@ -51,4 +51,8 @@ export const candidateFileSchema = z.object({
 
 export type InsertCandidate = z.infer<typeof insertCandidateSchema>;
 export type Candidate = typeof candidates.$inferSelect;
+
+// Firebase aangepaste kandidaat type (werkt met string ID's)
+export type FirebaseCandidate = Omit<Candidate, 'id'> & { id: string };
+
 export type CandidateFile = z.infer<typeof candidateFileSchema>;
