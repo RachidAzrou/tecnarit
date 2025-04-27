@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Sidebar from "@/components/layout/sidebar";
-import MobileHeader from "@/components/layout/mobile-header";
+// Verwijderd: import MobileHeader
 import { Employee, EmployeeFile } from "@shared/schema";
 
 export default function EmployeeDetail() {
@@ -98,7 +98,7 @@ export default function EmployeeDetail() {
       </div>
 
       <div className="flex flex-col w-0 flex-1 overflow-hidden">
-        <MobileHeader />
+        {/* Mobile header is verwijderd */}
 
         <div className="flex-1 relative z-0 overflow-y-auto focus:outline-none">
           <div className="py-6">

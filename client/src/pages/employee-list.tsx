@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import EmployeeTable from "@/components/employee/employee-table";
 import Sidebar from "@/components/layout/sidebar";
-import MobileHeader from "@/components/layout/mobile-header";
+// Verwijderd: import MobileHeader
 import { Employee } from "@shared/schema";
 
 export default function EmployeeList() {
@@ -76,7 +76,7 @@ export default function EmployeeList() {
       </div>
 
       <div className="flex flex-col w-0 flex-1 overflow-hidden">
-        <MobileHeader />
+        {/* Mobile header is verwijderd */}
 
         <div className="flex-1 relative z-0 overflow-y-auto focus:outline-none">
           <div className="py-6">
