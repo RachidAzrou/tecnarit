@@ -38,6 +38,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
 import * as z from "zod";
 import ImageCropper from "@/components/ui/image-cropper";
+import { PageTitle } from "@/components/layout/page-title";
 
 const formSchema = insertCandidateSchema.extend({
   unavailableUntil: z.date().optional().nullable(),
@@ -318,14 +319,7 @@ export default function CandidateForm() {
     <>
       <div className="flex flex-col flex-1 py-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-          <div className="flex flex-col mb-6">
-            <div className="flex-1">
-              <h1 className="text-2xl sm:text-3xl tecnarit-blue-text font-bold text-center">
-                {isEditMode ? "Kandidaat Bewerken" : "Kandidaat Toevoegen"}
-              </h1>
-
-            </div>
-          </div>
+          <PageTitle title={isEditMode ? "Kandidaat Bewerken" : "Kandidaat Toevoegen"} />
         </div>
 
         {/* Form Container - full width with margin away from sidebar */}

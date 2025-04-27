@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import CandidateTable from "@/components/candidate/candidate-table";
 import { Candidate } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { PageTitle } from "@/components/layout/page-title";
 
 export default function CandidateList() {
   const [, setLocation] = useLocation();
@@ -171,11 +172,7 @@ export default function CandidateList() {
       <div className="relative z-0 overflow-y-auto focus:outline-none">
         <div className="py-6">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-            <div className="text-center mb-6 lg:block hidden">
-              <h1 className="text-3xl md:text-4xl tecnarit-blue-text font-bold">
-                {showDashboard ? "Dashboard" : "Kandidaat zoeken"}
-              </h1>
-            </div>
+            <PageTitle title={showDashboard ? "Dashboard" : "Kandidaat zoeken"} />
             
             {/* Aparte rij voor knoppen onder de titel */}
             <div className="flex justify-between items-center mb-6">
