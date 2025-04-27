@@ -212,6 +212,17 @@ export default function CandidateList() {
                   )}
                 </div>
               </div>
+              {showDashboard && (
+                <div className="flex justify-center mt-4 mb-6">
+                  <Button 
+                    onClick={handleAddCandidate}
+                    className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Kandidaat Toevoegen
+                  </Button>
+                </div>
+              )}
             </div>
 
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
