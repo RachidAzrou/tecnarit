@@ -9,10 +9,11 @@ import {
   DownloadCloud,
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Search
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import tecnaritLogo from "../../assets/tecnarit-logo.png";
+import tecnaritLogo from "@assets/Color logo with background.png";
 
 interface SidebarProps {
   onClose?: () => void;
@@ -31,26 +32,32 @@ export default function Sidebar({ onClose }: SidebarProps) {
     setCollapsed(!collapsed);
   };
 
-  const isActive = (path: string, label: string) => {
-    // Exact match for dashboard 
-    if (path === "/" && location === "/" && label === "Dashboard") {
+  const isActive = (id: string) => {
+    // Check for query parameters
+    const hasSearchParam = window.location.search.includes('search=true');
+    
+    // Voor Dashboard - active wanneer op root pagina zonder search param
+    if (id === "dashboard" && location === "/" && !hasSearchParam) {
       return true;
     }
-    // Exact match for candidate form
-    if (path === "/candidates/new" && location === "/candidates/new") {
+    
+    // Voor Kandidaat toevoegen
+    if (id === "candidate-add" && location === "/candidates/new") {
       return true;
     }
-    // Het "Kandidaat zoeken" menu-item moet actief zijn wanneer we op de hoofdpagina zijn, maar alleen als het label "Kandidaat zoeken" is
-    if (path === "/" && location === "/" && label === "Kandidaat zoeken") {
+    
+    // Voor Kandidaat zoeken - active wanneer search param aanwezig is
+    if (id === "candidate-search" && location === "/" && hasSearchParam) {
       return true;
     }
+    
     return false;
   };
 
   const navItems = [
     { id: "dashboard", path: "/", label: "Dashboard", icon: <Home className="mr-3 h-5 w-5" /> },
     { id: "candidate-add", path: "/candidates/new", label: "Kandidaat toevoegen", icon: <Users className="mr-3 h-5 w-5" /> },
-    { id: "candidate-search", path: "/", label: "Kandidaat zoeken", icon: <Users className="mr-3 h-5 w-5" /> },
+    { id: "candidate-search", path: "/?search=true", label: "Kandidaat zoeken", icon: <Search className="mr-3 h-5 w-5" /> },
   ];
 
   return (
@@ -108,11 +115,11 @@ export default function Sidebar({ onClose }: SidebarProps) {
               onClick={onClose}
             >
               <a className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
-                isActive(item.path, item.label)
+                isActive(item.id)
                   ? "gradient-bg text-white font-medium"
                   : "text-foreground hover:bg-muted"
               }`}>
-                <span className={isActive(item.path, item.label) ? "text-white" : "text-primary"}>
+                <span className={isActive(item.id) ? "text-white" : "text-primary"}>
                   {item.icon}
                 </span>
                 {!collapsed && item.label}
