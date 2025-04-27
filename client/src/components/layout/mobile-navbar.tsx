@@ -60,10 +60,10 @@ export default function MobileNavbar() {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className={`h-12 w-12 rounded-full ${location.includes('search=true') ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
+                  className="h-12 w-12 rounded-full text-muted-foreground"
                   onClick={goToSearch}
                 >
-                  <Search className="h-5 w-5" />
+                  <Search className={`h-5 w-5 ${location.includes('search=true') ? 'text-primary' : ''}`} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">
@@ -77,10 +77,10 @@ export default function MobileNavbar() {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className={`h-12 w-12 rounded-full ${location === '/candidates/new' ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}
+                  className="h-12 w-12 rounded-full text-muted-foreground"
                   onClick={goToAddCandidate}
                 >
-                  <Plus className="h-5 w-5" />
+                  <Plus className={`h-5 w-5 ${location === '/candidates/new' ? 'text-primary' : ''}`} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">
@@ -97,7 +97,7 @@ export default function MobileNavbar() {
                   className="h-14 w-14 rounded-full tecnarit-blue-bg -mt-5 shadow-lg"
                   onClick={goToDashboard}
                 >
-                  <Home className="h-6 w-6" />
+                  <Home className={`h-6 w-6 ${location === '/' && !location.includes('search=true') ? 'text-primary' : 'text-white'}`} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">
