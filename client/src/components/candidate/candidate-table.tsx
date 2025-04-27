@@ -13,25 +13,25 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import DeleteCandidateDialog from "./delete-candidate-dialog";
-import { Candidate } from "@shared/schema";
+import { FirebaseCandidate } from "@shared/schema";
 
 interface CandidateTableProps {
-  candidates: Candidate[];
+  candidates: FirebaseCandidate[];
 }
 
 export default function CandidateTable({ candidates }: CandidateTableProps) {
   const [, setLocation] = useLocation();
-  const [candidateToDelete, setCandidateToDelete] = useState<Candidate | null>(null);
+  const [candidateToDelete, setCandidateToDelete] = useState<FirebaseCandidate | null>(null);
 
-  const handleView = (id: number) => {
+  const handleView = (id: string) => {
     setLocation(`/candidates/${id}`);
   };
 
-  const handleEdit = (id: number) => {
+  const handleEdit = (id: string) => {
     setLocation(`/candidates/${id}/edit`);
   };
 
-  const handleDeleteClick = (candidate: Candidate) => {
+  const handleDeleteClick = (candidate: FirebaseCandidate) => {
     setCandidateToDelete(candidate);
   };
 

@@ -11,12 +11,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Candidate } from "@shared/schema";
+import { FirebaseCandidate } from "@shared/schema";
 import { deleteDoc, doc, collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebase/config";
 
 interface DeleteCandidateDialogProps {
-  candidate: Candidate | null;
+  candidate: FirebaseCandidate | null;
   open: boolean;
   onClose: () => void;
 }
@@ -69,7 +69,8 @@ export default function DeleteCandidateDialog({
       setIsDeleting(true);
       
       // Direct naar Firebase verwijderen (geen omweg via andere functies)
-      const id = candidate.id.toString(); // Zorg ervoor dat ID een string is!
+      // ID is al een string in het FirebaseCandidate type
+      const id = candidate.id;
       console.log(`[DeleteDialog] Direct verwijderen van kandidaat met ID: ${id}`);
       
       const candidateRef = doc(db, 'candidates', id);
