@@ -44,7 +44,7 @@ export default function CandidateList() {
     });
 
     // Filter by status
-    if (status) {
+    if (status && status !== "all") {
       filtered = filtered.filter(
         (candidate) => candidate.status === status
       );
@@ -123,7 +123,7 @@ export default function CandidateList() {
                         <SelectValue placeholder="Alle Statussen" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Alle Statussen</SelectItem>
+                        <SelectItem value="all">Alle Statussen</SelectItem>
                         <SelectItem value="active">Actief</SelectItem>
                         <SelectItem value="contacted">Gecontacteerd</SelectItem>
                         <SelectItem value="interview">Interview Gepland</SelectItem>
@@ -179,11 +179,11 @@ export default function CandidateList() {
                     </svg>
                     <h3 className="mt-4 text-lg font-medium text-primary-800">Geen kandidaten gevonden</h3>
                     <p className="mt-2 text-primary/70">
-                      {searchQuery || status 
+                      {searchQuery || (status && status !== "all") 
                         ? "Pas je zoekcriteria aan of verwijder filters om meer resultaten te zien." 
                         : "Voeg je eerste kandidaat toe om te beginnen."}
                     </p>
-                    {!searchQuery && !status && (
+                    {!searchQuery && (!status || status === "all") && (
                       <Button 
                         onClick={handleAddCandidate}
                         className="mt-4 gradient-bg hover:opacity-90 transition-opacity"
