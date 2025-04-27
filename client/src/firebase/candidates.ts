@@ -13,13 +13,13 @@ import {
 } from 'firebase/firestore';
 import { db, storage, auth } from './config';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { Candidate, InsertCandidate, CandidateFile } from '@shared/schema';
+import { Candidate, FirebaseCandidate, InsertCandidate, CandidateFile } from '@shared/schema';
 
 const CANDIDATES_COLLECTION = 'candidates';
 const FILES_COLLECTION = 'candidateFiles';
 
 // Get all candidates
-export const getCandidates = async (): Promise<Candidate[]> => {
+export const getCandidates = async (): Promise<FirebaseCandidate[]> => {
   try {
     console.log("Ophalen van kandidaten van Firebase...");
     const candidatesCol = collection(db, CANDIDATES_COLLECTION);
@@ -36,13 +36,11 @@ export const getCandidates = async (): Promise<Candidate[]> => {
     
     const candidates = candidateSnapshot.docs.map(doc => {
       const data = doc.data();
-      // Hier is het probleem mogelijk dat we document ID's als integers gebruiken
-      // terwijl ze in Firestore strings zijn
-      const candidateId = doc.id; // behoud het als string voor debugging
+      const candidateId = doc.id; // Behoud het als string zoals in FirebaseCandidate
       
       try {
         return {
-          id: parseInt(doc.id), // converts string to number
+          id: candidateId, // Gebruik de string ID direct
           firstName: data.firstName,
           lastName: data.lastName,
           email: data.email,
@@ -61,7 +59,7 @@ export const getCandidates = async (): Promise<Candidate[]> => {
         console.error('Document data:', data);
         return null;
       }
-    }).filter(Boolean) as Candidate[]; // verwijder null waardes
+    }).filter(Boolean) as FirebaseCandidate[]; // verwijder null waardes
     
     console.log(`${candidates.length} kandidaten opgehaald uit Firebase`);
     return candidates;
@@ -72,7 +70,7 @@ export const getCandidates = async (): Promise<Candidate[]> => {
 };
 
 // Get a single candidate by ID
-export const getCandidate = async (id: number): Promise<Candidate | undefined> => {
+export const getCandidate = async (id: string): Promise<FirebaseCandidate | undefined> => {
   try {
     const candidateDoc = doc(db, CANDIDATES_COLLECTION, id.toString());
     const candidateSnap = await getDoc(candidateDoc);
@@ -83,7 +81,7 @@ export const getCandidate = async (id: number): Promise<Candidate | undefined> =
     
     const data = candidateSnap.data();
     return {
-      id: parseInt(candidateSnap.id),
+      id: candidateSnap.id, // Gebruik het document ID als string
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
