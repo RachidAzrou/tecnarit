@@ -274,28 +274,23 @@ export default function CandidateForm() {
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-primary-50">
-      <div className="hidden lg:flex lg:flex-shrink-0 w-64">
-        <Sidebar />
-      </div>
+    <div className="min-h-screen bg-gray-50/70">
+      <div className="flex min-h-screen">
+        <div className="hidden lg:flex lg:flex-shrink-0 w-64">
+          <Sidebar />
+        </div>
 
-      <div className="flex flex-col w-0 flex-1 overflow-hidden">
-        {/* Mobile header is verwijderd */}
-
-        <div className="flex-1 relative z-0 overflow-y-auto focus:outline-none">
-          <div className="py-6">
-            <div className="mx-auto max-w-5xl px-4 sm:px-6 md:px-8">
-              <div className="text-center mb-6 lg:block hidden">
-                <h1 className="text-3xl md:text-4xl tecnarit-blue-text font-bold">
+        <div className="flex-1">
+          {/* Main Content Area */}
+          <div className="py-6 max-w-5xl mx-auto">
+            {/* Desktop Header */}
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+              <div className="text-center">
+                <h1 className="text-3xl md:text-4xl tecnarit-blue-text font-bold mb-6">
                   {isEditMode ? "Kandidaat Bewerken" : "Kandidaat Toevoegen"}
                 </h1>
-              </div>
-              
-              <div className="flex justify-center md:justify-between items-center mb-6">
-                <div>
-                  {/* Linker deel - hier zou eventueel een knop kunnen staan */}
-                </div>
-                <div className="flex space-x-3">
+                
+                <div className="flex justify-center sm:justify-end mb-6">
                   <Button
                     onClick={() => setLocation("/")}
                     className="tecnarit-blue-bg transition-all hover-lift touch-friendly"
@@ -307,21 +302,22 @@ export default function CandidateForm() {
               </div>
             </div>
 
-            <div className="mx-auto max-w-4xl px-4 sm:px-6 md:px-8">
-              <div className="py-4">
+            {/* Form Container - centering with fixed width */}
+            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="bg-white shadow-sm rounded-lg overflow-hidden">
                 {isEditMode && isCandidateLoading ? (
                   <div className="flex justify-center items-center h-64">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
                 ) : isEditMode && candidateError ? (
-                  <div className="text-center text-red-500 p-4">
+                  <div className="text-center text-red-500 p-8">
                     Error loading candidate data. Please try again.
                   </div>
                 ) : (
                   <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mx-auto">
-                      <div className="bg-white shadow-sm ring-1 ring-primary-200 sm:rounded-lg">
-                        <div className="px-4 py-5 sm:p-6">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                      <div className="p-6">
+                        <div className="py-2 sm:p-4">
                           <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                             {/* Basic Information */}
                             <div className="sm:col-span-6">
