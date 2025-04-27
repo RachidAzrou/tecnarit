@@ -7,18 +7,18 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Sidebar from "@/components/layout/sidebar";
 import { PageTitle } from "@/components/layout/page-title";
-import { Candidate, CandidateFile } from "@shared/schema";
+import { FirebaseCandidate, CandidateFile } from "@shared/schema";
 import { getCandidate, getCandidateFiles } from "@/firebase/candidates";
 
 export default function CandidateDetail() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
 
-  const { data: candidate, isLoading: isCandidateLoading } = useQuery<Candidate>({
+  const { data: candidate, isLoading: isCandidateLoading } = useQuery<FirebaseCandidate>({
     queryKey: [`candidates/${params.id}`],
     queryFn: async () => {
       if (!params.id) throw new Error("No candidate ID provided");
-      return await getCandidate(parseInt(params.id));
+      return await getCandidate(params.id);
     },
   });
 
@@ -26,7 +26,7 @@ export default function CandidateDetail() {
     queryKey: [`candidates/${params.id}/files`],
     queryFn: async () => {
       if (!params.id) throw new Error("No candidate ID provided");
-      return await getCandidateFiles(parseInt(params.id));
+      return await getCandidateFiles(params.id);
     },
   });
 

@@ -443,7 +443,7 @@ export const getCandidatesByStatus = async (status: string): Promise<FirebaseCan
     return candidateSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
-        id: parseInt(doc.id),
+        id: doc.id, // Gebruik string ID
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
