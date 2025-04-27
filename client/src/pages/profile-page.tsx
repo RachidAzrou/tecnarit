@@ -72,7 +72,7 @@ export default function ProfilePage() {
 
   return (
     <div className="container max-w-4xl py-6 sm:py-10">
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 lg:block hidden">
         <h1 className="text-3xl md:text-4xl tecnarit-blue-text font-bold">Jouw Profiel</h1>
       </div>
 
