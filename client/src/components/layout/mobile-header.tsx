@@ -10,8 +10,8 @@ export default function MobileHeader() {
 
   return (
     <div className="flex items-center justify-between border-b border-border bg-card px-4 py-2 lg:hidden">
-      <div className="flex-1 flex justify-center items-center">
-        <img src={tecnaritLogo} alt="TECNARIT" className="h-10 object-contain max-w-full" />
+      <div className="flex-1 flex justify-center items-center h-12 overflow-hidden">
+        <img src={tecnaritLogo} alt="TECNARIT" className="h-full w-full object-contain" />
       </div>
       <div>
         <Sheet open={open} onOpenChange={setOpen}>
