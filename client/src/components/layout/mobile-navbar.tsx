@@ -44,10 +44,10 @@ export default function MobileNavbar() {
     setLocation('/candidates/new');
   };
 
-  // Functie om naar kandidaten zoeken te navigeren
-  const goToCandidateSearch = () => {
-    // Gebruik precies dezelfde functionaliteit als de zoekknop voor consistentie
-    setLocation("/candidates");
+  // Functie om naar dashboard te navigeren
+  const goToDashboard = () => {
+    // Navigeer naar de dashboard pagina (startpagina)
+    setLocation("/");
   };
 
   // Functie om naar het profiel te navigeren
@@ -109,7 +109,7 @@ export default function MobileNavbar() {
                   variant="default" 
                   size="icon" 
                   className="h-14 w-14 rounded-full tecnarit-blue-bg -mt-5 shadow-lg"
-                  onClick={goToCandidateSearch}
+                  onClick={goToDashboard}
                 >
                   <Home className="h-6 w-6" />
                 </Button>
