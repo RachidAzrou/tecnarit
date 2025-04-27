@@ -25,24 +25,43 @@ export const getCandidates = async (): Promise<Candidate[]> => {
     const candidatesCol = collection(db, CANDIDATES_COLLECTION);
     const candidateSnapshot = await getDocs(candidatesCol);
     
+    console.log(`Ruwe kandidaat documenten gevonden: ${candidateSnapshot.size}`);
+    
+    // Debug info over elke kandidaat
+    candidateSnapshot.docs.forEach((doc, index) => {
+      console.log(`Kandidaat document ${index+1}:`);
+      console.log(`  - Document ID: ${doc.id}`);
+      console.log(`  - Data:`, doc.data());
+    });
+    
     const candidates = candidateSnapshot.docs.map(doc => {
       const data = doc.data();
-      return {
-        id: parseInt(doc.id),
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        phone: data.phone || null,
-        linkedinProfile: data.linkedinProfile || null,
-        yearsOfExperience: data.yearsOfExperience || null,
-        status: data.status || 'beschikbaar',
-        unavailableUntil: data.unavailableUntil ? new Date(data.unavailableUntil) : null,
-        client: data.client || null,
-        notes: data.notes || null,
-        profileImage: data.profileImage || null,
-        createdAt: data.createdAt ? new Date(data.createdAt.toDate()) : new Date(),
-      };
-    });
+      // Hier is het probleem mogelijk dat we document ID's als integers gebruiken
+      // terwijl ze in Firestore strings zijn
+      const candidateId = doc.id; // behoud het als string voor debugging
+      
+      try {
+        return {
+          id: parseInt(doc.id), // converts string to number
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          phone: data.phone || null,
+          linkedinProfile: data.linkedinProfile || null,
+          yearsOfExperience: data.yearsOfExperience || null,
+          status: data.status || 'beschikbaar',
+          unavailableUntil: data.unavailableUntil ? new Date(data.unavailableUntil) : null,
+          client: data.client || null,
+          notes: data.notes || null,
+          profileImage: data.profileImage || null,
+          createdAt: data.createdAt ? new Date(data.createdAt.toDate()) : new Date(),
+        };
+      } catch (err) {
+        console.error(`Fout bij verwerken van kandidaat document ${candidateId}:`, err);
+        console.error('Document data:', data);
+        return null;
+      }
+    }).filter(Boolean) as Candidate[]; // verwijder null waardes
     
     console.log(`${candidates.length} kandidaten opgehaald uit Firebase`);
     return candidates;
@@ -204,12 +223,22 @@ export const deleteCandidate = async (id: number): Promise<boolean> => {
       throw new Error("Je moet ingelogd zijn om een kandidaat te verwijderen");
     }
     
-    // Controleer eerst of de kandidaat bestaat
+    // Controleer eerst of de kandidaat bestaat - debug info toevoegen
     const candidateRef = doc(db, CANDIDATES_COLLECTION, id.toString());
+    console.log(`Zoeken naar kandidaat document in collectie '${CANDIDATES_COLLECTION}' met ID: ${id.toString()}`);
     const candidateSnap = await getDoc(candidateRef);
     
     if (!candidateSnap.exists()) {
-      console.warn(`Kandidaat met ID ${id} bestaat niet meer, mogelijk al verwijderd`);
+      console.warn(`Kandidaat met ID ${id} bestaat niet in Firebase. Probeer eerst alle kandidaten op te halen om debugging informatie te tonen.`);
+      
+      // Haal alle kandidaten op voor debugging
+      const candidatesCollection = collection(db, CANDIDATES_COLLECTION);
+      const allCandidatesSnap = await getDocs(candidatesCollection);
+      console.log(`Er zijn in totaal ${allCandidatesSnap.size} kandidaten in de collectie`);
+      allCandidatesSnap.forEach(doc => {
+        console.log(`Kandidaat gevonden met ID: ${doc.id}, naam: ${doc.data().firstName} ${doc.data().lastName}`);
+      });
+      
       return true;
     }
     
