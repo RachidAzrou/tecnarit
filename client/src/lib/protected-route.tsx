@@ -1,9 +1,9 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { Redirect, Route, useLocation } from "wouter";
-import MobileHeader from "@/components/layout/mobile-header";
 import MobileNavbar from "@/components/layout/mobile-navbar";
 import Sidebar from "@/components/layout/sidebar";
+import tecnaritLogo from "../assets/tecnarit-logo.png";
 
 export function ProtectedRoute({
   path,
@@ -41,11 +41,15 @@ export function ProtectedRoute({
           <Sidebar />
         </div>
         
-        {/* Mobile header */}
-        <MobileHeader />
+        {/* Mobile logo header - centered logo voor mobiel */}
+        <div className="lg:hidden fixed top-0 left-0 right-0 z-10 flex items-center justify-center border-b border-border bg-card px-4 py-2">
+          <div className="flex-1 flex justify-center items-center h-12 overflow-hidden">
+            <img src={tecnaritLogo} alt="TECNARIT" className="h-full w-full object-contain" />
+          </div>
+        </div>
         
         {/* Main content */}
-        <div className="flex-1 overflow-auto pb-20 lg:pb-4">
+        <div className="flex-1 overflow-auto pt-16 pb-20 lg:pt-0 lg:pb-4">
           <Component />
         </div>
         
