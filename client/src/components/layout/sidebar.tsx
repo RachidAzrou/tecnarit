@@ -31,29 +31,26 @@ export default function Sidebar({ onClose }: SidebarProps) {
     setCollapsed(!collapsed);
   };
 
-  const isActive = (path: string) => {
-    // Exact match for dashboard
-    if (path === "/" && location === "/") {
+  const isActive = (path: string, label: string) => {
+    // Exact match for dashboard 
+    if (path === "/" && location === "/" && label === "Dashboard") {
       return true;
     }
-    // Exact match for other paths to avoid multiple selections
+    // Exact match for candidate form
     if (path === "/candidates/new" && location === "/candidates/new") {
       return true;
     }
-    if (path === "/candidates" && location === "/candidates") {
-      return true;
-    }
-    if (path === "/export" && location === "/export") {
+    // Het "Kandidaat zoeken" menu-item moet actief zijn wanneer we op de hoofdpagina zijn, maar alleen als het label "Kandidaat zoeken" is
+    if (path === "/" && location === "/" && label === "Kandidaat zoeken") {
       return true;
     }
     return false;
   };
 
   const navItems = [
-    { path: "/", label: "Dashboard", icon: <Home className="mr-3 h-5 w-5" /> },
-    { path: "/candidates/new", label: "Kandidaat toevoegen", icon: <Users className="mr-3 h-5 w-5" /> },
-    { path: "/candidates", label: "Kandidaat zoeken", icon: <Users className="mr-3 h-5 w-5" /> },
-    { path: "/export", label: "Exporteer", icon: <DownloadCloud className="mr-3 h-5 w-5" /> },
+    { id: "dashboard", path: "/", label: "Dashboard", icon: <Home className="mr-3 h-5 w-5" /> },
+    { id: "candidate-add", path: "/candidates/new", label: "Kandidaat toevoegen", icon: <Users className="mr-3 h-5 w-5" /> },
+    { id: "candidate-search", path: "/", label: "Kandidaat zoeken", icon: <Users className="mr-3 h-5 w-5" /> },
   ];
 
   return (
@@ -106,16 +103,16 @@ export default function Sidebar({ onClose }: SidebarProps) {
         <nav className="flex-1 space-y-1 px-2">
           {navItems.map((item) => (
             <Link 
-              key={item.path} 
+              key={item.id} 
               href={item.path}
               onClick={onClose}
             >
               <a className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
-                isActive(item.path)
+                isActive(item.path, item.label)
                   ? "gradient-bg text-white font-medium"
                   : "text-foreground hover:bg-muted"
               }`}>
-                <span className={isActive(item.path) ? "text-white" : "text-primary"}>
+                <span className={isActive(item.path, item.label) ? "text-white" : "text-primary"}>
                   {item.icon}
                 </span>
                 {!collapsed && item.label}
