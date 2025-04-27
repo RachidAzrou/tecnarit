@@ -173,7 +173,7 @@ export default function CandidateList() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
             <div className="text-center mb-6 lg:block hidden">
               <h1 className="text-3xl md:text-4xl tecnarit-blue-text font-bold">
-                {showDashboard ? "Dashboard" : "Kandidaten Zoeken"}
+                {showDashboard ? "Dashboard" : "Kandidaat zoeken"}
               </h1>
             </div>
             
@@ -382,20 +382,21 @@ export default function CandidateList() {
                   <div className="flex justify-center items-center h-48 sm:h-64 glass-effect rounded-lg">
                     <Loader2 className="h-8 w-8 animate-spin gradient-text" />
                   </div>
-                ) : error ? (
-                  <div className="text-center p-6 sm:p-8 border-2 border-red-300 rounded-lg glass-effect-green bg-red-50/80">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="12" y1="8" x2="12" y2="12"></line>
-                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                ) : error && error.message !== "Session expired" ? (
+                  <div className="text-center py-12 sm:py-16 px-4 border-2 border-dashed border-primary/30 rounded-lg glass-effect">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-primary/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                    <h3 className="mt-4 text-lg font-medium text-red-800">Fout bij het laden van kandidaten</h3>
-                    <p className="mt-2 text-red-700">Probeer het later opnieuw of neem contact op met ondersteuning.</p>
+                    <h3 className="mt-4 text-lg font-medium text-primary/80">Geen kandidaten gevonden</h3>
+                    <p className="mt-2 text-primary/70 max-w-md mx-auto">
+                      Voeg je eerste kandidaat toe om te beginnen.
+                    </p>
                     <Button 
                       onClick={() => window.location.reload()} 
-                      className="mt-4 bg-red-600 hover:bg-red-700 hover-lift touch-friendly"
+                      className="mt-4 tecnarit-blue-bg hover-lift touch-friendly"
                     >
-                      Opnieuw proberen
+                      Vernieuwen
                     </Button>
                   </div>
                 ) : filteredCandidates.length === 0 ? (
