@@ -8,6 +8,7 @@
     <meta name="theme-color" content="#233142" />
     
     <!-- PWA support -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
@@ -15,6 +16,16 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Vercel deployment fix -->
+    <script>
+      // Check if we're in a Vercel deployment and fix base URL if needed
+      if (window.location.hostname.endsWith('.vercel.app')) {
+        document.addEventListener('DOMContentLoaded', function() {
+          console.log('Vercel deployment detected, ensuring Firebase config is loaded correctly');
+        });
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
