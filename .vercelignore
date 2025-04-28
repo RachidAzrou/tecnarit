@@ -1,10 +1,18 @@
+# Vercel build bestanden
 node_modules
+.git
+.vercel
 .env
 .DS_Store
-server/
-uploads/
-.git/
-.replit
-README.md
-shared/
-*.log
+
+# Oude build bestanden en tijdelijke bestanden
+dist
+coverage
+.cache
+.turbo
+
+# Vercel deploy config (alles buiten client)
+vercel-deploy
+server
+shared
+uploads
