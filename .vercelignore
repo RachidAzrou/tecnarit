@@ -1,0 +1,10 @@
+# Negeer de server directory volledig
+server/
+
+# Negeer database gerelateerde bestanden
+*.db
+*.sqlite
+*.sqlite3
+
+# Negeer backend gerelateerde configuraties
+drizzle.config.ts
