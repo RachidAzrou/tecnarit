@@ -1,5 +1,5 @@
 // Service Worker voor TECNARIT - EMS
-const APP_VERSION = '1.2.3';
+const APP_VERSION = '1.2.4';
 const CACHE_NAME = `tecnarit-ems-v${APP_VERSION}`;
 const OFFLINE_URL = '/offline.html';
 
@@ -9,9 +9,9 @@ const urlsToCache = [
   '/index.html',
   '/favicon.png',
   '/favicon.svg',
-  '/logo192.png',
-  '/logo512.png',
-  '/apple-touch-icon.png',
+  '/favicon.png',
+  '/favicon.png',
+  '/iPhone.png',
   '/manifest.json',
   '/offline.html',
 ];

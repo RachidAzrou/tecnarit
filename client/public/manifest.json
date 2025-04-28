@@ -1,7 +1,7 @@
 {
   "short_name": "TECNARIT EMS",
   "name": "TECNARIT Employee Management System",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "icons": [
     {
       "src": "favicon.svg",
@@ -16,19 +16,19 @@
       "purpose": "any"
     },
     {
-      "src": "logo192.png",
+      "src": "favicon.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "logo512.png",
+      "src": "favicon.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
     },
     {
-      "src": "apple-touch-icon.png",
+      "src": "iPhone.png",
       "type": "image/png",
       "sizes": "180x180",
       "purpose": "any"

@@ -117,25 +117,43 @@ export default function CandidateForm() {
   // Mutations voor toevoegen/bijwerken van kandidaten
   const createMutation = useMutation({
     mutationFn: async (formData: FormValues) => {
-      // Gebruik Firebase in plaats van de API
-      const result = await createCandidate(formData);
-      if (!result) throw new Error("Failed to create candidate");
-      return result;
+      try {
+        // Gebruik Firebase in plaats van de API
+        const result = await createCandidate(formData);
+        if (!result) throw new Error("Failed to create candidate");
+        return result;
+      } catch (error) {
+        console.error("Error in createMutation:", error);
+        throw error; // Zorg dat de error doorgaat naar onError handler
+      }
     },
     onSuccess: async (data: FirebaseCandidate) => {
-      // Upload CV als die is geselecteerd
-      if (resumeFile) {
-        await addCandidateFile(data.id, resumeFile, "CV");
-      }
+      try {
+        // Upload CV als die is geselecteerd
+        if (resumeFile) {
+          await addCandidateFile(data.id, resumeFile, "CV");
+        }
 
-      queryClient.invalidateQueries({ queryKey: ["candidates"] });
-      toast({
-        title: "Kandidaat Toegevoegd",
-        description: `${data.firstName} ${data.lastName} is toegevoegd aan het systeem.`,
-      });
-      setLocation("/");
+        queryClient.invalidateQueries({ queryKey: ["candidates"] });
+        toast({
+          title: "Kandidaat Toegevoegd",
+          description: `${data.firstName} ${data.lastName} is toegevoegd aan het systeem.`,
+        });
+        // Kleine vertraging toevoegen om te zorgen dat de toast zichtbaar is voordat we navigeren
+        setTimeout(() => setLocation("/"), 500);
+      } catch (uploadError) {
+        console.error("Error during post-creation steps:", uploadError);
+        // Toch doorgaan met navigeren bij CV upload fout
+        queryClient.invalidateQueries({ queryKey: ["candidates"] });
+        toast({
+          title: "Kandidaat Toegevoegd",
+          description: `${data.firstName} ${data.lastName} is toegevoegd, maar CV kon niet worden geüpload.`,
+        });
+        setTimeout(() => setLocation("/"), 500);
+      }
     },
     onError: (error: Error) => {
+      console.error("Create mutation error handler triggered:", error);
       toast({
         title: "Fout bij toevoegen",
         description: error.message || "Er is een fout opgetreden tijdens het toevoegen van de kandidaat.",
