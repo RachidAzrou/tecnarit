@@ -16,8 +16,8 @@
       ]
     }
   ],
-  "buildCommand": "vite build",
+  "buildCommand": "cd client && npm install && npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "ignoreCommand": "find server -type f -name \"*.ts\" | grep -q \"\" && exit 1 || exit 0"
+  "installCommand": "npm install"
 }
