@@ -252,15 +252,7 @@ export default function CandidateList() {
                 {/* Linker deel leeg gelaten */}
               </div>
               <div className="flex space-x-2">
-                {showDashboard && (
-                  <Button 
-                    onClick={handleAddCandidate}
-                    className="tecnarit-blue-bg mobile-action-button tecnarit-blue-button hover-lift mr-2"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    <span className="responsive-button-text">Kandidaat Toevoegen</span>
-                  </Button>
-                )}
+                {/* 'Kandidaat Toevoegen' knop verwijderd */}
                 {filteredCandidates.length > 0 && !showDashboard && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
