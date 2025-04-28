@@ -59,6 +59,8 @@ export default function CandidateForm() {
   const isEditMode = !!id;
   const { toast } = useToast();
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
   const [resumeFileName, setResumeFileName] = useState<string | null>(null);
 
   // Query om kandidaat gegevens op te halen indien we in wijzigingsmodus zijn
@@ -131,7 +133,21 @@ export default function CandidateForm() {
       try {
         // Upload CV als die is geselecteerd
         if (resumeFile) {
-          await addCandidateFile(data.id, resumeFile, "CV");
+          setIsUploading(true);
+          setUploadProgress(0);
+          
+          // Voeg de progress callback toe
+          await addCandidateFile(
+            data.id, 
+            resumeFile, 
+            "CV",
+            (progress) => {
+              console.log(`Upload voortgang: ${progress}%`);
+              setUploadProgress(progress);
+            }
+          );
+          
+          setIsUploading(false);
         }
 
         queryClient.invalidateQueries({ queryKey: ["candidates"] });
@@ -143,6 +159,10 @@ export default function CandidateForm() {
         setTimeout(() => setLocation("/"), 500);
       } catch (uploadError) {
         console.error("Error during post-creation steps:", uploadError);
+        // Reset upload state
+        setIsUploading(false);
+        setUploadProgress(0);
+        
         // Toch doorgaan met navigeren bij CV upload fout
         queryClient.invalidateQueries({ queryKey: ["candidates"] });
         toast({

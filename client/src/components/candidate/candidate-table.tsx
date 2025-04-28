@@ -71,8 +71,8 @@ export default function CandidateTable({ candidates }: CandidateTableProps) {
   };
 
   // Formateer LinkedIn URL correct
-  const formatLinkedInUrl = (url: string | null) => {
-    if (!url) return null;
+  const formatLinkedInUrl = (url: string | null): string => {
+    if (!url) return '#'; // Geef een veilige fallback URL terug
     return url.startsWith('http') ? url : `https://${url}`;
   };
 

@@ -12,7 +12,15 @@ import {
   Timestamp 
 } from 'firebase/firestore';
 import { db, storage, auth } from './config';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { 
+  ref, 
+  uploadBytes, 
+  uploadBytesResumable, 
+  getDownloadURL, 
+  deleteObject, 
+  UploadTask,
+  UploadTaskSnapshot
+} from 'firebase/storage';
 import { Candidate, FirebaseCandidate, InsertCandidate, CandidateFile } from '@/firebase/schema';
 
 const CANDIDATES_COLLECTION = 'candidates';
@@ -320,50 +328,111 @@ export const uploadProfileImage = async (candidateId: string, file: File): Promi
   }
 };
 
-// Add candidate file (document like CV)
+// Add candidate file (document like CV) met uploadvoortgang
 export const addCandidateFile = async (
   candidateId: string, 
   file: File, 
-  fileName: string
+  fileName: string,
+  onProgress?: (percentage: number) => void
 ): Promise<CandidateFile> => {
   try {
     // Zorg ervoor dat de gebruiker is ingelogd
     if (!auth.currentUser) {
       throw new Error("Je moet ingelogd zijn om bestanden te uploaden");
     }
+
+    // Controleer bestandsgrootte vooraf
+    if (file.size > 10 * 1024 * 1024) { // 10MB limiet
+      throw new Error("Bestand is te groot, maximale grootte is 10MB");
+    }
     
-    const storageRef = ref(storage, `candidates/${candidateId}/documents/${file.name}`);
-    await uploadBytes(storageRef, file);
-    const downloadURL = await getDownloadURL(storageRef);
+    // Upload vooruitgang melden
+    onProgress?.(10);
     
-    // Save file metadata in Firestore
+    // Voeg timestamp toe aan bestandsnaam om unieke namen te garanderen
+    const timestamp = new Date().getTime();
+    const fileNameWithTimestamp = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+    const filePath = `candidates/${candidateId}/documents/${fileNameWithTimestamp}`;
+    
+    // Metadata opslaan
     const filesCol = collection(db, FILES_COLLECTION);
-    const docRef = await addDoc(filesCol, {
+    const tempDocRef = await addDoc(filesCol, {
       candidateId,
       fileName,
       fileType: file.type,
-      filePath: `candidates/${candidateId}/documents/${file.name}`,
-      fileUrl: downloadURL,
+      filePath: filePath,
+      fileUrl: 'pending', // Tijdelijke waarde
       fileSize: file.size,
       uploadDate: serverTimestamp(),
-      uploadedBy: auth.currentUser.uid
+      uploadedBy: auth.currentUser.uid,
+      status: 'uploading',
     });
     
-    return {
-      id: parseInt(docRef.id),
-      candidateId,
-      fileName,
-      fileType: file.type,
-      filePath: `candidates/${candidateId}/documents/${file.name}`,
-      fileSize: file.size,
-      uploadDate: new Date(),
-    };
+    onProgress?.(30);
+    
+    // Upload starten met voortgangsinformatie
+    const storageRef = ref(storage, filePath);
+    
+    const uploadTask = uploadBytesResumable(storageRef, file);
+    
+    // Functie om uploadvoortgang te volgen
+    return new Promise<CandidateFile>((resolve, reject) => {
+      uploadTask.on(
+        'state_changed', 
+        // Voortgang bijhouden
+        (snapshot: UploadTaskSnapshot) => {
+          const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 50) + 30;
+          onProgress?.(progress);
+        },
+        // Fout afhandelen
+        (error) => {
+          console.error('Upload error:', error);
+          reject(error);
+        },
+        // Voltooid
+        async () => {
+          try {
+            // URL ophalen
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            
+            onProgress?.(90);
+            
+            // Update document met URL
+            await updateDoc(doc(db, FILES_COLLECTION, tempDocRef.id), {
+              fileUrl: downloadURL,
+              status: 'completed'
+            });
+            
+            onProgress?.(100);
+            
+            // Resultaat teruggeven
+            resolve({
+              id: parseInt(tempDocRef.id),
+              candidateId,
+              fileName,
+              fileType: file.type,
+              filePath,
+              fileSize: file.size,
+              uploadDate: new Date(),
+            });
+          } catch (error) {
+            console.error('Error getting download URL:', error);
+            reject(error);
+          }
+        }
+      );
+    });
   } catch (error) {
     console.error("Error adding candidate file:", error);
+    
     // Geef een meer specifieke foutmelding terug
     if (error instanceof Error) {
       if (error.message.includes("permission")) {
         throw new Error("Onvoldoende rechten. Controleer of je bent ingelogd en de juiste rechten hebt.");
+      } else if (error.message.includes("network")) {
+        throw new Error("Netwerkfout. Controleer je internetverbinding en probeer het opnieuw.");
+      } else if (error.message.includes("storage/quota-exceeded")) {
+        throw new Error("Opslaglimiet bereikt. Neem contact op met de systeembeheerder.");
       }
     }
     throw error;
