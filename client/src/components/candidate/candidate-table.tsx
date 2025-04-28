@@ -63,16 +63,16 @@ export default function CandidateTable({ candidates }: CandidateTableProps) {
 
   return (
     <>
-      <div className="rounded-md border shadow-sm overflow-hidden mb-8 tecnarit-card">
+      <div className="rounded-md overflow-hidden mb-8 border border-gray-200">
         <Table>
-          <TableHeader className="bg-primary-50">
+          <TableHeader className="bg-gradient-to-r from-[#233142] to-[#4da58e]">
             <TableRow>
-              <TableHead className="w-[300px]">Naam</TableHead>
-              <TableHead>Jaren Erv.</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>LinkedIn</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Acties</TableHead>
+              <TableHead className="w-[300px] font-medium text-white uppercase text-xs tracking-wider">Naam</TableHead>
+              <TableHead className="font-medium text-white uppercase text-xs tracking-wider">Jaren Erv.</TableHead>
+              <TableHead className="font-medium text-white uppercase text-xs tracking-wider">Email</TableHead>
+              <TableHead className="font-medium text-white uppercase text-xs tracking-wider">LinkedIn</TableHead>
+              <TableHead className="font-medium text-white uppercase text-xs tracking-wider">Status</TableHead>
+              <TableHead className="text-right font-medium text-white uppercase text-xs tracking-wider">Acties</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -149,14 +149,14 @@ export default function CandidateTable({ candidates }: CandidateTableProps) {
       
       {/* Pagination - Simplified for this implementation */}
       <div className="flex items-center justify-between">
-        <div className="text-sm text-primary-700">
-          Toont <span className="font-medium">1</span> tot <span className="font-medium">{candidates.length}</span> van <span className="font-medium">{candidates.length}</span> resultaten
+        <div className="text-sm text-[#233142]/70">
+          Toont <span className="font-medium text-[#233142]">1</span> tot <span className="font-medium text-[#233142]">{candidates.length}</span> van <span className="font-medium text-[#233142]">{candidates.length}</span> resultaten
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" disabled>
+          <Button variant="outline" disabled className="border-[#233142]/20 text-[#233142]/40">
             Vorige
           </Button>
-          <Button variant="outline" disabled>
+          <Button variant="outline" disabled className="border-[#233142]/20 text-[#233142]/40">
             Volgende
           </Button>
         </div>

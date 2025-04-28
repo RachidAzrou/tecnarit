@@ -225,7 +225,7 @@ export default function AuthPage() {
         
         {/* App versie informatie */}
         <div className="text-center mt-4 text-sm text-white/80">
-          <p>TECNARIT EMS v1.2.2</p>
+          <p>TECNARIT EMS v1.2.3</p>
         </div>
       </div>
     </div>

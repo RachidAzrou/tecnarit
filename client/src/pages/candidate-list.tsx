@@ -276,15 +276,7 @@ export default function CandidateList() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
-                {!showDashboard && (
-                  <Button 
-                    onClick={handleAddCandidate}
-                    className="tecnarit-blue-bg mobile-action-button tecnarit-blue-button hover-lift"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    <span className="responsive-button-text">Kandidaat Toevoegen</span>
-                  </Button>
-                )}
+                {/* Tweede 'Kandidaat Toevoegen' knop verwijderd */}
               </div>
             </div>
           </div>
@@ -437,7 +429,7 @@ export default function CandidateList() {
                   
                   {/* Recente kandidaten tabel */}
                   <div className="flex justify-between items-center mt-8 mb-4">
-                    <h2 className="text-xl tecnarit-blue-text">Recente Kandidaten</h2>
+                    <h2 className="text-lg font-semibold uppercase tracking-wider text-[#233142] pb-1 border-b-2 border-[#4da58e]">Recente Kandidaten</h2>
                     {/* Knop verwijderd op verzoek */}
                   </div>
                   {isLoadingState ? (
@@ -449,9 +441,15 @@ export default function CandidateList() {
                       <CandidateTable candidates={candidatesToUse.slice(0, 5)} />
                     </div>
                   ) : (
-                    <div className="text-center py-8 px-4 border-2 border-dashed border-primary/30 rounded-lg glass-effect">
-                      <h3 className="mt-2 text-lg font-medium text-primary-800">Geen kandidaten beschikbaar</h3>
-                      <p className="mt-2 text-primary/70">
+                    <div className="text-center py-12 px-4 border border-dashed border-[#4da58e] rounded-lg bg-gradient-to-br from-[#f8f9fa] to-white">
+                      <div className="bg-[#EDF7F5] p-2 rounded-full inline-flex mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-[#4da58e]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="11" cy="11" r="8"></circle>
+                          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                      </div>
+                      <h3 className="text-xl font-medium text-[#233142]">Geen kandidaten beschikbaar</h3>
+                      <p className="mt-2 text-[#545e6b]">
                         Voeg uw eerste kandidaat toe om te beginnen.
                       </p>
                       {/* Knop verwijderd op verzoek */}
@@ -465,31 +463,35 @@ export default function CandidateList() {
                     <Loader2 className="h-8 w-8 animate-spin gradient-text" />
                   </div>
                 ) : error && error.message !== "Session expired" ? (
-                  <div className="text-center py-12 sm:py-16 px-4 border-2 border-dashed border-primary/30 rounded-lg glass-effect">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-primary/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="11" cy="11" r="8"></circle>
-                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <h3 className="mt-4 text-lg font-medium tecnarit-blue-text">Geen kandidaten gevonden</h3>
-                    <p className="mt-2 tecnarit-blue-text/70 max-w-md mx-auto">
+                  <div className="text-center py-12 px-4 border border-dashed border-[#4da58e] rounded-lg bg-gradient-to-br from-[#f8f9fa] to-white">
+                    <div className="bg-[#EDF7F5] p-2 rounded-full inline-flex mb-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-[#4da58e]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-medium text-[#233142]">Geen kandidaten gevonden</h3>
+                    <p className="mt-2 text-[#545e6b] max-w-md mx-auto">
                       Voeg je eerste kandidaat toe om te beginnen.
                     </p>
                     <Button 
                       onClick={() => window.location.reload()} 
-                      className="mt-4 tecnarit-blue-bg mobile-action-button tecnarit-blue-button hover-lift"
+                      className="mt-4 bg-gradient-to-r from-[#233142] to-[#4da58e] hover:opacity-90 text-white"
                     >
                       <RefreshCw className="h-4 w-4 mr-2" />
                       <span className="responsive-button-text">Vernieuwen</span>
                     </Button>
                   </div>
                 ) : filteredCandidates.length === 0 ? (
-                  <div className="text-center py-12 sm:py-16 px-4 border-2 border-dashed border-primary/30 rounded-lg glass-effect">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-primary/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="11" cy="11" r="8"></circle>
-                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <h3 className="mt-4 text-lg font-medium tecnarit-blue-text">Geen kandidaten gevonden</h3>
-                    <p className="mt-2 tecnarit-blue-text/70 max-w-md mx-auto">
+                  <div className="text-center py-12 px-4 border border-dashed border-[#4da58e] rounded-lg bg-gradient-to-br from-[#f8f9fa] to-white">
+                    <div className="bg-[#EDF7F5] p-2 rounded-full inline-flex mb-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-[#4da58e]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-medium text-[#233142]">Geen kandidaten gevonden</h3>
+                    <p className="mt-2 text-[#545e6b] max-w-md mx-auto">
                       {searchQuery || (status && status !== "all") 
                         ? "Pas je zoekcriteria aan of verwijder filters om meer resultaten te zien." 
                         : "Voeg je eerste kandidaat toe om te beginnen."}
