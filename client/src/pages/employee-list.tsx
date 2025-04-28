@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import EmployeeTable from "@/components/employee/employee-table";
 import Sidebar from "@/components/layout/sidebar";
 import { PageTitle } from "@/components/layout/page-title";
-import { Employee } from "@shared/schema";
+import { Employee } from "@/firebase/schema";
 
 export default function EmployeeList() {
   const [, setLocation] = useLocation();

@@ -1,6 +1,6 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { getCandidate, getCandidates, getCandidateFiles, getCandidatesByStatus } from "../firebase/candidates";
-import { FirebaseCandidate, CandidateFile } from "@shared/schema";
+import { FirebaseCandidate, CandidateFile } from "@/firebase/schema";
 
 // Deze functie is niet meer nodig voor Firebase maar we houden hem voor compatibiliteit
 export async function apiRequest(

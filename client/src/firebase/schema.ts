@@ -48,3 +48,34 @@ export const candidateFileSchema = z.object({
 });
 
 export type CandidateFile = z.infer<typeof candidateFileSchema>;
+
+// Employee types
+export const insertEmployeeSchema = z.object({
+  firstName: z.string(),
+  lastName: z.string(),
+  email: z.string().email(),
+  phone: z.string().optional().nullable(),
+  position: z.string(),
+  department: z.string(),
+  startDate: z.string(),
+  status: z.string().default("active"),
+  address: z.string().optional().nullable(),
+  city: z.string().optional().nullable(),
+  state: z.string().optional().nullable(),
+  zip: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  profileImage: z.string().optional().nullable(),
+});
+
+export type InsertEmployee = z.infer<typeof insertEmployeeSchema>;
+export type Employee = InsertEmployee & { id: number; };
+
+export type EmployeeFile = {
+  id: number;
+  employeeId: number;
+  fileName: string;
+  fileType: string;
+  filePath: string;
+  fileSize: number;
+  uploadDate: Date;
+};

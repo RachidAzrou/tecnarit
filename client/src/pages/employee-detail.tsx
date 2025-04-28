@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Sidebar from "@/components/layout/sidebar";
 import { PageTitle } from "@/components/layout/page-title";
-import { Employee, EmployeeFile } from "@shared/schema";
+import { Employee, EmployeeFile } from "@/firebase/schema";
 
 export default function EmployeeDetail() {
   const params = useParams<{ id: string }>();
