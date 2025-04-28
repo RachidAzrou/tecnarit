@@ -37,14 +37,12 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
 import * as z from "zod";
-import ImageCropper from "@/components/ui/image-cropper";
 import { PageTitle } from "@/components/layout/page-title";
 // Firebase import
 import { 
   createCandidate, 
   updateCandidate, 
   getCandidate,
-  uploadProfileImage as firebaseUploadProfileImage,
   addCandidateFile
 } from "@/firebase/candidates";
 
@@ -60,14 +58,8 @@ export default function CandidateForm() {
   const [, setLocation] = useLocation();
   const isEditMode = !!id;
   const { toast } = useToast();
-  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
-  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeFileName, setResumeFileName] = useState<string | null>(null);
-  
-  // State voor beeldbewerking
-  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
-  const [cropperOpen, setCropperOpen] = useState(false);
 
   // Query om kandidaat gegevens op te halen indien we in wijzigingsmodus zijn
   const {
@@ -98,7 +90,6 @@ export default function CandidateForm() {
       unavailableUntil: null,
       client: "",
       notes: "",
-      profileImage: "",
     },
   });
 
@@ -117,13 +108,9 @@ export default function CandidateForm() {
         unavailableUntil: candidate.unavailableUntil ? new Date(candidate.unavailableUntil) : null,
         client: candidate.client || null,
         notes: candidate.notes || null,
-        profileImage: candidate.profileImage || "",
       });
 
-      // Update de profielfoto preview als die bestaat
-      if (candidate.profileImage) {
-        setProfileImagePreview(candidate.profileImage);
-      }
+
     }
   }, [candidate, isEditMode, form]);
 
@@ -136,11 +123,6 @@ export default function CandidateForm() {
       return result;
     },
     onSuccess: async (data: FirebaseCandidate) => {
-      // Upload profiel foto als die is geselecteerd
-      if (profileImageFile) {
-        await firebaseUploadProfileImage(data.id, profileImageFile);
-      }
-
       // Upload CV als die is geselecteerd
       if (resumeFile) {
         await addCandidateFile(data.id, resumeFile, "CV");
@@ -171,11 +153,6 @@ export default function CandidateForm() {
       return result;
     },
     onSuccess: async (data: FirebaseCandidate) => {
-      // Upload profiel foto als die is geselecteerd
-      if (profileImageFile) {
-        await firebaseUploadProfileImage(data.id, profileImageFile);
-      }
-
       // Upload CV als die is geselecteerd
       if (resumeFile) {
         await addCandidateFile(data.id, resumeFile, "CV");
@@ -210,58 +187,7 @@ export default function CandidateForm() {
     }
   };
 
-  // Functie om de bestandsselectie voor de profielfoto af te handelen
-  const handleProfileImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
 
-    // Controleer het bestandstype
-    if (!file.type.startsWith("image/")) {
-      toast({
-        title: "Ongeldig bestandstype",
-        description: "Upload alstublieft een afbeelding (JPEG, PNG, GIF, etc.)",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Controleer de bestandsgrootte (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      toast({
-        title: "Bestand te groot",
-        description: "De afbeelding moet kleiner zijn dan 2MB",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setProfileImageFile(file);
-    
-    // Open de image cropper
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        setImageToCrop(e.target.result.toString());
-        setCropperOpen(true);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // Functie om geknipt beeld te verwerken
-  const handleCroppedImage = (croppedImage: string) => {
-    setProfileImagePreview(croppedImage);
-    setCropperOpen(false);
-    setImageToCrop(null);
-    
-    // Converteer base64 naar bestand
-    fetch(croppedImage)
-      .then(res => res.blob())
-      .then(blob => {
-        const file = new File([blob], profileImageFile?.name || "profile.jpg", { type: 'image/jpeg' });
-        setProfileImageFile(file);
-      });
-  };
 
   // Functie om de bestandsselectie voor het CV af te handelen
   const handleResumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -313,54 +239,7 @@ export default function CandidateForm() {
                           <h2 className="text-lg font-medium text-primary-900">Basis Informatie</h2>
                         </div>
 
-                        {/* Profile Image */}
-                        <div className="sm:col-span-6">
-                          <FormLabel>Profielfoto</FormLabel>
-                          <div className="mt-3 flex flex-col sm:flex-row items-center">
-                            <div className="mb-4 sm:mb-0 sm:mr-6">
-                              <div 
-                                className="cursor-pointer block"
-                                onClick={() => {
-                                  document.getElementById('profile-upload')?.click();
-                                }}
-                              >
-                                <Avatar className="h-28 w-28 border-2 border-primary hover:border-primary/70 transition-colors">
-                                  <AvatarImage 
-                                    src={profileImagePreview || undefined} 
-                                    className="object-cover"
-                                  />
-                                  <AvatarFallback className="gradient-bg text-white">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                      <circle cx="12" cy="7" r="4"></circle>
-                                    </svg>
-                                  </AvatarFallback>
-                                </Avatar>
-                              </div>
-                            </div>
-                            <div className="text-center sm:text-left">
-                              <Button 
-                                variant="outline" 
-                                type="button" 
-                                className="cursor-pointer mb-2"
-                                onClick={() => {
-                                  document.getElementById('profile-upload')?.click();
-                                }}
-                              >
-                                {profileImagePreview ? 'Foto wijzigen' : 'Foto uploaden'}
-                              </Button>
-                              <input
-                                id="profile-upload"
-                                type="file"
-                                className="hidden"
-                                accept="image/*"
-                                onChange={handleProfileImageChange}
-                              />
-                              <p className="text-xs text-primary-500">Klik op de cirkel of de knop om een foto te uploaden</p>
-                              <p className="mt-1 text-xs text-primary-500">JPG, PNG of GIF tot 2MB</p>
-                            </div>
-                          </div>
-                        </div>
+
 
                         {/* First Name */}
                         <div className="sm:col-span-3">
@@ -640,19 +519,7 @@ export default function CandidateForm() {
           </div>
         </div>
       </div>
-      
-      {/* Beeldbewerking Modal */}
-      {imageToCrop && (
-        <ImageCropper
-          image={imageToCrop}
-          open={cropperOpen}
-          onClose={() => {
-            setCropperOpen(false);
-            setImageToCrop(null);
-          }}
-          onCropComplete={handleCroppedImage}
-        />
-      )}
+
     </>
   );
 }
