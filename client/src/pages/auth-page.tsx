@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { IconInput } from "@/components/ui/icon-input";
+import { IconInput } from "../components/ui/icon-input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import logoWithBg from "@assets/Color logo with background.png";
@@ -193,13 +193,13 @@ export default function AuthPage() {
                 </Button>
               </form>
             </Form>
-            
-            {/* App versie informatie */}
-            <div className="text-center mt-8 text-sm text-gray-500">
-              <p>TECNARIT EMS v1.2.0</p>
-            </div>
           </CardContent>
         </Card>
+        
+        {/* App versie informatie */}
+        <div className="text-center mt-4 text-sm text-white/80">
+          <p>TECNARIT EMS v1.2.0</p>
+        </div>
       </div>
     </div>
   );
