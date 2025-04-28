@@ -13,7 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db, storage, auth } from './config';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { Candidate, FirebaseCandidate, InsertCandidate, CandidateFile } from '@shared/schema';
+import { Candidate, FirebaseCandidate, InsertCandidate, CandidateFile } from '@/firebase/schema';
 
 const CANDIDATES_COLLECTION = 'candidates';
 const FILES_COLLECTION = 'candidateFiles';

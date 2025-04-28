@@ -38,13 +38,17 @@ export type FirebaseCandidate = Omit<Candidate, 'id'> & { id: string };
 
 export const candidateFileSchema = z.object({
   id: z.number(),
-  candidateId: z.number(),
-  filename: z.string(),
-  originalFilename: z.string(),
+  candidateId: z.number().or(z.string()),
   fileType: z.string(),
-  size: z.number(),
   uploadDate: z.date(),
-  url: z.string(),
+  fileName: z.string(),
+  filePath: z.string(),
+  fileSize: z.number(),
+  // Compatibiliteit met de oude API
+  filename: z.string().optional(),
+  originalFilename: z.string().optional(),
+  size: z.number().optional(),
+  url: z.string().optional(),
 });
 
 export type CandidateFile = z.infer<typeof candidateFileSchema>;
@@ -65,6 +69,9 @@ export const insertEmployeeSchema = z.object({
   zip: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
   profileImage: z.string().optional().nullable(),
+  // Compatibiliteit met oudere versies
+  hireDate: z.date().optional(),
+  salary: z.number().optional(),
 });
 
 export type InsertEmployee = z.infer<typeof insertEmployeeSchema>;
@@ -78,4 +85,6 @@ export type EmployeeFile = {
   filePath: string;
   fileSize: number;
   uploadDate: Date;
+  // Compatibiliteit met de API
+  fileUrl?: string;
 };

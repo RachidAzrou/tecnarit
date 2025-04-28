@@ -14,7 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db, storage } from './config';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { Employee, InsertEmployee } from '@shared/schema';
+import { Employee, InsertEmployee } from '@/firebase/schema';
 
 const EMPLOYEES_COLLECTION = 'employees';
 const FILES_COLLECTION = 'employeeFiles';
