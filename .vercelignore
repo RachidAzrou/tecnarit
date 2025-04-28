@@ -14,5 +14,4 @@ coverage
 # Vercel deploy config (alles buiten client)
 vercel-deploy
 server
-shared
 uploads

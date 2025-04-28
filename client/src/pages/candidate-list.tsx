@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import CandidateTable from "@/components/candidate/candidate-table";
-import { FirebaseCandidate } from "@shared/schema";
+import { FirebaseCandidate } from "@/firebase/schema";
 import { useToast } from "@/hooks/use-toast";
 import { PageTitle } from "@/components/layout/page-title";
 // Firebase import

@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Sidebar from "@/components/layout/sidebar";
 import { PageTitle } from "@/components/layout/page-title";
-import { FirebaseCandidate, CandidateFile } from "@shared/schema";
+import { FirebaseCandidate, CandidateFile } from "@/firebase/schema";
 import { getCandidate, getCandidateFiles } from "@/firebase/candidates";
 
 export default function CandidateDetail() {
