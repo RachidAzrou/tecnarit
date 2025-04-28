@@ -14,7 +14,34 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { IconInput } from "../components/ui/icon-input";
+// Inline icon input component
+import * as React from "react";
+import { cn } from "@/lib/utils";
+
+interface IconInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  icon: React.ReactNode
+}
+
+const IconInput = React.forwardRef<HTMLInputElement, IconInputProps>(
+  ({ className, icon, ...props }, ref) => {
+    return (
+      <div className="flex items-center w-full rounded-md border border-gray-300 focus-within:ring-2 focus-within:ring-[#233142]/25 focus-within:border-[#233142] overflow-hidden">
+        <div className="flex-shrink-0 px-3 text-gray-400">
+          {icon}
+        </div>
+        <input
+          className={cn(
+            "flex h-10 w-full bg-background py-2 pr-3 text-base outline-none border-0 focus:outline-none focus:ring-0 focus:border-0 placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+            className
+          )}
+          ref={ref}
+          {...props}
+        />
+      </div>
+    )
+  }
+);
+IconInput.displayName = "IconInput";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import logoWithBg from "@assets/Color logo with background.png";
