@@ -1,9 +1,14 @@
 {
-  "buildCommand": "cd client && npm install && vite build",
-  "outputDirectory": "dist",
-  "framework": null,
-  "installCommand": "cd client && npm install",
-  "regions": ["arn1"],
+  "version": 2,
+  "builds": [
+    {
+      "src": "vercel-deploy/build.sh",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
   "routes": [
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
