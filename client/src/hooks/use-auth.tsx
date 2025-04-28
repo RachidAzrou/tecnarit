@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Listen for Firebase auth state changes and sync with backend
+  // Listen for Firebase auth state changes
   useEffect(() => {
     const unsubscribe = subscribeToAuthChanges((firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
@@ -64,34 +64,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           username: firebaseUser.email?.split('@')[0] || firebaseUser.displayName
         };
         
-        // Sync the Firebase authentication with our backend
-        fetch('/api/firebase-auth', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: firebaseUser.email,
-            firebaseUid: firebaseUser.uid,
-          }),
-          credentials: 'include',
-        })
-        .then(response => {
-          if (response.ok) {
-            console.log('Firebase auth synced with backend');
-            // Invalidate any relevant queries
-            queryClient.invalidateQueries({queryKey: ['/api/candidates']});
-          } else {
-            console.error('Failed to sync Firebase auth with backend');
-          }
-        })
-        .catch(error => {
-          console.error('Error syncing Firebase auth with backend:', error);
-        })
-        .finally(() => {
-          setUser(transformedUser);
-          setIsLoading(false);
-        });
+        setUser(transformedUser);
+        setIsLoading(false);
       } else {
         setUser(null);
         setIsLoading(false);
@@ -107,32 +81,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Firebase authentication
       const { user, error } = await loginWithEmail(credentials.email, credentials.password);
       if (error) throw new Error(error);
-      
-      // Now also login to the backend to establish a session
-      try {
-        const response = await fetch('/api/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username: credentials.email,
-            password: credentials.password,
-          }),
-          credentials: 'include',
-        });
-        
-        if (!response.ok) {
-          throw new Error('Sessie opzetten mislukt');
-        }
-        
-        const sessionUser = await response.json();
-        console.log('Backend session established', sessionUser);
-      } catch (sessionError) {
-        console.error('Failed to establish backend session', sessionError);
-        // We don't throw here as Firebase auth already succeeded
-      }
-      
       return user;
     },
     onSuccess: (firebaseUser) => {
@@ -142,8 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       // Invalidate any cached queries to force refetching
-      queryClient.invalidateQueries({queryKey: ['/api/user']});
-      queryClient.invalidateQueries({queryKey: ['/api/candidates']});
+      queryClient.invalidateQueries();
     },
     onError: (error: Error) => {
       toast({
@@ -161,33 +108,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Firebase authentication
       const { user, error } = await registerWithEmail(credentials.email, credentials.password);
       if (error) throw new Error(error);
-      
-      // Now also register in the backend to establish a session
-      try {
-        const response = await fetch('/api/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username: credentials.email,
-            password: credentials.password,
-            ...(credentials.username ? { name: credentials.username } : {})
-          }),
-          credentials: 'include',
-        });
-        
-        if (!response.ok) {
-          throw new Error('Backend registratie mislukt');
-        }
-        
-        const sessionUser = await response.json();
-        console.log('Backend user registered', sessionUser);
-      } catch (sessionError) {
-        console.error('Failed to register in backend', sessionError);
-        // We don't throw here as Firebase auth already succeeded
-      }
-      
       return user;
     },
     onSuccess: (firebaseUser) => {
@@ -197,7 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       // Invalidate any cached queries to force refetching
-      queryClient.invalidateQueries({queryKey: ['/api/user']});
+      queryClient.invalidateQueries();
     },
     onError: (error: Error) => {
       toast({
@@ -215,26 +135,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Firebase logout
       const { error } = await firebaseLogout();
       if (error) throw new Error(error);
-      
-      // Also logout from the backend to invalidate the session
-      try {
-        const response = await fetch('/api/logout', {
-          method: 'POST',
-          credentials: 'include',
-        });
-        
-        if (!response.ok) {
-          console.warn('Backend logout was not successful, but continuing anyway');
-        }
-      } catch (sessionError) {
-        console.error('Failed to logout from backend', sessionError);
-        // We don't throw here as Firebase logout already succeeded
-      }
     },
     onSuccess: () => {
       // Clear all cached data
-      queryClient.setQueryData(["/api/user"], null);
-      queryClient.invalidateQueries({queryKey: ['/api/candidates']});
+      queryClient.invalidateQueries();
       
       // Zet de user state op null
       setUser(null);
