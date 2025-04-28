@@ -1,5 +1,6 @@
 // Service Worker voor TECNARIT - EMS
-const CACHE_NAME = 'tecnarit-ems-v1.2.1';
+const APP_VERSION = '1.2.1';
+const CACHE_NAME = `tecnarit-ems-v${APP_VERSION}`;
 const OFFLINE_URL = '/offline.html';
 
 // Bestanden om te cachen (statische assets)
