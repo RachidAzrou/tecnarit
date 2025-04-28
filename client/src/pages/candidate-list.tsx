@@ -106,51 +106,13 @@ export default function CandidateList() {
     };
   }, []);
   
-  // De originele query behouden we voor compatibiliteit, maar we verbeteren de werking
+  // Gebruik de globale queryClient configuratie
   const { data: candidates, isLoading: queryIsLoading, error, refetch } = useQuery<FirebaseCandidate[]>({
     queryKey: ["candidates"],
-    queryFn: async () => {
-      try {
-        // Direct ophalen van de meest recente gegevens uit Firebase
-        const candidatesCollection = collection(db, 'candidates');
-        const candidatesSnapshot = await getDocs(candidatesCollection);
-        
-        const fetchedCandidates = candidatesSnapshot.docs.map(doc => {
-          const data = doc.data();
-          
-          return {
-            id: doc.id,
-            firstName: data.firstName,
-            lastName: data.lastName,
-            email: data.email,
-            phone: data.phone || null,
-            linkedinProfile: data.linkedinProfile || null,
-            yearsOfExperience: data.yearsOfExperience || null,
-            status: data.status || 'beschikbaar',
-            unavailableUntil: data.unavailableUntil ? new Date(data.unavailableUntil) : null,
-            client: data.client || null,
-            notes: data.notes || null,
-            profileImage: data.profileImage || null,
-            createdAt: data.createdAt ? new Date(data.createdAt.toDate()) : new Date(),
-          };
-        });
-        
-        console.log(`${fetchedCandidates.length} kandidaten opgehaald voor TanStack Query`);
-        
-        // Update ook de directe lijst
-        setDirectCandidates(fetchedCandidates);
-        
-        return fetchedCandidates;
-      } catch (error) {
-        console.error("Fout bij ophalen van kandidaten:", error);
-        throw error;
-      }
-    },
+    // We hoeven geen queryFn te definiëren omdat dit nu in de queryClient wordt afgehandeld
     retry: 3,
     retryDelay: 1000,
-    // Voorkom dat 401-fouten als error worden beschouwd
     gcTime: 0,
-    // Forceer een refetch bij iedere focus om candidate lijst vers te houden
     refetchOnWindowFocus: true,
     staleTime: 0
   });
