@@ -1,6 +1,6 @@
 import { useParams, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Download, PencilIcon, Loader2 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, Download, PencilIcon, Loader2, Trash2, File } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,11 +8,29 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Sidebar from "@/components/layout/sidebar";
 import { PageTitle } from "@/components/layout/page-title";
 import { FirebaseCandidate, CandidateFile } from "@/firebase/schema";
-import { getCandidate, getCandidateFiles } from "@/firebase/candidates";
+import { getCandidate, getCandidateFiles, deleteCandidateFile } from "@/firebase/candidates";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CandidateDetail() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  // State voor bestandsverwijdering dialoog
+  const [fileToDelete, setFileToDelete] = useState<CandidateFile | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { data: candidate, isLoading: isCandidateLoading } = useQuery<FirebaseCandidate>({
     queryKey: [`candidates/${params.id}`],
@@ -31,6 +49,31 @@ export default function CandidateDetail() {
       return await getCandidateFiles(params.id);
     },
   });
+  
+  // Mutatie voor het verwijderen van bestanden
+  const deleteFileMutation = useMutation<boolean, Error, string | number>({
+    mutationFn: async (fileId: string | number) => {
+      console.log("Verwijderen van bestand met ID:", fileId);
+      return await deleteCandidateFile(fileId);
+    },
+    onSuccess: () => {
+      // Vernieuw de bestanden query na succesvol verwijderen
+      queryClient.invalidateQueries({ queryKey: [`candidates/${params.id}/files`] });
+      toast({
+        title: "Bestand verwijderd",
+        description: "Het bestand is succesvol verwijderd."
+      });
+      setFileToDelete(null);
+      setShowDeleteDialog(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Fout bij verwijderen",
+        description: error instanceof Error ? error.message : "Er is een fout opgetreden bij het verwijderen van het bestand.",
+        variant: "destructive"
+      });
+    }
+  });
 
   const handleBackToList = () => {
     setLocation("/");
@@ -38,6 +81,25 @@ export default function CandidateDetail() {
 
   const handleEdit = () => {
     setLocation(`/candidates/${params.id}/edit`);
+  };
+  
+  // Handler voor het openen van de verwijder-bevestigingsdialoog
+  const handleDeleteClick = (file: CandidateFile) => {
+    setFileToDelete(file);
+    setShowDeleteDialog(true);
+  };
+  
+  // Handler voor het bevestigen van de bestandsverwijdering
+  const confirmDelete = () => {
+    if (fileToDelete) {
+      deleteFileMutation.mutate(fileToDelete.id);
+    }
+  };
+  
+  // Handler voor het annuleren van de bestandsverwijdering
+  const cancelDelete = () => {
+    setFileToDelete(null);
+    setShowDeleteDialog(false);
   };
 
   const getStatusBadgeVariant = (status: string) => {
@@ -69,6 +131,20 @@ export default function CandidateDetail() {
       month: "short",
       day: "numeric",
     });
+  };
+  
+  // Functie om leeftijd te berekenen op basis van geboortedatum
+  const calculateAge = (birthDate: Date): number => {
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    
+    // Als de maand nog niet voorbij is of als het dezelfde maand is maar de dag nog niet voorbij is
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age;
   };
 
   if (isCandidateLoading) {
@@ -151,13 +227,14 @@ export default function CandidateDetail() {
                         </h3>
                         <p className="text-sm text-primary/80 mt-1">
                           {candidate.yearsOfExperience} {candidate.yearsOfExperience === 1 ? 'jaar' : 'jaren'} ervaring
+                          {candidate.birthDate && ` • ${calculateAge(new Date(candidate.birthDate))} jaar oud`}
                         </p>
                         <div className="mt-2">
                           <Badge variant="outline" className={getStatusBadgeVariant(candidate.status)}>
-                            {candidate.status === "active" ? "Actief" : 
-                             candidate.status === "contacted" ? "Gecontacteerd" :
-                             candidate.status === "interview" ? "Interview Gepland" :
-                             candidate.status === "hired" ? "Aangenomen" : "Afgewezen"}
+                            {candidate.status === "beschikbaar" ? "Beschikbaar" : 
+                             candidate.status === "onbeschikbaar" ? "Onbeschikbaar" :
+                             candidate.status === "in_dienst" ? "In Dienst" : 
+                             candidate.status || "Onbekend"}
                           </Badge>
                         </div>
                       </div>
@@ -285,8 +362,8 @@ export default function CandidateDetail() {
                                       Geüpload op {formatFileDate(file.uploadDate)} • {formatFileSize(file.fileSize)}
                                     </p>
                                   </div>
-                                  <div>
-                                    <a href={`/${file.filePath}`} download={file.fileName} target="_blank" rel="noopener noreferrer">
+                                  <div className="flex space-x-2">
+                                    <a href={`/${file.filePath}`} download={file.fileName}>
                                       <Button 
                                         variant="outline" 
                                         size="sm"
@@ -296,6 +373,15 @@ export default function CandidateDetail() {
                                         <span className="responsive-button-text">Download</span>
                                       </Button>
                                     </a>
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      className="text-red-500 hover:text-red-700 hover:bg-red-50 mobile-action-button hover-lift"
+                                      onClick={() => handleDeleteClick(file)}
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      <span className="responsive-button-text">Verwijderen</span>
+                                    </Button>
                                   </div>
                                 </div>
                               </div>
@@ -326,6 +412,48 @@ export default function CandidateDetail() {
           </div>
         </div>
       </div>
+      
+      {/* Bevestigingsdialoog voor bestandsverwijdering */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Bestand verwijderen</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je dit bestand wilt verwijderen?
+              {fileToDelete && (
+                <div className="mt-2 p-3 rounded-md bg-gray-100 text-sm">
+                  <div className="font-medium">{fileToDelete.fileName}</div>
+                  <div className="text-gray-500 text-xs mt-1">
+                    Geüpload op {formatFileDate(fileToDelete.uploadDate)} • {formatFileSize(fileToDelete.fileSize)}
+                  </div>
+                </div>
+              )}
+              <p className="mt-2 text-red-600 text-sm">
+                Let op: Dit kan niet ongedaan worden gemaakt!
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelDelete} disabled={deleteFileMutation.isPending}>
+              Annuleren
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 text-white hover:bg-red-700"
+              disabled={deleteFileMutation.isPending}
+            >
+              {deleteFileMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Verwijderen...
+                </>
+              ) : (
+                "Verwijderen"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

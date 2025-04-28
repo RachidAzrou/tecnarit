@@ -3,7 +3,7 @@ import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -59,9 +59,13 @@ export default function CandidateForm() {
   const isEditMode = !!id;
   const { toast } = useToast();
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [certificateFile, setCertificateFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [certificateProgress, setCertificateProgress] = useState<number>(0);
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isCertificateUploading, setIsCertificateUploading] = useState<boolean>(false);
   const [resumeFileName, setResumeFileName] = useState<string | null>(null);
+  const [certificateFileName, setCertificateFileName] = useState<string | null>(null);
 
   // Query om kandidaat gegevens op te halen indien we in wijzigingsmodus zijn
   const {
@@ -88,6 +92,7 @@ export default function CandidateForm() {
       phone: "",
       linkedinProfile: "",
       yearsOfExperience: null,
+      birthDate: null,
       status: "beschikbaar",
       unavailableUntil: null,
       client: "",
@@ -106,6 +111,7 @@ export default function CandidateForm() {
         phone: candidate.phone || null,
         linkedinProfile: candidate.linkedinProfile || null,
         yearsOfExperience: candidate.yearsOfExperience,
+        birthDate: candidate.birthDate ? new Date(candidate.birthDate) : null,
         status: candidate.status,
         unavailableUntil: candidate.unavailableUntil ? new Date(candidate.unavailableUntil) : null,
         client: candidate.client || null,
@@ -142,12 +148,31 @@ export default function CandidateForm() {
             resumeFile, 
             "CV",
             (progress) => {
-              console.log(`Upload voortgang: ${progress}%`);
+              console.log(`Upload voortgang CV: ${progress}%`);
               setUploadProgress(progress);
             }
           );
           
           setIsUploading(false);
+        }
+        
+        // Upload certificaat als die is geselecteerd
+        if (certificateFile) {
+          setIsCertificateUploading(true);
+          setCertificateProgress(0);
+          
+          // Voeg de progress callback toe
+          await addCandidateFile(
+            data.id, 
+            certificateFile, 
+            "Certificaat",
+            (progress) => {
+              console.log(`Upload voortgang certificaat: ${progress}%`);
+              setCertificateProgress(progress);
+            }
+          );
+          
+          setIsCertificateUploading(false);
         }
 
         queryClient.invalidateQueries({ queryKey: ["candidates"] });
@@ -162,12 +187,14 @@ export default function CandidateForm() {
         // Reset upload state
         setIsUploading(false);
         setUploadProgress(0);
+        setIsCertificateUploading(false);
+        setCertificateProgress(0);
         
-        // Toch doorgaan met navigeren bij CV upload fout
+        // Toch doorgaan met navigeren bij upload fout
         queryClient.invalidateQueries({ queryKey: ["candidates"] });
         toast({
           title: "Kandidaat Toegevoegd",
-          description: `${data.firstName} ${data.lastName} is toegevoegd, maar CV kon niet worden geüpload.`,
+          description: `${data.firstName} ${data.lastName} is toegevoegd, maar bestanden konden niet worden geüpload.`,
         });
         setTimeout(() => setLocation("/"), 500);
       }
@@ -191,18 +218,69 @@ export default function CandidateForm() {
       return result;
     },
     onSuccess: async (data: FirebaseCandidate) => {
-      // Upload CV als die is geselecteerd
-      if (resumeFile) {
-        await addCandidateFile(data.id, resumeFile, "CV");
-      }
+      try {
+        // Upload CV als die is geselecteerd
+        if (resumeFile) {
+          setIsUploading(true);
+          setUploadProgress(0);
+          
+          // Voeg de progress callback toe
+          await addCandidateFile(
+            data.id, 
+            resumeFile, 
+            "CV",
+            (progress) => {
+              console.log(`Upload voortgang CV: ${progress}%`);
+              setUploadProgress(progress);
+            }
+          );
+          
+          setIsUploading(false);
+        }
+        
+        // Upload certificaat als die is geselecteerd
+        if (certificateFile) {
+          setIsCertificateUploading(true);
+          setCertificateProgress(0);
+          
+          // Voeg de progress callback toe
+          await addCandidateFile(
+            data.id, 
+            certificateFile, 
+            "Certificaat",
+            (progress) => {
+              console.log(`Upload voortgang certificaat: ${progress}%`);
+              setCertificateProgress(progress);
+            }
+          );
+          
+          setIsCertificateUploading(false);
+        }
 
-      queryClient.invalidateQueries({ queryKey: [`candidates/${id}`] });
-      queryClient.invalidateQueries({ queryKey: ["candidates"] });
-      toast({
-        title: "Kandidaat Bijgewerkt",
-        description: `${data.firstName} ${data.lastName} is bijgewerkt.`,
-      });
-      setLocation("/");
+        queryClient.invalidateQueries({ queryKey: [`candidates/${id}`] });
+        queryClient.invalidateQueries({ queryKey: ["candidates"] });
+        toast({
+          title: "Kandidaat Bijgewerkt",
+          description: `${data.firstName} ${data.lastName} is bijgewerkt.`,
+        });
+        setTimeout(() => setLocation("/"), 500);
+      } catch (uploadError) {
+        console.error("Error during post-update steps:", uploadError);
+        // Reset upload state
+        setIsUploading(false);
+        setUploadProgress(0);
+        setIsCertificateUploading(false);
+        setCertificateProgress(0);
+        
+        // Toch doorgaan met navigeren bij upload fout
+        queryClient.invalidateQueries({ queryKey: [`candidates/${id}`] });
+        queryClient.invalidateQueries({ queryKey: ["candidates"] });
+        toast({
+          title: "Kandidaat Bijgewerkt",
+          description: `${data.firstName} ${data.lastName} is bijgewerkt, maar bestanden konden niet worden geüpload.`,
+        });
+        setTimeout(() => setLocation("/"), 500);
+      }
     },
     onError: (error: Error) => {
       toast({
@@ -245,6 +323,44 @@ export default function CandidateForm() {
     setResumeFile(file);
     setResumeFileName(file.name);
   };
+  
+  // Functie om de bestandsselectie voor certificaten af te handelen
+  const handleCertificateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    // We kiezen het eerste bestand voor de weergave, maar alle bestanden worden verwerkt tijdens upload
+    const selectedFile = files[0];
+    
+    // Controleer de bestandsgrootte (max 5MB per bestand)
+    let allFilesValid = true;
+    let totalFileCount = 0;
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      totalFileCount++;
+      
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Bestand te groot",
+          description: `Certificaat '${file.name}' is groter dan 5MB en kan niet worden geüpload.`,
+          variant: "destructive",
+        });
+        allFilesValid = false;
+      }
+    }
+    
+    if (!allFilesValid) return;
+    
+    setCertificateFile(selectedFile); // Voorlopig alleen eerste bestand opslaan
+    
+    // Aangepaste bestandsnaam voor meerdere bestanden
+    if (files.length === 1) {
+      setCertificateFileName(selectedFile.name);
+    } else {
+      setCertificateFileName(`${totalFileCount} certificaten geselecteerd`);
+    }
+  };
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
@@ -268,15 +384,14 @@ export default function CandidateForm() {
               </div>
             ) : (
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-8 md:p-10">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-8 md:p-10">
                   <div>
-                    <div className="py-4 sm:p-0">
+                    <div className="py-2 sm:p-0">
                       <div className="grid grid-cols-1 gap-y-6 gap-x-6 sm:grid-cols-6">
                         {/* Basic Information */}
                         <div className="sm:col-span-6">
-                          <h2 className="text-lg font-medium text-primary-900">Basis Informatie</h2>
+                          <h2 className="text-lg font-medium text-primary-900 mb-2">Basis Informatie</h2>
                         </div>
-
 
 
                         {/* First Name */}
@@ -285,7 +400,7 @@ export default function CandidateForm() {
                             control={form.control}
                             name="firstName"
                             render={({ field }) => (
-                              <FormItem>
+                              <FormItem className="flex flex-col">
                                 <FormLabel>Voornaam</FormLabel>
                                 <FormControl>
                                   <Input {...field} />
@@ -302,7 +417,7 @@ export default function CandidateForm() {
                             control={form.control}
                             name="lastName"
                             render={({ field }) => (
-                              <FormItem>
+                              <FormItem className="flex flex-col">
                                 <FormLabel>Achternaam</FormLabel>
                                 <FormControl>
                                   <Input {...field} />
@@ -319,7 +434,7 @@ export default function CandidateForm() {
                             control={form.control}
                             name="email"
                             render={({ field }) => (
-                              <FormItem>
+                              <FormItem className="flex flex-col">
                                 <FormLabel>E-mailadres</FormLabel>
                                 <FormControl>
                                   <Input type="email" {...field} />
@@ -330,16 +445,25 @@ export default function CandidateForm() {
                           />
                         </div>
 
-                        {/* Phone */}
+                        {/* Geboortedatum */}
                         <div className="sm:col-span-3">
                           <FormField
                             control={form.control}
-                            name="phone"
+                            name="birthDate"
                             render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Telefoonnummer</FormLabel>
+                              <FormItem className="flex flex-col">
+                                <FormLabel>Geboortedatum</FormLabel>
                                 <FormControl>
-                                  <Input type="tel" {...field} value={field.value || ''} />
+                                  <Input
+                                    type="date"
+                                    {...field}
+                                    placeholder="DD/MM/JJJJ"
+                                    value={field.value ? format(new Date(field.value), "yyyy-MM-dd") : ""}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      field.onChange(value ? new Date(value) : null);
+                                    }}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -353,7 +477,7 @@ export default function CandidateForm() {
                             control={form.control}
                             name="linkedinProfile"
                             render={({ field }) => (
-                              <FormItem>
+                              <FormItem className="flex flex-col">
                                 <FormLabel>LinkedIn Profiel</FormLabel>
                                 <FormControl>
                                   <Input {...field} value={field.value || ''} />
@@ -364,13 +488,30 @@ export default function CandidateForm() {
                           />
                         </div>
 
+                        {/* Phone */}
+                        <div className="sm:col-span-3">
+                          <FormField
+                            control={form.control}
+                            name="phone"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col">
+                                <FormLabel>Telefoonnummer</FormLabel>
+                                <FormControl>
+                                  <Input type="tel" {...field} value={field.value || ''} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        
                         {/* Years of Experience */}
                         <div className="sm:col-span-3">
                           <FormField
                             control={form.control}
                             name="yearsOfExperience"
                             render={({ field }) => (
-                              <FormItem>
+                              <FormItem className="flex flex-col">
                                 <FormLabel>Jaren Ervaring</FormLabel>
                                 <FormControl>
                                   <Input 
@@ -395,7 +536,7 @@ export default function CandidateForm() {
                             control={form.control}
                             name="status"
                             render={({ field }) => (
-                              <FormItem>
+                              <FormItem className="flex flex-col">
                                 <FormLabel>Status</FormLabel>
                                 <FormControl>
                                   <Select
@@ -427,34 +568,18 @@ export default function CandidateForm() {
                               render={({ field }) => (
                                 <FormItem className="flex flex-col">
                                   <FormLabel>Onbeschikbaar tot</FormLabel>
-                                  <Popover>
-                                    <PopoverTrigger asChild>
-                                      <FormControl>
-                                        <Button
-                                          variant={"outline"}
-                                          className={cn(
-                                            "w-full pl-3 text-left font-normal",
-                                            !field.value && "text-muted-foreground"
-                                          )}
-                                        >
-                                          {field.value ? (
-                                            format(field.value, "PPP", { locale: nl })
-                                          ) : (
-                                            <span>Selecteer datum</span>
-                                          )}
-                                        </Button>
-                                      </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                      <Calendar
-                                        mode="single"
-                                        selected={field.value || undefined}
-                                        onSelect={field.onChange}
-                                        initialFocus
-                                        locale={nl}
-                                      />
-                                    </PopoverContent>
-                                  </Popover>
+                                  <FormControl>
+                                    <Input
+                                      type="date"
+                                      {...field}
+                                      placeholder="DD/MM/JJJJ"
+                                      value={field.value ? format(new Date(field.value), "yyyy-MM-dd") : ""}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        field.onChange(value ? new Date(value) : null);
+                                      }}
+                                    />
+                                  </FormControl>
                                   <FormMessage />
                                 </FormItem>
                               )}
@@ -469,7 +594,7 @@ export default function CandidateForm() {
                               control={form.control}
                               name="client"
                               render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="flex flex-col">
                                   <FormLabel>Klant</FormLabel>
                                   <FormControl>
                                     <Input {...field} value={field.value || ''} />
@@ -481,46 +606,134 @@ export default function CandidateForm() {
                           </div>
                         )}
 
-                        {/* Resume Upload */}
-                        <div className="sm:col-span-6">
-                          <FormLabel>CV Upload</FormLabel>
-                          <div className="mt-2">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className="w-full sm:w-auto"
-                              onClick={() => {
-                                document.getElementById('resume-upload')?.click();
-                              }}
-                            >
-                              {resumeFileName ? 'CV Wijzigen' : 'CV Uploaden'}
-                            </Button>
-                            <input
-                              id="resume-upload"
-                              type="file"
-                              className="hidden"
-                              accept=".pdf,.doc,.docx"
-                              onChange={handleResumeChange}
-                            />
-                            {resumeFileName && (
-                              <p className="mt-2 text-sm text-primary-800">
-                                Geselecteerd bestand: {resumeFileName}
-                              </p>
-                            )}
-                            <p className="mt-1 text-xs text-primary-500">
-                              PDF, DOCX tot 5MB
-                            </p>
+                        {/* Resume & Certificates Upload section */}
+                        <div className="sm:col-span-6 mt-6 border-t border-primary-100 pt-6">
+                          <h2 className="text-lg font-medium text-primary-900 mb-4">Documenten</h2>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Resume Upload */}
+                            <div>
+                              <FormLabel>CV Upload</FormLabel>
+                              <div className="mt-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  className="w-full sm:w-auto"
+                                  onClick={() => {
+                                    document.getElementById('resume-upload')?.click();
+                                  }}
+                                  disabled={isUploading}
+                                >
+                                  {resumeFileName ? 'CV Wijzigen' : 'CV Uploaden'}
+                                </Button>
+                                <input
+                                  id="resume-upload"
+                                  type="file"
+                                  className="hidden"
+                                  accept=".pdf,.doc,.docx"
+                                  onChange={handleResumeChange}
+                                  disabled={isUploading}
+                                />
+                                {resumeFileName && (
+                                  <p className="mt-2 text-sm text-primary-800">
+                                    Geselecteerd bestand: {resumeFileName}
+                                  </p>
+                                )}
+                                
+                                {/* Voortgangsbalk voor uploaden */}
+                                {isUploading && (
+                                  <div className="mt-3 w-full">
+                                    <div className="relative pt-1">
+                                      <div className="flex items-center justify-between mb-1">
+                                        <div className="text-xs text-primary-800 font-medium">
+                                          {uploadProgress < 100 
+                                            ? `CV wordt geüpload (${Math.round(uploadProgress)}%)` 
+                                            : "Upload voltooid!"}
+                                        </div>
+                                      </div>
+                                      <div className="overflow-hidden h-2 mb-2 text-xs flex rounded bg-gray-200">
+                                        <div 
+                                          style={{ width: `${uploadProgress}%` }}
+                                          className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-primary/60 to-primary transition-all duration-300 ease-in-out"
+                                        ></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                <p className="mt-1 text-xs text-primary-500">
+                                  PDF, DOCX tot 5MB
+                                </p>
+                              </div>
+                            </div>
+                            
+                            {/* Certificaten Upload */}
+                            <div>
+                              <FormLabel>Certificaten</FormLabel>
+                              <div className="mt-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  className="w-full sm:w-auto"
+                                  onClick={() => {
+                                    document.getElementById('certificate-upload')?.click();
+                                  }}
+                                  disabled={isCertificateUploading}
+                                >
+                                  {certificateFileName ? 'Certificaten Wijzigen' : 'Certificaten Uploaden'}
+                                </Button>
+                                <input
+                                  id="certificate-upload"
+                                  type="file"
+                                  className="hidden"
+                                  accept=".pdf"
+                                  multiple
+                                  onChange={handleCertificateChange}
+                                  disabled={isCertificateUploading}
+                                />
+                                {certificateFileName && (
+                                  <p className="mt-2 text-sm text-primary-800">
+                                    Geselecteerd bestand: {certificateFileName}
+                                  </p>
+                                )}
+                                
+                                {/* Voortgangsbalk voor certificaat uploaden */}
+                                {isCertificateUploading && (
+                                  <div className="mt-3 w-full">
+                                    <div className="relative pt-1">
+                                      <div className="flex items-center justify-between mb-1">
+                                        <div className="text-xs text-primary-800 font-medium">
+                                          {certificateProgress < 100 
+                                            ? `Certificaten worden geüpload (${Math.round(certificateProgress)}%)` 
+                                            : "Upload voltooid!"}
+                                        </div>
+                                      </div>
+                                      <div className="overflow-hidden h-2 mb-2 text-xs flex rounded bg-gray-200">
+                                        <div 
+                                          style={{ width: `${certificateProgress}%` }}
+                                          className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-primary/60 to-primary transition-all duration-300 ease-in-out"
+                                        ></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                <p className="mt-1 text-xs text-primary-500">
+                                  Alleen PDF tot 5MB (meerdere certificaten mogelijk)
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         </div>
 
                         {/* Notes */}
-                        <div className="sm:col-span-6">
+                        <div className="sm:col-span-6 mt-6 border-t border-primary-100 pt-6">
+                          <h2 className="text-lg font-medium text-primary-900 mb-4">Notities</h2>
                           <FormField
                             control={form.control}
                             name="notes"
                             render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Notities</FormLabel>
+                              <FormItem className="flex flex-col">
+                                <FormLabel>Aanvullende informatie</FormLabel>
                                 <FormControl>
                                   <Textarea rows={4} {...field} value={field.value || ''} />
                                 </FormControl>

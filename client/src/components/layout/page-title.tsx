@@ -8,14 +8,12 @@ interface PageTitleProps {
 export function PageTitle({ title, children }: PageTitleProps) {
   return (
     <div className="mb-6 relative w-full">
-      <div className="pt-4 pb-5 px-4 sm:px-6 bg-[#f8f9fa] relative overflow-hidden w-full">
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-[#233142] to-[#4da58e]"></div>
-        
-        <h1 className="text-2xl md:text-3xl font-semibold text-center mb-1 text-[#233142]">
+      <div className="pt-5 pb-6 px-4 sm:px-6 bg-gradient-to-r from-[#233142] to-[#4da58e] relative overflow-hidden w-full rounded-md shadow-sm">
+        <h1 className="text-2xl md:text-3xl font-bold text-center mb-1 text-white uppercase tracking-wider">
           {title}
         </h1>
         {children && (
-          <div className="text-center text-sm text-gray-600 max-w-2xl mx-auto mt-1">
+          <div className="text-center text-sm text-white/90 max-w-2xl mx-auto mt-2">
             {children}
           </div>
         )}

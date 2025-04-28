@@ -61,6 +61,22 @@
     color: hsl(214, 40%, 20%);
   }
   
+  /* Verbeterde styling voor datumvelden */
+  input[type="date"] {
+    @apply cursor-text appearance-none;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    @apply hidden;
+  }
+  
+  /* Voor Firefox */
+  @-moz-document url-prefix() {
+    input[type="date"] {
+      @apply appearance-none;
+    }
+  }
+  
   /* TECNARIT Brand Styles */
   .gradient-text {
     @apply text-transparent bg-clip-text bg-gradient-to-r from-[hsl(130,65%,40%)] to-[hsl(84,100%,59%)];

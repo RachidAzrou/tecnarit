@@ -23,6 +23,7 @@ export const insertCandidateSchema = z.object({
   phone: z.string().optional().nullable(),
   linkedinProfile: z.string().optional().nullable(),
   yearsOfExperience: z.number().optional().nullable(),
+  birthDate: z.date().optional().nullable(),
   status: z.string().default("beschikbaar"),
   unavailableUntil: z.date().optional().nullable(),
   client: z.string().optional().nullable(),

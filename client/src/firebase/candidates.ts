@@ -406,8 +406,9 @@ export const addCandidateFile = async (
             onProgress?.(100);
             
             // Resultaat teruggeven
+            console.log("Bestand succesvol geüpload, document ID:", tempDocRef.id);
             resolve({
-              id: parseInt(tempDocRef.id),
+              id: tempDocRef.id, // Document ID als string gebruiken
               candidateId,
               fileName,
               fileType: file.type,
@@ -442,14 +443,18 @@ export const addCandidateFile = async (
 // Get candidate files
 export const getCandidateFiles = async (candidateId: string): Promise<CandidateFile[]> => {
   try {
+    console.log("Ophalen bestanden voor kandidaat:", candidateId);
     const filesCol = collection(db, FILES_COLLECTION);
     const q = query(filesCol, where("candidateId", "==", candidateId));
     const filesSnapshot = await getDocs(q);
     
+    console.log(`${filesSnapshot.docs.length} bestanden gevonden`);
+    
     return filesSnapshot.docs.map(doc => {
       const data = doc.data();
+      console.log("Bestand document ID:", doc.id);
       return {
-        id: parseInt(doc.id),
+        id: doc.id, // Gebruik string ID in plaats van parseInt
         candidateId: data.candidateId,
         fileName: data.fileName,
         fileType: data.fileType,
@@ -466,27 +471,42 @@ export const getCandidateFiles = async (candidateId: string): Promise<CandidateF
 };
 
 // Delete candidate file
-export const deleteCandidateFile = async (fileId: number): Promise<boolean> => {
+export const deleteCandidateFile = async (fileId: number | string): Promise<boolean> => {
   try {
     // Zorg ervoor dat de gebruiker is ingelogd
     if (!auth.currentUser) {
       throw new Error("Je moet ingelogd zijn om bestanden te verwijderen");
     }
+
+    console.log("Attempting to delete file with ID:", fileId);
     
-    const fileRef = doc(db, FILES_COLLECTION, fileId.toString());
+    const fileIdStr = fileId.toString();
+    const fileRef = doc(db, FILES_COLLECTION, fileIdStr);
     const fileSnap = await getDoc(fileRef);
     
     if (fileSnap.exists()) {
       const fileData = fileSnap.data();
+      console.log("Found file data:", fileData);
       
       // Delete from Storage
       if (fileData.filePath) {
         const storageRef = ref(storage, fileData.filePath);
-        await deleteObject(storageRef);
+        console.log("Deleting file from storage:", fileData.filePath);
+        try {
+          await deleteObject(storageRef);
+          console.log("Storage file deleted successfully");
+        } catch (storageError) {
+          console.error("Error deleting from storage:", storageError);
+          // Continue with document deletion even if storage deletion fails
+        }
       }
       
       // Delete the document
+      console.log("Deleting file document:", fileIdStr);
       await deleteDoc(fileRef);
+      console.log("File document deleted successfully");
+    } else {
+      console.log("File document not found:", fileIdStr);
     }
     
     return true;
