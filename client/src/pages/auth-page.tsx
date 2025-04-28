@@ -193,6 +193,11 @@ export default function AuthPage() {
                 </Button>
               </form>
             </Form>
+            
+            {/* App versie informatie */}
+            <div className="text-center mt-8 text-sm text-gray-500">
+              <p>TECNARIT EMS v1.2.0</p>
+            </div>
           </CardContent>
         </Card>
       </div>
