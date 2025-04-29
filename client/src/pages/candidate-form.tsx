@@ -45,6 +45,8 @@ import {
   getCandidate,
   addCandidateFile
 } from "@/firebase/candidates";
+// Import bestandscompressie functies
+import { compressFile, isFileSizeValid } from "@/lib/fileCompression";
 
 const formSchema = insertCandidateSchema.extend({
   unavailableUntil: z.date().optional().nullable(),
