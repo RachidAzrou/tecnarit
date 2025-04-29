@@ -470,54 +470,55 @@ export const getCandidateFiles = async (candidateId: string): Promise<CandidateF
   }
 };
 
-// Delete candidate file
+// Nieuwe, vereenvoudigde implementatie voor het verwijderen van bestanden
 export const deleteCandidateFile = async (fileId: number | string): Promise<boolean> => {
   try {
-    // Zorg ervoor dat de gebruiker is ingelogd
+    console.log(`*** DEBUGGING: Verwijderen van bestand met ID: ${fileId} (type: ${typeof fileId}) ***`);
+    
+    // Controleer of de gebruiker is ingelogd
     if (!auth.currentUser) {
+      console.error("Gebruiker niet ingelogd");
       throw new Error("Je moet ingelogd zijn om bestanden te verwijderen");
     }
-
-    console.log("Attempting to delete file with ID:", fileId);
     
-    const fileIdStr = fileId.toString();
-    const fileRef = doc(db, FILES_COLLECTION, fileIdStr);
-    const fileSnap = await getDoc(fileRef);
+    // Converteer naar string voor consistentie
+    const fileIdStr = String(fileId);
+    console.log(`*** DEBUGGING: ID als string: ${fileIdStr} ***`);
     
-    if (fileSnap.exists()) {
-      const fileData = fileSnap.data();
-      console.log("Found file data:", fileData);
-      
-      // Delete from Storage
-      if (fileData.filePath) {
-        const storageRef = ref(storage, fileData.filePath);
-        console.log("Deleting file from storage:", fileData.filePath);
-        try {
-          await deleteObject(storageRef);
-          console.log("Storage file deleted successfully");
-        } catch (storageError) {
-          console.error("Error deleting from storage:", storageError);
-          // Continue with document deletion even if storage deletion fails
-        }
+    // Eerst document ophalen om het pad te krijgen
+    const fileDocRef = doc(db, FILES_COLLECTION, fileIdStr);
+    const docSnapshot = await getDoc(fileDocRef);
+    
+    if (!docSnapshot.exists()) {
+      console.error(`Document met ID ${fileIdStr} bestaat niet`);
+      throw new Error(`Bestand niet gevonden: ${fileIdStr}`);
+    }
+    
+    const fileData = docSnapshot.data();
+    console.log(`*** DEBUGGING: Bestandsdata opgehaald: `, fileData);
+    
+    // Document direct verwijderen
+    console.log(`*** DEBUGGING: Document verwijderen: ${fileIdStr} ***`);
+    await deleteDoc(fileDocRef);
+    console.log(`*** DEBUGGING: Document verwijderd ***`);
+    
+    // Probeer daarna het bestand uit Storage te verwijderen (niet wachten)
+    if (fileData.filePath) {
+      try {
+        const storageFileRef = ref(storage, fileData.filePath);
+        console.log(`*** DEBUGGING: Storage pad: ${fileData.filePath} ***`);
+        // We verwijderen het bestand, maar wachten er niet op
+        deleteObject(storageFileRef)
+          .then(() => console.log(`*** DEBUGGING: Bestand uit storage verwijderd ***`))
+          .catch(err => console.warn(`Probleem bij verwijderen uit Storage: ${err instanceof Error ? err.message : 'Onbekende fout'}`, err));
+      } catch (err) {
+        console.warn(`Probleem bij aanmaken storage reference: ${err instanceof Error ? err.message : 'Onbekende fout'}`, err);
       }
-      
-      // Delete the document
-      console.log("Deleting file document:", fileIdStr);
-      await deleteDoc(fileRef);
-      console.log("File document deleted successfully");
-    } else {
-      console.log("File document not found:", fileIdStr);
     }
     
     return true;
   } catch (error) {
-    console.error("Error deleting candidate file:", error);
-    // Geef een meer specifieke foutmelding terug
-    if (error instanceof Error) {
-      if (error.message.includes("permission")) {
-        throw new Error("Onvoldoende rechten. Controleer of je bent ingelogd en de juiste rechten hebt.");
-      }
-    }
+    console.error("Fout bij het verwijderen van het bestand:", error);
     throw error;
   }
 };

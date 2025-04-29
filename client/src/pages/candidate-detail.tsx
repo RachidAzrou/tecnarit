@@ -53,18 +53,34 @@ export default function CandidateDetail() {
   // Mutatie voor het verwijderen van bestanden
   const deleteFileMutation = useMutation<boolean, Error, string | number>({
     mutationFn: async (fileId: string | number) => {
-      console.log("Verwijderen van bestand met ID:", fileId);
-      return await deleteCandidateFile(fileId);
+      console.log(`Verwijderproces gestart voor bestand met ID: ${fileId} (${typeof fileId})`);
+      try {
+        const result = await deleteCandidateFile(fileId);
+        console.log("Verwijderproces succesvol afgerond");
+        return result;
+      } catch (error) {
+        console.error("Fout gevangen in mutatiefunctie:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
-      // Vernieuw de bestanden query na succesvol verwijderen
-      queryClient.invalidateQueries({ queryKey: [`candidates/${params.id}/files`] });
-      toast({
-        title: "Bestand verwijderd",
-        description: "Het bestand is succesvol verwijderd."
-      });
-      setFileToDelete(null);
-      setShowDeleteDialog(false);
+      // Update de UI direct zonder te wachten op een nieuwe query
+      if (fileToDelete && files) {
+        // Filter het verwijderde bestand uit de lokale lijst
+        const updatedFiles = files.filter(file => file.id !== fileToDelete.id);
+        
+        // Update de cache direct met de nieuwe lijst
+        queryClient.setQueryData([`candidates/${params.id}/files`], updatedFiles);
+        
+        // Toon bevestigingsmelding
+        toast({
+          title: "Bestand verwijderd",
+          description: "Het bestand is succesvol verwijderd."
+        });
+        
+        // Reset state
+        setFileToDelete(null);
+      }
     },
     onError: (error) => {
       toast({
@@ -92,6 +108,16 @@ export default function CandidateDetail() {
   // Handler voor het bevestigen van de bestandsverwijdering
   const confirmDelete = () => {
     if (fileToDelete) {
+      // Toon direct feedback aan de gebruiker
+      toast({
+        title: "Bezig met verwijderen...",
+        description: "Het bestand wordt verwijderd."
+      });
+      
+      // Sluit de dialoog direct
+      setShowDeleteDialog(false);
+      
+      // Start de verwijdering
       deleteFileMutation.mutate(fileToDelete.id);
     }
   };
