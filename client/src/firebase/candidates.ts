@@ -347,12 +347,15 @@ export const addCandidateFile = async (
     }
     
     // Upload vooruitgang melden
-    onProgress?.(10);
+    onProgress?.(5);
     
     // Voeg timestamp toe aan bestandsnaam om unieke namen te garanderen
     const timestamp = new Date().getTime();
     const fileNameWithTimestamp = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
     const filePath = `candidates/${candidateId}/documents/${fileNameWithTimestamp}`;
+    
+    console.log(`Bestand voorbereiden voor upload: ${fileName}`);
+    onProgress?.(10);
     
     // Metadata opslaan
     const filesCol = collection(db, FILES_COLLECTION);
@@ -368,7 +371,8 @@ export const addCandidateFile = async (
       status: 'uploading',
     });
     
-    onProgress?.(30);
+    console.log(`Metadata aangemaakt in Firestore, start upload naar Storage`);
+    onProgress?.(15);
     
     // Upload starten met voortgangsinformatie
     const storageRef = ref(storage, filePath);
@@ -381,20 +385,44 @@ export const addCandidateFile = async (
         'state_changed', 
         // Voortgang bijhouden
         (snapshot: UploadTaskSnapshot) => {
-          const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 50) + 30;
+          // Maak gebruik van de volledige range van 15-80% voor de uploadvoortgang
+          const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 65) + 15;
+          console.log(`Upload voortgang: ${progress}%`);
           onProgress?.(progress);
         },
         // Fout afhandelen
         (error) => {
           console.error('Upload error:', error);
-          reject(error);
+          
+          // Probeer het document toch te verwijderen als de upload mislukt
+          try {
+            deleteDoc(doc(db, FILES_COLLECTION, tempDocRef.id))
+              .then(() => console.log(`Document verwijderd na uploadfout`))
+              .catch(err => console.error(`Kon document niet verwijderen na uploadfout: ${err}`));
+          } catch (e) {
+            console.error(`Fout bij opruimen na uploadfout: ${e}`);
+          }
+          
+          // Specifiekere foutmeldingen geven
+          if (error.code === 'storage/unauthorized') {
+            reject(new Error("Geen toestemming voor deze upload. Controleer je rechten."));
+          } else if (error.code === 'storage/canceled') {
+            reject(new Error("Upload is geannuleerd."));
+          } else if (error.code === 'storage/retry-limit-exceeded') {
+            reject(new Error("Upload mislukt door netwerkproblemen. Controleer je verbinding."));
+          } else {
+            reject(error);
+          }
         },
         // Voltooid
         async () => {
           try {
             // URL ophalen
+            console.log(`Upload voltooid, bezig met ophalen van download URL`);
+            onProgress?.(80);
             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
             
+            console.log(`Download URL verkregen, document bijwerken`);
             onProgress?.(90);
             
             // Update document met URL
@@ -403,6 +431,7 @@ export const addCandidateFile = async (
               status: 'completed'
             });
             
+            console.log(`Document bijgewerkt, upload volledig voltooid`);
             onProgress?.(100);
             
             // Resultaat teruggeven
