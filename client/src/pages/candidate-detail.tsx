@@ -201,11 +201,11 @@ export default function CandidateDetail() {
         <Sidebar />
       </div>
 
-      <div className="flex flex-col w-0 flex-1 overflow-hidden">
+      <div className="flex flex-col w-full lg:w-0 lg:flex-1 overflow-hidden">
         {/* Mobile header is verwijderd */}
 
         <div className="flex-1 relative z-0 overflow-y-auto focus:outline-none">
-          <div className="py-6">
+          <div className="py-4 sm:py-6">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
               <PageTitle title="Kandidaat Details" />
               
@@ -213,20 +213,20 @@ export default function CandidateDetail() {
                 <div>
                   {/* Linker deel - hier zou eventueel een knop kunnen staan */}
                 </div>
-                <div className="flex space-x-3">
+                <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2 sm:gap-3">
                   <Button
                     onClick={handleBackToList}
-                    className="tecnarit-blue-bg mobile-action-button tecnarit-blue-button hover-lift"
+                    className="tecnarit-blue-bg tecnarit-blue-button hover-lift w-full sm:w-auto"
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
-                    <span className="responsive-button-text">Dashboard</span>
+                    <span>Dashboard</span>
                   </Button>
                   <Button 
                     onClick={handleEdit}
-                    className="tecnarit-blue-bg mobile-action-button tecnarit-blue-button hover-lift"
+                    className="tecnarit-blue-bg tecnarit-blue-button hover-lift w-full sm:w-auto"
                   >
                     <PencilIcon className="h-4 w-4 mr-2" />
-                    <span className="responsive-button-text">Bewerken</span>
+                    <span>Bewerken</span>
                   </Button>
                 </div>
               </div>
@@ -237,8 +237,8 @@ export default function CandidateDetail() {
                 <Card>
                   {/* Candidate Header */}
                   <div className="px-4 py-5 sm:px-6 border-b bg-gradient-to-r from-[#111827]/5 to-primary/5">
-                    <div className="flex items-center">
-                      <Avatar className="h-24 w-24 border-2 border-primary/30">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+                      <Avatar className="h-24 w-24 border-2 border-primary/30 mx-auto sm:mx-0">
                         <AvatarImage 
                           src={candidate.profileImage ? `/${candidate.profileImage}` : undefined} 
                           alt={`${candidate.firstName} ${candidate.lastName}`}
@@ -247,7 +247,7 @@ export default function CandidateDetail() {
                           {candidate.firstName.charAt(0)}{candidate.lastName.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="ml-6">
+                      <div className="text-center sm:text-left">
                         <h3 className="text-xl font-bold gradient-text">
                           {candidate.firstName} {candidate.lastName}
                         </h3>
@@ -255,7 +255,7 @@ export default function CandidateDetail() {
                           {candidate.yearsOfExperience} {candidate.yearsOfExperience === 1 ? 'jaar' : 'jaren'} ervaring
                           {candidate.birthDate && ` • ${calculateAge(new Date(candidate.birthDate))} jaar oud`}
                         </p>
-                        <div className="mt-2">
+                        <div className="mt-2 flex justify-center sm:justify-start">
                           <Badge variant="outline" className={getStatusBadgeVariant(candidate.status)}>
                             {candidate.status === "beschikbaar" ? "Beschikbaar" : 
                              candidate.status === "onbeschikbaar" ? "Onbeschikbaar" :
@@ -333,19 +333,20 @@ export default function CandidateDetail() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="mt-4 mobile-action-button hover-lift"
+                              className="mt-4 w-full sm:w-auto hover-lift"
                               onClick={handleEdit}
                             >
                               <PencilIcon className="h-4 w-4 mr-2" />
-                              <span className="responsive-button-text">CV toevoegen</span>
+                              <span>CV toevoegen</span>
                             </Button>
                           </div>
                         ) : (
                           <div className="space-y-3">
                             {files.map((file) => (
                               <div key={file.id} className="bg-card shadow border border-border/40 rounded-lg p-4 hover:border-primary/40 transition-colors duration-200">
-                                <div className="flex items-center">
-                                  <div className="flex-shrink-0">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                  {/* Bestandstype icoon */}
+                                  <div className="flex-shrink-0 mx-auto sm:mx-0">
                                     {file.fileType.includes("pdf") ? (
                                       <div className="flex items-center justify-center h-12 w-12 rounded-lg gradient-bg text-white">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -382,31 +383,35 @@ export default function CandidateDetail() {
                                       </div>
                                     )}
                                   </div>
-                                  <div className="ml-4 flex-1">
+                                  
+                                  {/* Bestandsdetails */}
+                                  <div className="flex-1 text-center sm:text-left">
                                     <h4 className="text-sm font-medium text-primary-900">{file.fileName}</h4>
                                     <p className="text-xs text-primary/70">
                                       Geüpload op {formatFileDate(file.uploadDate)} • {formatFileSize(file.fileSize)}
                                     </p>
                                   </div>
-                                  <div className="flex space-x-2">
-                                    <a href={`/${file.filePath}`} download={file.fileName}>
+                                  
+                                  {/* Actieknoppen */}
+                                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 mt-3 sm:mt-0">
+                                    <a href={`/${file.filePath}`} download={file.fileName} className="w-full sm:w-auto">
                                       <Button 
                                         variant="outline" 
                                         size="sm"
-                                        className="text-primary hover:text-primary-700 hover:bg-primary/5 mobile-action-button hover-lift"
+                                        className="w-full text-primary hover:text-primary-700 hover:bg-primary/5 hover-lift"
                                       >
                                         <Download className="h-4 w-4 mr-2" />
-                                        <span className="responsive-button-text">Download</span>
+                                        <span>Download</span>
                                       </Button>
                                     </a>
                                     <Button 
                                       variant="outline" 
                                       size="sm"
-                                      className="text-red-500 hover:text-red-700 hover:bg-red-50 mobile-action-button hover-lift"
+                                      className="w-full text-red-500 hover:text-red-700 hover:bg-red-50 hover-lift"
                                       onClick={() => handleDeleteClick(file)}
                                     >
                                       <Trash2 className="h-4 w-4 mr-2" />
-                                      <span className="responsive-button-text">Verwijderen</span>
+                                      <span>Verwijderen</span>
                                     </Button>
                                   </div>
                                 </div>
