@@ -308,33 +308,51 @@ export default function CandidateForm() {
 
 
   // Functie om de bestandsselectie voor het CV af te handelen
-  const handleResumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleResumeChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Controleer de bestandsgrootte (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Controleer de bestandsgrootte (max 10MB vóór compressie)
+    if (!isFileSizeValid(file, 10)) {
       toast({
         title: "Bestand te groot",
-        description: "Het CV moet kleiner zijn dan 5MB",
+        description: "Het CV moet kleiner zijn dan 10MB",
         variant: "destructive",
       });
       return;
     }
 
-    setResumeFile(file);
-    setResumeFileName(file.name);
+    try {
+      // Bestanden direct comprimeren bij selectie voor betere feedback
+      const compressedFile = await compressFile(file);
+      
+      // Toon melding over compressie als het bestand verkleind is
+      if (compressedFile.size < file.size) {
+        toast({
+          title: "Bestand gecomprimeerd",
+          description: `Bestandsgrootte verminderd van ${(file.size / (1024 * 1024)).toFixed(1)}MB naar ${(compressedFile.size / (1024 * 1024)).toFixed(1)}MB`,
+        });
+      }
+      
+      setResumeFile(compressedFile);
+      setResumeFileName(file.name); // Behoud originele bestandsnaam voor weergave
+    } catch (error) {
+      console.error("Fout bij comprimeren van bestand:", error);
+      // Gebruik het originele bestand als compressie mislukt
+      setResumeFile(file);
+      setResumeFileName(file.name);
+    }
   };
   
   // Functie om de bestandsselectie voor certificaten af te handelen
-  const handleCertificateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCertificateChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
-    // We kiezen het eerste bestand voor de weergave, maar alle bestanden worden verwerkt tijdens upload
+    // We kiezen het eerste bestand voor de weergave
     const selectedFile = files[0];
     
-    // Controleer de bestandsgrootte (max 5MB per bestand)
+    // Controleer de bestandsgrootte (max 10MB vóór compressie)
     let allFilesValid = true;
     let totalFileCount = 0;
     
@@ -342,10 +360,10 @@ export default function CandidateForm() {
       const file = files[i];
       totalFileCount++;
       
-      if (file.size > 5 * 1024 * 1024) {
+      if (!isFileSizeValid(file, 10)) {
         toast({
           title: "Bestand te groot",
-          description: `Certificaat '${file.name}' is groter dan 5MB en kan niet worden geüpload.`,
+          description: `Certificaat '${file.name}' is groter dan 10MB en kan niet worden geüpload.`,
           variant: "destructive",
         });
         allFilesValid = false;
@@ -354,7 +372,25 @@ export default function CandidateForm() {
     
     if (!allFilesValid) return;
     
-    setCertificateFile(selectedFile); // Voorlopig alleen eerste bestand opslaan
+    try {
+      // Comprimeer het geselecteerde bestand (alleen eerste voor nu)
+      const compressedFile = await compressFile(selectedFile);
+      
+      // Toon melding over compressie als het bestand verkleind is
+      if (compressedFile.size < selectedFile.size) {
+        const reductiePercentage = Math.round((1 - compressedFile.size / selectedFile.size) * 100);
+        toast({
+          title: "Bestand gecomprimeerd",
+          description: `Bestandsgrootte verminderd met ${reductiePercentage}%`,
+        });
+      }
+      
+      setCertificateFile(compressedFile);
+    } catch (error) {
+      console.error("Fout bij comprimeren van certificaat:", error);
+      // Als compressie mislukt, gebruik origineel
+      setCertificateFile(selectedFile);
+    }
     
     // Aangepaste bestandsnaam voor meerdere bestanden
     if (files.length === 1) {

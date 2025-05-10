@@ -1,513 +1,826 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
-import { Loader2, Plus, Search, Download, FileSpreadsheet, FileText, Home, Users, RefreshCw } from "lucide-react";
+import { useParams, useLocation } from "wouter";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { ArrowLeft, Loader2, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import CandidateTable from "@/components/candidate/candidate-table";
-import { FirebaseCandidate } from "@/firebase/schema";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { nl } from "date-fns/locale";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { FirebaseCandidate, insertCandidateSchema } from "@/firebase/schema";
 import { useToast } from "@/hooks/use-toast";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { cn } from "@/lib/utils";
+import * as z from "zod";
 import { PageTitle } from "@/components/layout/page-title";
 // Firebase import
-import { getCandidates, getCandidatesByStatus } from "@/firebase/candidates";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/firebase/config";
+import { 
+  createCandidate, 
+  updateCandidate, 
+  getCandidate,
+  addCandidateFile
+} from "@/firebase/candidates";
+// Import bestandscompressie functies
+import { compressFile, isFileSizeValid } from "@/lib/fileCompression";
 
-export default function CandidateList() {
+const formSchema = insertCandidateSchema.extend({
+  unavailableUntil: z.date().optional().nullable(),
+  client: z.string().optional().nullable(),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+export default function CandidateForm() {
+  const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [status, setStatus] = useState("");
-  const [sortOrder, setSortOrder] = useState("name_asc");
-  const [showDashboard, setShowDashboard] = useState(true);
+  const isEditMode = !!id;
   const { toast } = useToast();
-  
-  // Check de URL query parameters om te bepalen of we het dashboard of de zoekpagina moeten tonen
-  useEffect(() => {
-    const hasSearchParam = window.location.search.includes('search=true');
-    setShowDashboard(!hasSearchParam);
-  }, []);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [certificateFile, setCertificateFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [certificateProgress, setCertificateProgress] = useState<number>(0);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isCertificateUploading, setIsCertificateUploading] = useState<boolean>(false);
+  const [resumeFileName, setResumeFileName] = useState<string | null>(null);
+  const [certificateFileName, setCertificateFileName] = useState<string | null>(null);
 
-  // Directe kandidatenlijst uit Firebase (omzeilt cachingproblemen)
-  const [directCandidates, setDirectCandidates] = useState<FirebaseCandidate[]>([]);
-  const [directLoading, setDirectLoading] = useState(false);
-  
-  // Deze functie haalt kandidaten direct uit Firebase op
-  const fetchDirectCandidates = async () => {
-    try {
-      setDirectLoading(true);
-      console.log("Direct ophalen van kandidaten uit Firebase...");
-      
-      const candidatesCollection = collection(db, 'candidates');
-      const candidatesSnapshot = await getDocs(candidatesCollection);
-      
-      const candidates = candidatesSnapshot.docs.map(doc => {
-        const data = doc.data();
-        console.log(`Preparing candidate data - Document ID: ${doc.id}`);
-        
-        // Store the original document ID string
-        return {
-          // BELANGRIJK: We gebruiken het originele document ID als string
-          id: doc.id,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email,
-          phone: data.phone || null,
-          linkedinProfile: data.linkedinProfile || null,
-          yearsOfExperience: data.yearsOfExperience || null,
-          status: data.status || 'beschikbaar',
-          unavailableUntil: data.unavailableUntil ? new Date(data.unavailableUntil) : null,
-          client: data.client || null,
-          notes: data.notes || null,
-          profileImage: data.profileImage || null,
-          createdAt: data.createdAt ? new Date(data.createdAt.toDate()) : new Date(),
-        };
-      });
-      
-      console.log(`${candidates.length} kandidaten direct opgehaald uit Firebase`);
-      setDirectCandidates(candidates);
-    } catch (error) {
-      console.error("Fout bij direct ophalen van kandidaten:", error);
-      toast({
-        title: "Fout bij ophalen",
-        description: "Er is een fout opgetreden bij het ophalen van kandidaten.",
-        variant: "destructive",
-      });
-    } finally {
-      setDirectLoading(false);
-    }
-  };
-  
-  // Bij componentmount en wanneer we terugkeren naar deze pagina
-  useEffect(() => {
-    fetchDirectCandidates();
-    
-    // Refresh kandidaten wanneer we terugkeren naar deze pagina
-    window.addEventListener('focus', fetchDirectCandidates);
-    
-    return () => {
-      window.removeEventListener('focus', fetchDirectCandidates);
-    };
-  }, []);
-  
-  // Gebruik de globale queryClient configuratie
-  const { data: candidates, isLoading: queryIsLoading, error, refetch } = useQuery<FirebaseCandidate[]>({
-    queryKey: ["candidates"],
-    // We hoeven geen queryFn te definiëren omdat dit nu in de queryClient wordt afgehandeld
-    retry: 3,
-    retryDelay: 1000,
-    gcTime: 0,
-    refetchOnWindowFocus: true,
-    staleTime: 0
+  // Query om kandidaat gegevens op te halen indien we in wijzigingsmodus zijn
+  const {
+    data: candidate,
+    isLoading: isCandidateLoading,
+    error: candidateError,
+  } = useQuery<FirebaseCandidate>({
+    queryKey: [`candidates/${id}`],
+    queryFn: async () => {
+      if (!id) throw new Error("No candidate ID provided");
+      const result = await getCandidate(id);
+      if (!result) throw new Error("Candidate not found");
+      return result;
+    },
+    enabled: isEditMode,
   });
 
-  const handleAddCandidate = () => {
-    setLocation("/candidates/new");
-  };
-  
-  // Functie voor het exporteren van kandidaten naar CSV
-  const exportToCSV = (candidates: FirebaseCandidate[]) => {
-    // Headers voor de CSV
-    const headers = [
-      "Voornaam", 
-      "Achternaam", 
-      "E-mail", 
-      "Telefoon", 
-      "LinkedIn",
-      "Jaren Ervaring",
-      "Status", 
-      "Onbeschikbaar Tot", 
-      "Klant",
-      "Notities"
-    ];
-    
-    // Format DateTime to string
-    const formatDate = (date: Date | null) => {
-      if (!date) return "";
-      const d = new Date(date);
-      return d.toLocaleDateString('nl-NL');
-    };
-    
-    // Converteren van kandidaten naar rijen
-    const rows = candidates.map(candidate => [
-      candidate.firstName,
-      candidate.lastName,
-      candidate.email,
-      candidate.phone || "",
-      candidate.linkedinProfile || "",
-      candidate.yearsOfExperience ? candidate.yearsOfExperience.toString() : "",
-      candidate.status,
-      formatDate(candidate.unavailableUntil),
-      candidate.client || "",
-      candidate.notes || ""
-    ]);
-    
-    // Combineren van headers en rijen
-    const csvContent = [
-      headers.join(","),
-      ...rows.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(","))
-    ].join("\n");
-    
-    // Creëer een Blob van de CSV data
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    
-    // Creëer een download link
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `tecnarit-kandidaten-${new Date().toISOString().slice(0, 10)}.csv`);
-    link.style.display = "none";
-    document.body.appendChild(link);
-    
-    // Klik op de link om het bestand te downloaden
-    link.click();
-    document.body.removeChild(link);
-    
-    toast({
-      title: "Export succesvol",
-      description: `${candidates.length} kandidaten geëxporteerd naar CSV`,
-    });
-  };
-  
-  // Export naar PDF
-  const exportToPDF = () => {
-    toast({
-      title: "PDF Export",
-      description: "PDF export-functionaliteit komt binnenkort beschikbaar.",
-    });
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      linkedinProfile: "",
+      yearsOfExperience: null,
+      birthDate: null,
+      status: "beschikbaar",
+      unavailableUntil: null,
+      client: "",
+      notes: "",
+    },
+  });
+
+  // Zorg ervoor dat het formulier wordt ingevuld met bestaande gegevens wanneer we in wijzigingsmodus zijn
+  useEffect(() => {
+    if (candidate && isEditMode) {
+      // Update de form values met bestaande kandidaat gegevens
+      form.reset({
+        firstName: candidate.firstName,
+        lastName: candidate.lastName,
+        email: candidate.email,
+        phone: candidate.phone || null,
+        linkedinProfile: candidate.linkedinProfile || null,
+        yearsOfExperience: candidate.yearsOfExperience,
+        birthDate: candidate.birthDate ? new Date(candidate.birthDate) : null,
+        status: candidate.status,
+        unavailableUntil: candidate.unavailableUntil ? new Date(candidate.unavailableUntil) : null,
+        client: candidate.client || null,
+        notes: candidate.notes || null,
+      });
+
+
+    }
+  }, [candidate, isEditMode, form]);
+
+  // Mutations voor toevoegen/bijwerken van kandidaten
+  const createMutation = useMutation({
+    mutationFn: async (formData: FormValues) => {
+      try {
+        // Gebruik Firebase in plaats van de API
+        const result = await createCandidate(formData);
+        if (!result) throw new Error("Failed to create candidate");
+        return result;
+      } catch (error) {
+        console.error("Error in createMutation:", error);
+        throw error; // Zorg dat de error doorgaat naar onError handler
+      }
+    },
+    onSuccess: async (data: FirebaseCandidate) => {
+      try {
+        // Upload CV als die is geselecteerd
+        if (resumeFile) {
+          setIsUploading(true);
+          setUploadProgress(0);
+          
+          console.log(`Start upload van CV: ${resumeFile.name} (${resumeFile.size} bytes)`);
+          
+          // Verbeterde progress callback toevoegen
+          await addCandidateFile(
+            data.id, 
+            resumeFile, 
+            "CV",
+            (progress) => {
+              console.log(`Upload voortgang CV: ${progress}%`);
+              setUploadProgress(progress);
+            }
+          );
+          
+          console.log('CV upload voltooid');
+          setIsUploading(false);
+        }
+        
+        // Upload certificaat als die is geselecteerd
+        if (certificateFile) {
+          setIsCertificateUploading(true);
+          setCertificateProgress(0);
+          
+          console.log(`Start upload van certificaat: ${certificateFile.name} (${certificateFile.size} bytes)`);
+          
+          // Verbeterde progress callback toevoegen
+          await addCandidateFile(
+            data.id, 
+            certificateFile, 
+            "Certificaat",
+            (progress) => {
+              console.log(`Upload voortgang certificaat: ${progress}%`);
+              setCertificateProgress(progress);
+            }
+          );
+          
+          console.log('Certificaat upload voltooid');
+          setIsCertificateUploading(false);
+        }
+
+        queryClient.invalidateQueries({ queryKey: ["candidates"] });
+        toast({
+          title: "Kandidaat Toegevoegd",
+          description: `${data.firstName} ${data.lastName} is toegevoegd aan het systeem.`,
+        });
+        // Kleine vertraging toevoegen om te zorgen dat de toast zichtbaar is voordat we navigeren
+        setTimeout(() => setLocation("/"), 500);
+      } catch (uploadError) {
+        console.error("Error during post-creation steps:", uploadError);
+        // Reset upload state
+        setIsUploading(false);
+        setUploadProgress(0);
+        setIsCertificateUploading(false);
+        setCertificateProgress(0);
+        
+        // Toch doorgaan met navigeren bij upload fout
+        queryClient.invalidateQueries({ queryKey: ["candidates"] });
+        toast({
+          title: "Kandidaat Toegevoegd",
+          description: `${data.firstName} ${data.lastName} is toegevoegd, maar bestanden konden niet worden geüpload.`,
+        });
+        setTimeout(() => setLocation("/"), 500);
+      }
+    },
+    onError: (error: Error) => {
+      console.error("Create mutation error handler triggered:", error);
+      toast({
+        title: "Fout bij toevoegen",
+        description: error.message || "Er is een fout opgetreden tijdens het toevoegen van de kandidaat.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (formData: FormValues) => {
+      if (!id) throw new Error("Geen kandidaat ID opgegeven");
+      // Gebruik Firebase in plaats van de API
+      const result = await updateCandidate(id, formData);
+      if (!result) throw new Error("Failed to update candidate");
+      return result;
+    },
+    onSuccess: async (data: FirebaseCandidate) => {
+      try {
+        // Upload CV als die is geselecteerd
+        if (resumeFile) {
+          setIsUploading(true);
+          setUploadProgress(0);
+          
+          console.log(`Start upload van CV: ${resumeFile.name} (${resumeFile.size} bytes)`);
+          
+          // Verbeterde progress callback toevoegen
+          await addCandidateFile(
+            data.id, 
+            resumeFile, 
+            "CV",
+            (progress) => {
+              console.log(`Upload voortgang CV: ${progress}%`);
+              setUploadProgress(progress);
+            }
+          );
+          
+          console.log('CV upload voltooid');
+          setIsUploading(false);
+        }
+        
+        // Upload certificaat als die is geselecteerd
+        if (certificateFile) {
+          setIsCertificateUploading(true);
+          setCertificateProgress(0);
+          
+          console.log(`Start upload van certificaat: ${certificateFile.name} (${certificateFile.size} bytes)`);
+          
+          // Verbeterde progress callback toevoegen
+          await addCandidateFile(
+            data.id, 
+            certificateFile, 
+            "Certificaat",
+            (progress) => {
+              console.log(`Upload voortgang certificaat: ${progress}%`);
+              setCertificateProgress(progress);
+            }
+          );
+          
+          console.log('Certificaat upload voltooid');
+          setIsCertificateUploading(false);
+        }
+
+        queryClient.invalidateQueries({ queryKey: [`candidates/${id}`] });
+        queryClient.invalidateQueries({ queryKey: ["candidates"] });
+        toast({
+          title: "Kandidaat Bijgewerkt",
+          description: `${data.firstName} ${data.lastName} is bijgewerkt.`,
+        });
+        setTimeout(() => setLocation("/"), 500);
+      } catch (uploadError) {
+        console.error("Error during post-update steps:", uploadError);
+        // Reset upload state
+        setIsUploading(false);
+        setUploadProgress(0);
+        setIsCertificateUploading(false);
+        setCertificateProgress(0);
+        
+        // Toch doorgaan met navigeren bij upload fout
+        queryClient.invalidateQueries({ queryKey: [`candidates/${id}`] });
+        queryClient.invalidateQueries({ queryKey: ["candidates"] });
+        toast({
+          title: "Kandidaat Bijgewerkt",
+          description: `${data.firstName} ${data.lastName} is bijgewerkt, maar bestanden konden niet worden geüpload.`,
+        });
+        setTimeout(() => setLocation("/"), 500);
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Fout bij bijwerken",
+        description: error.message || "Er is een fout opgetreden tijdens het bijwerken van de kandidaat.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Deze functies gebruiken nu direct de Firebase-functies
+  // De oude implementaties zijn vervangen
+
+  // Functie om het formulier in te dienen
+  const onSubmit = (data: FormValues) => {
+    if (isEditMode) {
+      updateMutation.mutate(data);
+    } else {
+      createMutation.mutate(data);
+    }
   };
 
-  const filterCandidates = (candidates: FirebaseCandidate[]) => {
-    if (!candidates) return [];
 
-    // Filter by search query
-    let filtered = candidates.filter((candidate) => {
-      const fullName = `${candidate.firstName} ${candidate.lastName}`.toLowerCase();
-      return (
-        fullName.includes(searchQuery.toLowerCase()) ||
-        candidate.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (candidate.linkedinProfile && candidate.linkedinProfile.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
-    });
 
-    // Filter by status
-    if (status && status !== "all") {
-      filtered = filtered.filter(
-        (candidate) => candidate.status === status
-      );
+  // Functie om de bestandsselectie voor het CV af te handelen
+  const handleResumeChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Controleer de bestandsgrootte (max 10MB vóór compressie)
+    if (!isFileSizeValid(file, 10)) {
+      toast({
+        title: "Bestand te groot",
+        description: "Het CV moet kleiner zijn dan 10MB",
+        variant: "destructive",
+      });
+      return;
     }
 
-    // Sort candidates
-    return [...filtered].sort((a, b) => {
-      switch (sortOrder) {
-        case "name_asc":
-          return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
-        case "name_desc":
-          return `${b.firstName} ${b.lastName}`.localeCompare(`${a.firstName} ${a.lastName}`);
-        case "experience_asc":
-          const expA = a.yearsOfExperience || 0;
-          const expB = b.yearsOfExperience || 0;
-          return expA - expB;
-        case "experience_desc":
-          const expDescA = a.yearsOfExperience || 0;
-          const expDescB = b.yearsOfExperience || 0;
-          return expDescB - expDescA;
-        default:
-          return 0;
+    try {
+      // Bestanden direct comprimeren bij selectie voor betere feedback
+      const compressedFile = await compressFile(file);
+      
+      // Toon melding over compressie als het bestand verkleind is
+      if (compressedFile.size < file.size) {
+        toast({
+          title: "Bestand gecomprimeerd",
+          description: `Bestandsgrootte verminderd van ${(file.size / (1024 * 1024)).toFixed(1)}MB naar ${(compressedFile.size / (1024 * 1024)).toFixed(1)}MB`,
+        });
       }
-    });
+      
+      setResumeFile(compressedFile);
+      setResumeFileName(file.name); // Behoud originele bestandsnaam voor weergave
+    } catch (error) {
+      console.error("Fout bij comprimeren van bestand:", error);
+      // Gebruik het originele bestand als compressie mislukt
+      setResumeFile(file);
+      setResumeFileName(file.name);
+    }
+  };
+  
+  // Functie om de bestandsselectie voor certificaten af te handelen
+  const handleCertificateChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    // We kiezen het eerste bestand voor de weergave
+    const selectedFile = files[0];
+    
+    // Controleer de bestandsgrootte (max 10MB vóór compressie)
+    let allFilesValid = true;
+    let totalFileCount = 0;
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      totalFileCount++;
+      
+      if (!isFileSizeValid(file, 10)) {
+        toast({
+          title: "Bestand te groot",
+          description: `Certificaat '${file.name}' is groter dan 10MB en kan niet worden geüpload.`,
+          variant: "destructive",
+        });
+        allFilesValid = false;
+      }
+    }
+    
+    if (!allFilesValid) return;
+    
+    try {
+      // Comprimeer het geselecteerde bestand (alleen eerste voor nu)
+      const compressedFile = await compressFile(selectedFile);
+      
+      // Toon melding over compressie als het bestand verkleind is
+      if (compressedFile.size < selectedFile.size) {
+        const reductiePercentage = Math.round((1 - compressedFile.size / selectedFile.size) * 100);
+        toast({
+          title: "Bestand gecomprimeerd",
+          description: `Bestandsgrootte verminderd met ${reductiePercentage}%`,
+        });
+      }
+      
+      setCertificateFile(compressedFile);
+    } catch (error) {
+      console.error("Fout bij comprimeren van certificaat:", error);
+      // Als compressie mislukt, gebruik origineel
+      setCertificateFile(selectedFile);
+    }
+    
+    // Aangepaste bestandsnaam voor meerdere bestanden
+    if (files.length === 1) {
+      setCertificateFileName(selectedFile.name);
+    } else {
+      setCertificateFileName(`${totalFileCount} certificaten geselecteerd`);
+    }
   };
 
-  // Prioritize direct candidates over query-fetched candidates
-  const candidatesToUse = directCandidates.length > 0 ? directCandidates : (candidates || []);
-  const isLoadingState = directLoading || queryIsLoading;
-  const filteredCandidates = candidatesToUse ? filterCandidates(candidatesToUse) : [];
+  const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="bg-primary-50">
-      <div className="relative z-0 overflow-y-auto focus:outline-none">
-        <div className="py-6">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-            <PageTitle title={showDashboard ? "Dashboard" : "Kandidaat zoeken"} />
-            
-            {/* Aparte rij voor knoppen onder de titel */}
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                {/* Linker deel leeg gelaten */}
+    <>
+      <div className="flex flex-col flex-1 py-6">
+        <div className="w-full px-4 sm:px-6 md:px-8">
+          <PageTitle title={isEditMode ? "Kandidaat Bewerken" : "Kandidaat Toevoegen"} />
+        </div>
+
+        {/* Form Container - full width with margin away from sidebar */}
+        <div className="w-full px-4 sm:px-6 md:px-8">
+          <div className="glass-effect rounded-lg overflow-hidden">
+            {isEditMode && isCandidateLoading ? (
+              <div className="flex justify-center items-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
-              <div className="flex space-x-2">
-                {/* 'Kandidaat Toevoegen' knop verwijderd */}
-                {filteredCandidates.length > 0 && !showDashboard && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        className="border-primary/30 mobile-action-button hover-lift"
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        <span className="responsive-button-text">Exporteer</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => exportToCSV(filteredCandidates)}>
-                        <FileSpreadsheet className="h-4 w-4 mr-2" />
-                        <span>Exporteer naar CSV</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={exportToPDF}>
-                        <FileText className="h-4 w-4 mr-2" />
-                        <span>Exporteer naar PDF</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-                {/* Tweede 'Kandidaat Toevoegen' knop verwijderd */}
+            ) : isEditMode && candidateError ? (
+              <div className="text-center text-red-500 p-8">
+                Error loading candidate data. Please try again.
               </div>
-            </div>
-          </div>
+            ) : (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-8 md:p-10">
+                  <div>
+                    <div className="py-2 sm:p-0">
+                      <div className="grid grid-cols-1 gap-y-6 gap-x-6 sm:grid-cols-6">
+                        {/* Basic Information */}
+                        <div className="sm:col-span-6">
+                          <h2 className="text-lg font-medium text-primary-900 mb-2">Basis Informatie</h2>
+                        </div>
 
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-            <div className="py-4">
-              {/* Search and Filters - alleen tonen als we in zoek-modus zijn */}
-              {!showDashboard && (
-                <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-6">
-                  <div className="sm:col-span-3">
-                    <div className="relative rounded-md">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <Search className="h-4 w-4 text-primary/60" />
+
+                        {/* First Name */}
+                        <div className="sm:col-span-3">
+                          <FormField
+                            control={form.control}
+                            name="firstName"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col">
+                                <FormLabel>Voornaam</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Last Name */}
+                        <div className="sm:col-span-3">
+                          <FormField
+                            control={form.control}
+                            name="lastName"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col">
+                                <FormLabel>Achternaam</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Email */}
+                        <div className="sm:col-span-3">
+                          <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col">
+                                <FormLabel>E-mailadres</FormLabel>
+                                <FormControl>
+                                  <Input type="email" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Geboortedatum */}
+                        <div className="sm:col-span-3">
+                          <FormField
+                            control={form.control}
+                            name="birthDate"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col">
+                                <FormLabel>Geboortedatum</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="date"
+                                    {...field}
+                                    placeholder="DD/MM/JJJJ"
+                                    value={field.value ? format(new Date(field.value), "yyyy-MM-dd") : ""}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      field.onChange(value ? new Date(value) : null);
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* LinkedIn Profile */}
+                        <div className="sm:col-span-3">
+                          <FormField
+                            control={form.control}
+                            name="linkedinProfile"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col">
+                                <FormLabel>LinkedIn Profiel</FormLabel>
+                                <FormControl>
+                                  <Input {...field} value={field.value || ''} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Phone */}
+                        <div className="sm:col-span-3">
+                          <FormField
+                            control={form.control}
+                            name="phone"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col">
+                                <FormLabel>Telefoonnummer</FormLabel>
+                                <FormControl>
+                                  <Input type="tel" {...field} value={field.value || ''} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        
+                        {/* Years of Experience */}
+                        <div className="sm:col-span-3">
+                          <FormField
+                            control={form.control}
+                            name="yearsOfExperience"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col">
+                                <FormLabel>Jaren Ervaring</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="number" 
+                                    {...field} 
+                                    value={field.value === null ? '' : field.value}
+                                    onChange={(e) => {
+                                      const value = e.target.value === '' ? null : Number(e.target.value);
+                                      field.onChange(value);
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Status */}
+                        <div className="sm:col-span-3">
+                          <FormField
+                            control={form.control}
+                            name="status"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col">
+                                <FormLabel>Status</FormLabel>
+                                <FormControl>
+                                  <Select
+                                    value={field.value}
+                                    onValueChange={field.onChange}
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Selecteer status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="beschikbaar">Beschikbaar</SelectItem>
+                                      <SelectItem value="onbeschikbaar">Onbeschikbaar</SelectItem>
+                                      <SelectItem value="in_dienst">In Dienst</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Unavailable Until - alleen tonen als status "onbeschikbaar" is */}
+                        {form.watch("status") === "onbeschikbaar" && (
+                          <div className="sm:col-span-3">
+                            <FormField
+                              control={form.control}
+                              name="unavailableUntil"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                  <FormLabel>Onbeschikbaar tot</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="date"
+                                      {...field}
+                                      placeholder="DD/MM/JJJJ"
+                                      value={field.value ? format(new Date(field.value), "yyyy-MM-dd") : ""}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        field.onChange(value ? new Date(value) : null);
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
+
+                        {/* Client - alleen tonen als status "in_dienst" is */}
+                        {form.watch("status") === "in_dienst" && (
+                          <div className="sm:col-span-3">
+                            <FormField
+                              control={form.control}
+                              name="client"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                  <FormLabel>Klant</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} value={field.value || ''} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
+
+                        {/* Resume & Certificates Upload section */}
+                        <div className="sm:col-span-6 mt-6 border-t border-primary-100 pt-6">
+                          <h2 className="text-lg font-medium text-primary-900 mb-4">Documenten</h2>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Resume Upload */}
+                            <div>
+                              <FormLabel>CV Upload</FormLabel>
+                              <div className="mt-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  className="w-full sm:w-auto"
+                                  onClick={() => {
+                                    document.getElementById('resume-upload')?.click();
+                                  }}
+                                  disabled={isUploading}
+                                >
+                                  {resumeFileName ? 'CV Wijzigen' : 'CV Uploaden'}
+                                </Button>
+                                <input
+                                  id="resume-upload"
+                                  type="file"
+                                  className="hidden"
+                                  accept=".pdf,.doc,.docx"
+                                  onChange={handleResumeChange}
+                                  disabled={isUploading}
+                                />
+                                {resumeFileName && (
+                                  <p className="mt-2 text-sm text-primary-800">
+                                    Geselecteerd bestand: {resumeFileName}
+                                  </p>
+                                )}
+                                
+                                {/* Voortgangsbalk voor uploaden */}
+                                {isUploading && (
+                                  <div className="mt-3 w-full">
+                                    <div className="relative pt-1">
+                                      <div className="flex items-center justify-between mb-1">
+                                        <div className="text-xs text-primary-800 font-medium">
+                                          {uploadProgress < 100 
+                                            ? `CV wordt geüpload (${Math.round(uploadProgress)}%)` 
+                                            : "Upload voltooid!"}
+                                        </div>
+                                      </div>
+                                      <div className="overflow-hidden h-2 mb-2 text-xs flex rounded bg-gray-200">
+                                        <div 
+                                          style={{ width: `${uploadProgress}%` }}
+                                          className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-primary/60 to-primary transition-all duration-300 ease-in-out"
+                                        ></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                <p className="mt-1 text-xs text-primary-500">
+                                  PDF, DOCX tot 5MB
+                                </p>
+                              </div>
+                            </div>
+                            
+                            {/* Certificaten Upload */}
+                            <div>
+                              <FormLabel>Certificaten</FormLabel>
+                              <div className="mt-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  className="w-full sm:w-auto"
+                                  onClick={() => {
+                                    document.getElementById('certificate-upload')?.click();
+                                  }}
+                                  disabled={isCertificateUploading}
+                                >
+                                  {certificateFileName ? 'Certificaten Wijzigen' : 'Certificaten Uploaden'}
+                                </Button>
+                                <input
+                                  id="certificate-upload"
+                                  type="file"
+                                  className="hidden"
+                                  accept=".pdf"
+                                  multiple
+                                  onChange={handleCertificateChange}
+                                  disabled={isCertificateUploading}
+                                />
+                                {certificateFileName && (
+                                  <p className="mt-2 text-sm text-primary-800">
+                                    Geselecteerd bestand: {certificateFileName}
+                                  </p>
+                                )}
+                                
+                                {/* Voortgangsbalk voor certificaat uploaden */}
+                                {isCertificateUploading && (
+                                  <div className="mt-3 w-full">
+                                    <div className="relative pt-1">
+                                      <div className="flex items-center justify-between mb-1">
+                                        <div className="text-xs text-primary-800 font-medium">
+                                          {certificateProgress < 100 
+                                            ? `Certificaten worden geüpload (${Math.round(certificateProgress)}%)` 
+                                            : "Upload voltooid!"}
+                                        </div>
+                                      </div>
+                                      <div className="overflow-hidden h-2 mb-2 text-xs flex rounded bg-gray-200">
+                                        <div 
+                                          style={{ width: `${certificateProgress}%` }}
+                                          className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-primary/60 to-primary transition-all duration-300 ease-in-out"
+                                        ></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                <p className="mt-1 text-xs text-primary-500">
+                                  Alleen PDF tot 5MB (meerdere certificaten mogelijk)
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Notes */}
+                        <div className="sm:col-span-6 mt-6 border-t border-primary-100 pt-6">
+                          <h2 className="text-lg font-medium text-primary-900 mb-4">Notities</h2>
+                          <FormField
+                            control={form.control}
+                            name="notes"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col">
+                                <FormLabel>Aanvullende informatie</FormLabel>
+                                <FormControl>
+                                  <Textarea rows={4} {...field} value={field.value || ''} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        <div className="sm:col-span-6 mt-4">
+                          <Button 
+                            type="submit"
+                            className="tecnarit-blue-bg tecnarit-blue-border hover-lift touch-friendly w-full sm:w-auto"
+                            disabled={isPending}
+                          >
+                            {isPending ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                {isEditMode ? "Bijwerken..." : "Toevoegen..."}
+                              </>
+                            ) : (
+                              <>
+                                {isEditMode ? "Kandidaat Bijwerken" : "Kandidaat Toevoegen"}
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       </div>
-                      <Input
-                        placeholder="Zoek kandidaten..."
-                        className="pl-10 border-primary/30 focus-visible:ring-primary"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                      />
                     </div>
                   </div>
-                  <div className="sm:col-span-2">
-                    <Select
-                      value={status}
-                      onValueChange={setStatus}
-                    >
-                      <SelectTrigger className="border-primary/30 focus:ring-primary">
-                        <SelectValue placeholder="Alle Statussen" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Alle Statussen</SelectItem>
-                        <SelectItem value="beschikbaar">Beschikbaar</SelectItem>
-                        <SelectItem value="onbeschikbaar">Onbeschikbaar</SelectItem>
-                        <SelectItem value="in_dienst">In Dienst</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <Select
-                      value={sortOrder}
-                      onValueChange={setSortOrder}
-                    >
-                      <SelectTrigger className="border-primary/30 focus:ring-primary">
-                        <SelectValue placeholder="Sorteer op" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="name_asc">Naam A-Z</SelectItem>
-                        <SelectItem value="name_desc">Naam Z-A</SelectItem>
-                        <SelectItem value="experience_asc">Ervaring (Laag-Hoog)</SelectItem>
-                        <SelectItem value="experience_desc">Ervaring (Hoog-Laag)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              )}
-
-              {/* Dashboard of Candidates Table */}
-              {showDashboard ? (
-                // Dashboard weergave
-                <div className="mb-8">
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Totaal aantal kandidaten */}
-                    <Card 
-                      className="dashboard-total-card cursor-pointer hover-lift mobile-friendly-card"
-                      onClick={() => {
-                        setShowDashboard(false);
-                        setStatus("all");
-                        window.history.pushState({}, "", "?search=true");
-                      }}
-                    >
-                      <CardContent className="flex flex-col items-center justify-center p-4 sm:p-6">
-                        <div className="rounded-full bg-blue-100/80 p-3 mb-3">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                          </svg>
-                        </div>
-                        <h3 className="text-base sm:text-lg font-medium text-gray-900">Totaal Kandidaten</h3>
-                        <p className="text-2xl sm:text-3xl font-bold gradient-text mt-2">
-                          {isLoadingState ? <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" /> : candidatesToUse?.length || 0}
-                        </p>
-                      </CardContent>
-                    </Card>
-                    
-                    {/* Beschikbare kandidaten */}
-                    <Card 
-                      className="dashboard-available-card cursor-pointer hover-lift mobile-friendly-card"
-                      onClick={() => {
-                        setShowDashboard(false);
-                        setStatus("beschikbaar");
-                        window.history.pushState({}, "", "?search=true&status=beschikbaar");
-                      }}
-                    >
-                      <CardContent className="flex flex-col items-center justify-center p-4 sm:p-6">
-                        <div className="rounded-full bg-green-100/80 p-3 mb-3">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                            <line x1="3" y1="9" x2="21" y2="9" />
-                            <line x1="9" y1="21" x2="9" y2="9" />
-                            <polyline points="16 16 14 14 16 12" />
-                            <line x1="14" y1="14" x2="18" y2="14" />
-                          </svg>
-                        </div>
-                        <h3 className="text-base sm:text-lg font-medium text-gray-900">Beschikbare Kandidaten</h3>
-                        <p className="text-2xl sm:text-3xl font-bold gradient-text mt-2">
-                          {isLoadingState ? (
-                            <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
-                          ) : (
-                            candidatesToUse?.filter(c => c.status === "beschikbaar").length || 0
-                          )}
-                        </p>
-                      </CardContent>
-                    </Card>
-                    
-                    {/* Kandidaten in dienst */}
-                    <Card 
-                      className="dashboard-employed-card cursor-pointer hover-lift mobile-friendly-card"
-                      onClick={() => {
-                        setShowDashboard(false);
-                        setStatus("in_dienst");
-                        window.history.pushState({}, "", "?search=true&status=in_dienst");
-                      }}
-                    >
-                      <CardContent className="flex flex-col items-center justify-center p-4 sm:p-6">
-                        <div className="rounded-full bg-purple-100/80 p-3 mb-3">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M20 11.08V8l-6-6H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h6" />
-                            <path d="M14 2v6h6" />
-                            <path d="M18 14v6" />
-                            <path d="M18 17h4" />
-                            <path d="M10 12h2" />
-                            <path d="M10 16h2" />
-                          </svg>
-                        </div>
-                        <h3 className="text-base sm:text-lg font-medium text-gray-900">Kandidaten in Dienst</h3>
-                        <p className="text-2xl sm:text-3xl font-bold gradient-text mt-2">
-                          {isLoadingState ? (
-                            <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
-                          ) : (
-                            candidatesToUse?.filter(c => c.status === "in_dienst").length || 0
-                          )}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                  
-                  {/* Recente kandidaten tabel */}
-                  <div className="flex justify-between items-center mt-8 mb-4">
-                    <h2 className="text-lg font-semibold uppercase tracking-wider text-[#233142] pb-1 border-b-2 border-[#4da58e]">Recente Kandidaten</h2>
-                    {/* Knop verwijderd op verzoek */}
-                  </div>
-                  {isLoadingState ? (
-                    <div className="flex justify-center items-center h-48 sm:h-64 glass-effect rounded-lg">
-                      <Loader2 className="h-8 w-8 animate-spin gradient-text" />
-                    </div>
-                  ) : candidatesToUse?.length ? (
-                    <div className="glass-effect rounded-lg overflow-hidden">
-                      <CandidateTable candidates={candidatesToUse.slice(0, 5)} />
-                    </div>
-                  ) : (
-                    <div className="text-center py-12 px-4 border border-dashed border-[#4da58e] rounded-lg bg-gradient-to-br from-[#f8f9fa] to-white">
-                      <div className="bg-[#EDF7F5] p-2 rounded-full inline-flex mb-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-[#4da58e]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="11" cy="11" r="8"></circle>
-                          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                      </div>
-                      <h3 className="text-xl font-medium text-[#233142]">Geen kandidaten beschikbaar</h3>
-                      <p className="mt-2 text-[#545e6b]">
-                        Voeg uw eerste kandidaat toe om te beginnen.
-                      </p>
-                      {/* Knop verwijderd op verzoek */}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                // Kandidaat zoeken weergave
-                isLoadingState ? (
-                  <div className="flex justify-center items-center h-48 sm:h-64 glass-effect rounded-lg">
-                    <Loader2 className="h-8 w-8 animate-spin gradient-text" />
-                  </div>
-                ) : error && error.message !== "Session expired" ? (
-                  <div className="text-center py-12 px-4 border border-dashed border-[#4da58e] rounded-lg bg-gradient-to-br from-[#f8f9fa] to-white">
-                    <div className="bg-[#EDF7F5] p-2 rounded-full inline-flex mb-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-[#4da58e]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                      </svg>
-                    </div>
-                    <h3 className="text-xl font-medium text-[#233142]">Geen kandidaten gevonden</h3>
-                    <p className="mt-2 text-[#545e6b] max-w-md mx-auto">
-                      Voeg je eerste kandidaat toe om te beginnen.
-                    </p>
-                    <Button 
-                      onClick={() => window.location.reload()} 
-                      className="mt-4 bg-gradient-to-r from-[#233142] to-[#4da58e] hover:opacity-90 text-white"
-                    >
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      <span className="responsive-button-text">Vernieuwen</span>
-                    </Button>
-                  </div>
-                ) : filteredCandidates.length === 0 ? (
-                  <div className="text-center py-12 px-4 border border-dashed border-[#4da58e] rounded-lg bg-gradient-to-br from-[#f8f9fa] to-white">
-                    <div className="bg-[#EDF7F5] p-2 rounded-full inline-flex mb-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-[#4da58e]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                      </svg>
-                    </div>
-                    <h3 className="text-xl font-medium text-[#233142]">Geen kandidaten gevonden</h3>
-                    <p className="mt-2 text-[#545e6b] max-w-md mx-auto">
-                      {searchQuery || (status && status !== "all") 
-                        ? "Pas je zoekcriteria aan of verwijder filters om meer resultaten te zien." 
-                        : "Voeg je eerste kandidaat toe om te beginnen."}
-                    </p>
-                    {/* Knop verwijderd op verzoek */}
-                  </div>
-                ) : (
-                  <div className="glass-effect rounded-lg overflow-hidden">
-                    <CandidateTable candidates={filteredCandidates} />
-                  </div>
-                )
-              )}
-            </div>
+                </form>
+              </Form>
+            )}
           </div>
         </div>
       </div>
-    </div>
+
+    </>
   );
 }
