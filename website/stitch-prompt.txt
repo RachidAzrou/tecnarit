@@ -1,0 +1,16 @@
+(NL) Open stitch.withgoogle.com, plak onderstaande prompt, genereer varianten, en exporteer eventueel code om hier te mergen.
+(EN) Open stitch.withgoogle.com, paste the prompt below, explore variants, and export code to merge into this repo if you like.
+
+Google Stitch — master prompt:
+
+Create a modern, premium, trust-driven corporate landing page for “Tecnarit”, a startup founded by passionate IT and sales professionals. Tecnarit is a technology company that designs and builds solutions with social impact — professional, ambitious, human, and internationally credible. Keep geography neutral (no cities or countries named). Avoid staff-augmentation or “rent-a-team” framing; emphasise products and impact.
+
+Visual direction:
+- Refined enterprise aesthetic: generous whitespace, crisp grid, subtle borders, soft shadows.
+- Palette: deep teal/ink hero, warm off-white sections, restrained gold accent for trust and quality.
+- Typography: distinctive sans for UI (e.g. Sora or DM Sans) + optional editorial serif for headlines.
+- Include: sticky nav, hero with dual CTAs, three pillars, services/capabilities grid, values & social impact, trust strip (security/process without fake logos), contact CTA, footer.
+- Tone in copy: professional, ambitious, human, socially conscious, internationally credible.
+- Accessibility: strong contrast, focus states, semantic landmarks.
+
+Deliver: desktop + mobile layouts, component structure suggestions, and export-ready front-end.
