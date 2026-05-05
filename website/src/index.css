@@ -1,15 +1,27 @@
 :root {
-  --bg: #0c0c0e;
-  --bg-elev: #121214;
-  --line: #242428;
-  --text: #e4e4e7;
-  --muted: #71717a;
-  --accent: #5eead4;
-  --max: 640px;
-  --font: 'Inter', system-ui, sans-serif;
-  --font-display: 'Outfit', system-ui, sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, monospace;
-  color-scheme: dark;
+  --bg: #fbfaf7;
+  --bg-tint: #f5f1ea;
+  --surface: rgba(255, 255, 255, 0.8);
+  --text: #0b1220;
+  --muted: #4b5565;
+  --line: rgba(14, 22, 39, 0.12);
+  --shadow: 0 12px 40px rgba(11, 18, 32, 0.08);
+
+  /* Emerald primary accent */
+  --accent: #059669;
+  --accent-2: #34d399;
+
+  /* Warm neutral accent used in subtle glows */
+  --warm: #b07a2a;
+  --warm-soft: rgba(176, 122, 42, 0.16);
+
+  --max: 1120px;
+  --radius: 14px;
+  --font: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --font-display: 'Outfit', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+  color-scheme: light;
 }
 
 *,
@@ -27,8 +39,8 @@ body {
   margin: 0;
   min-height: 100%;
   font-family: var(--font);
-  font-size: 0.9375rem;
-  line-height: 1.55;
+  font-size: 16px;
+  line-height: 1.6;
   color: var(--text);
   background: var(--bg);
   text-rendering: optimizeLegibility;
@@ -43,10 +55,16 @@ body {
 
 a {
   color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--warm) 22%, white);
 }
 
 :focus-visible {
-  outline: 1px solid var(--accent);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
@@ -61,3 +79,4 @@ a {
   white-space: nowrap;
   border: 0;
 }
+
